@@ -1,0 +1,63 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.HearingAssist" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/border_color</item>
+        <item name="colorPrimaryVariant">@color/border_color</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+        <item name="tabStyle">@style/Widget.App.TabLayout</item>
+        <!-- 空出状态栏的空间 -->
+        <item name="android:fitsSystemWindows">false</item>
+        <!-- 设置状态栏为light 模式，字体颜色为黑色 -->
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+    </style>
+
+    <style name="Theme.HearingAssist.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.HearingAssist.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.HearingAssist.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+    <style name="Widget.App.TabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabMode">scrollable</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.TabLayout</item>
+        <item name="tabTextAppearance">@style/TextAppearance.HearingAssist.TabLayout</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TabLayout" parent="">
+        <item name="colorPrimary">@color/red_C7</item>     <!-- activated -->
+        <item name="colorSurface">@color/white</item>      <!-- background -->
+        <item name="colorOnSurface">@color/red_C7</item>   <!-- inactivated 60%-->
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">15dp</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabMinWidth">@dimen/tab_width</item>
+    </style>
+
+    <style name="TextAppearance.HearingAssist.TabLayout" parent="">
+        <item name="android:textSize">15dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/red_C7</item>
+    </style>
+
+    <style name="TextAppearance.HearingAssist.Toolbar.Title" parent="">
+        <item name="android:textSize">16dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/black_toolbar_title</item>
+    </style>
+
+
+</resources>
