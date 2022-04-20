@@ -1,13 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.ModeFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:text="@string/large_text" />
+        android:paddingBottom="20dp">
+
+        <TextView
+            android:id="@+id/tv_hearing_modes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:textSize="17dp"
+            android:textStyle="bold"
+            android:textColor="@color/black_toolbar_title"
+            android:text="@string/HearingModes"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_m"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintGuide_percent="0.5"
+            android:orientation="vertical"/>
+
+        <Button
+            style="@style/ButtonModes"
+            android:id="@+id/btn_conversation"
+            android:layout_width="160dp"
+            android:layout_height="92dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_hearing_modes"
+            app:layout_constraintEnd_toEndOf="@id/guideline_m"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="6dp"
+            android:gravity="center"
+            android:text="@string/Conversation"
+            app:icon="@drawable/icon_mode_conversation_nor"/>
+
+        <Button
+            style="@style/ButtonModes"
+            android:id="@+id/btn_restaurant"
+            android:layout_width="160dp"
+            android:layout_height="92dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_hearing_modes"
+            app:layout_constraintStart_toEndOf="@id/guideline_m"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="6dp"
+            android:gravity="center"
+            android:text="@string/Restaurant"
+            app:icon="@drawable/icon_mode_restaurant_nor"/>
+
+        <Button
+            style="@style/ButtonModes"
+            android:id="@+id/btn_our_door"
+            android:layout_width="160dp"
+            android:layout_height="92dp"
+            app:layout_constraintTop_toBottomOf="@id/btn_conversation"
+            app:layout_constraintEnd_toEndOf="@id/guideline_m"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="6dp"
+            android:gravity="center"
+            android:text="@string/Outdoor"
+            app:icon="@drawable/icon_mode_outdoor_nor"/>
+
+        <Button
+            style="@style/ButtonModes"
+            android:id="@+id/btn_music"
+            android:layout_width="160dp"
+            android:layout_height="92dp"
+            app:layout_constraintTop_toBottomOf="@id/btn_restaurant"
+            app:layout_constraintStart_toEndOf="@id/guideline_m"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="6dp"
+            android:gravity="center"
+            android:text="@string/Music"
+            app:icon="@drawable/icon_mode_music_nor"/>
+
+        <TextView
+            android:id="@+id/tv_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tips_content_0"
+            android:textSize="14dp"
+            android:textColor="@color/black_toolbar_title"
+            app:layout_constraintTop_toBottomOf="@id/btn_our_door"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"/>
+
+        <View
+            android:id="@+id/view_0"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:background="@drawable/shape_radius"
+            app:layout_constraintTop_toTopOf="@id/tv_0"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tips_content_1"
+            android:textSize="14dp"
+            android:textColor="@color/black_toolbar_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"/>
+
+        <View
+            android:id="@+id/view_1"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:background="@drawable/shape_radius"
+            app:layout_constraintTop_toTopOf="@id/tv_1"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tips_content_1"
+            android:textSize="14dp"
+            android:textColor="@color/black_toolbar_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"/>
+
+        <View
+            android:id="@+id/view_2"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:background="@drawable/shape_radius"
+            app:layout_constraintTop_toTopOf="@id/tv_2"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 </androidx.core.widget.NestedScrollView>

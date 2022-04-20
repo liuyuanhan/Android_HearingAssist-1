@@ -1,0 +1,40 @@
+1. AwesomeSwitch Switch View 的封装
+2. AwesomeNavigation 底部导航栏封装
+3. AwesomeTextInputLayout 输入文本封装
+4. BaseRecyclerViewAdapterHelper https://github.com/CymChad/BaseRecyclerViewAdapterHelper  BRVAH
+5. EasyRefreshLayout 上拉刷新 下拉加载 https://github.com/anzaizai/EasyRefreshLayout
+6. PinnedSectionItemDecoration 一个强大的粘性标签库 https://github.com/oubowu/PinnedSectionItemDecoration
+7. EasySwipeMenuLayout 右滑删除
+
+CommonLib 版本记录
+1. version 0.0.1 2020.02.19
+    1.1 添加OkGo库
+
+2. version 0.0.2 2021.05.08
+    JH Smart 实际APP中使用，更新了部分接口
+
+Android10 兼容性：
+  1. targetSdkVersion 28 、 compileSdkVersion 28 不写 android:requestLegacyExternalStorage="true" // 该属性只有api 29有效
+     在Android 10 上 可以使用旧的功能
+
+  2. targetSdkVersion 29 、 compileSdkVersion 29 ，写 android:requestLegacyExternalStorage="true"  并卸载之后重新安装，旧的可用
+     targetSdkVersion 29 、 compileSdkVersion 29 ，写 android:requestLegacyExternalStorage="false" 必须使用新的Scoped Storage
+
+  MediaStore:
+   MediaStore.Images.Media <- MediaStore.Images.ImageColumns <- MediaStore.MediaColumns <- BaseColumns
+
+
+Apache 记录
+ /var/www/cgi-bin
+
+ Jellyfish_Andriod_Version
+ #!/bin/sh
+ echo -e "Content-type: application/json\n"
+ echo "{
+ \"versionCode\":1,
+ \"versionName\":\"1.0\",
+ \"downloadUrl\":\"xxxxx\",
+ \"appSize\":46.5,
+ \"updateInfo\":\"1.xxxx 2.yyyy 3.zzz\",
+ }"
+ #echo "xxxxxxx"

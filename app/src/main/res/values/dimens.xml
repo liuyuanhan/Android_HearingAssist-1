@@ -8,4 +8,7 @@
 
     <dimen name="tab_width">80dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <!--  首页  -->
+    <dimen name="rl_width">160dp</dimen> <!-- Sound Control 背景宽度 -->
 </resources>
