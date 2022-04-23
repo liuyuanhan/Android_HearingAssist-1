@@ -26,6 +26,15 @@
     <string name="HA_connected_L">HA-Connect-L</string>
     <string name="HA_connected_R">HA-Connect-R</string>
 
+    <string name="Theme">Theme</string>
+    <string name="Light">Light</string>
+    <string name="Dark">Dark</string>
+    <string name="Auto">Auto(according to OS)</string>
+
+    <string name="Help">Help</string>
+    <string name="Settings">Settings</string>
+    <string name="About">About</string>
+
     <!-- Connect Fragment -->
     <string name="search_for_a_device">Search for a Device</string>
     <string name="no_devices_found">No devices found</string>
@@ -33,6 +42,18 @@
     <string name="tap_to_connect">Tap to Connect</string>
     <string name="personalize_my_device">Personalize My Device</string>
     <string name="my_device">My Device</string>
+    <string name="bluetooth_permission">need your Bluetooth/Location Permission to set you hearing-aid!</string>
+    <string name="tips_bt_permission_system_settings">Please enable Bluetooth/Location Permission in system Settings, otherwise APP functions cannot be used normally!</string>
+    <string name="bt_scanning">Scanning</string>
+    <string name="loc_service_permisson">Location Disable</string>
+    <string name="tips_loc_service_permisson">Please turn on your location service, otherwise APP will not be able to use bluetooth!</string>
+    
+    <string name="dialog_device_placeholder">Right Ear: G.SoundBuds-L(232E)</string>
+    <string name="rename_device">Rename Device</string>
+    <string name="remove_device">Remove Device</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
 
 
     <string name="Connected">Connected</string>
@@ -41,10 +62,16 @@
     <string name="Disconnecting">Disconnecting</string>
     <string name="Connect_Error">Connect Error</string>
     <string name="connect">Connect</string>
-    <string name="disconnect">Disconnect</string>
+    <string name="Disconnect">Disconnect</string>
     <string name="delete">Delete</string>
 
-    <string name="title_activity_first">FirstActivity</string>
+
+    <string name="tips_bluetooth_permission">No bluetooth permission granted, the program cannot work!</string>
+    <string name="tips_open_bt">Please turn on the bluetooth switch!</string>
+    <string name="tips_connect_same_type">Please connect the same type of device!</string>
+    <string name="tips_not_scanned_device">The Device is not scanned, please rescan it!</string>
+
+    <string name="title_activity_first">HomeActivity</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>

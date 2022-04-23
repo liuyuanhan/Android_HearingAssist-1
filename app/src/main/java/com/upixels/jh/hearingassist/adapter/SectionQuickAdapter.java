@@ -48,7 +48,7 @@ public class SectionQuickAdapter extends BaseSectionQuickAdapter<BLEDeviceEntity
         ((EasySwipeMenuLayout) helper.getView(R.id.layout_device)).setCanLeftSwipe(false);
         if (item.section == 0) {
             if (item.connectStatus == BLEUtil.STATE_CONNECTED || item.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER) {
-                helper.setText(R.id.tv_device_status, R.string.tap_to_connect);
+                helper.setText(R.id.tv_device_status, R.string.Connected);
 //                helper.getView(R.id.iv_device_status).setVisibility(View.VISIBLE);
 //                helper.setText(R.id.right_text, R.string.disconnect);
             } else if (item.connectStatus == BLEUtil.STATE_CONNECTING || item.connectStatus == BLEUtil.STATE_RECONNECTING) {
@@ -58,7 +58,7 @@ public class SectionQuickAdapter extends BaseSectionQuickAdapter<BLEDeviceEntity
                 helper.setText(R.id.tv_device_status, R.string.Disconnecting);
 //                helper.getView(R.id.iv_device_status).setVisibility(View.GONE);
             } else if (item.connectStatus == BLEUtil.STATE_DISCONNECTED) {
-                helper.setText(R.id.tv_device_status, R.string.Disconnected);
+                helper.setText(R.id.tv_device_status, R.string.tap_to_connect);
 //                helper.getView(R.id.iv_device_status).setVisibility(View.GONE);
 //                helper.setText(R.id.right_text, R.string.delete);
             }

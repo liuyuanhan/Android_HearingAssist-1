@@ -5,10 +5,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +24,7 @@ import android.widget.LinearLayout;
 
 import java.util.Locale;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 
@@ -65,7 +68,7 @@ public class PermissionUtil {
                         .setActivity(fragment.getActivity())
                         .setMessage(message)
                         .setPermissions(permissions, requestCode)
-                        .show(fragment.getActivity().getFragmentManager(), "PermissionDialog");
+                        .show(fragment.requireActivity().getFragmentManager(), "PermissionDialog");
             } else {
                 fragment.requestPermissions(permissions, requestCode);
             }
@@ -169,5 +172,13 @@ public class PermissionUtil {
 //            });
 //            return view;
 //        }
+    }
+
+    // 是否开启了定位服务
+    public static boolean isLocServiceEnable(Context context) {
+        LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean network = manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        return gps || network;
     }
 }

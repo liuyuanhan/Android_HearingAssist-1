@@ -24,8 +24,14 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        initView();
+    }
+
+    private void initView() {
+        binding.ivMore.setOnClickListener(v -> {
+            binding.drawerLayout.open();
+        });
     }
 }

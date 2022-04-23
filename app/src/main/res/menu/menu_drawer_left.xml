@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:showIn="navigation_view">
+
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
+        <item android:title="Theme">
+            <menu >
+                <item
+                    android:id="@+id/nav_light"
+                    android:icon="@drawable/icon_menu_light"
+                    android:title="Light"/>
+                <item
+                    android:id="@+id/nav_dark"
+                    android:icon="@drawable/icon_menu_dark"
+                    android:title="Dark"/>
+                <item
+                    android:id="@+id/nav_auto"
+                    android:icon="@drawable/icon_menu_auto"
+                    android:title="Auto(According to OS)"/>
+            </menu>
+        </item>
+    </group>
+
+
+    <item
+        android:id="@+id/nav_use_guide_video"
+        android:icon="@drawable/icon_menu_video"
+        android:title="Use guide video"/>
+    <item
+        android:id="@+id/nav_help"
+        android:icon="@drawable/icon_menu_help"
+        android:title="Help"/>
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/icon_menu_settings"
+        android:title="Settings"/>
+    <item
+        android:id="@+id/nav_about"
+        android:icon="@drawable/icon_menu_about"
+        android:title="About"/>
+
+</menu>
