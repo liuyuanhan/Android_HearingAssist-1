@@ -8,8 +8,6 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 31
-        versionCode 1
-        versionName "1.0"
     }
     buildTypes {
         release {
@@ -23,12 +21,12 @@ android {
         kotlinOptions.freeCompilerArgs += ['-module-name', "com.github.CymChad.brvah"]
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     buildFeatures {
         dataBinding = true
+    }
+    lint {
+        abortOnError false
     }
 }
 

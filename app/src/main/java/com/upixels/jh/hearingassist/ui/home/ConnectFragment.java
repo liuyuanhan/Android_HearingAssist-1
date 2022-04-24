@@ -32,6 +32,7 @@ import com.upixels.jh.hearingassist.view.LocServiceDialog;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,7 +44,12 @@ public class ConnectFragment extends Fragment {
     private SectionQuickAdapter mAdapter;
     private boolean visible;
     private final Handler mUIHandler = new Handler();
+    private Runnable dismissDialogRunnable;
 
+    private boolean leftConnected;
+    private boolean rightConnected;
+    private boolean readLeftBat;  //是否读了一次电量
+    private boolean readRightBat; //是否读了一次电量
     private List<BLEDeviceEntity> mDeviceList;
     private List<BLEUtil.BLEDevice> mBleDevices;
     private final List<BLEDeviceEntity> mScannedDeviceEntities =  new ArrayList<>(5); // 扫描到的设备
@@ -64,7 +70,7 @@ public class ConnectFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "[onCreateView]");
         binding = FragmentConnectBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -74,13 +80,6 @@ public class ConnectFragment extends Fragment {
         Log.d(TAG, "[onViewCreated]");
         super.onViewCreated(view, savedInstanceState);
         initView();
-//        binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                NavHostFragment.findNavController(ConnectFragment.this)
-//                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
-//            }
-//        });
         // 添加BLEUtil监听回调
         BLEUtil.getInstance().addJHBleListener(mBLEListener);
     }
@@ -111,6 +110,8 @@ public class ConnectFragment extends Fragment {
         Log.d(TAG, "[onStop]");
         super.onStop();
         visible = false;
+        readLeftBat = false;
+        readRightBat = false;
     }
 
     @Override
@@ -167,10 +168,11 @@ public class ConnectFragment extends Fragment {
                 v.setEnabled(false);
                 IOSLoadingDialog.instance.dismissDialog();
                 IOSLoadingDialog.instance.setOnTouchOutside(false).showDialog(getParentFragmentManager(), getString(R.string.bt_scanning));
-                mUIHandler.postDelayed(() -> {
+                dismissDialogRunnable = () -> {
                     if (visible) { IOSLoadingDialog.instance.dismissDialog(); }
                     v.setEnabled(true);
-                }, 10500);
+                };
+                mUIHandler.postDelayed(dismissDialogRunnable, 10500);
             } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_open_bt));
             }
@@ -198,9 +200,84 @@ public class ConnectFragment extends Fragment {
         });
 
         binding.layoutDeviceL.setOnClickListener(v -> {
-            DeviceCtlDialog dialog = new DeviceCtlDialog(requireContext(), R.layout.dialog_device_ctl, true);
+            final BLEUtil.BLEDevice device = getPairedDevice(leftPairedDevices);
+            if (device == null) { return; }
+            String[] macChar = device.mac.split(":");
+            DeviceCtlDialog dialog = new DeviceCtlDialog(requireContext(), R.layout.dialog_device_ctl, false);
+            dialog.setTitle(String.format("Left Ear: %s(%s)", device.deviceName, macChar[4]+macChar[5]));
+            dialog.setOnClickListener(new DeviceCtlDialog.OnClickListener() {
+                @Override
+                public void onDisconnectClick(DeviceCtlDialog dialog) {
+                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
+                        BLEUtil.getInstance().disconnectBLE(device.mac);
+                    }
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void onRenameClick(DeviceCtlDialog dialog) {
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void onRemoveClick(DeviceCtlDialog dialog) {
+                    leftPairedDevices.remove(device);
+                    FileUtil.writePairedDevices(requireContext(), "Left",leftPairedDevices);
+                    binding.layoutDeviceL.setVisibility(View.GONE);
+                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
+                        BLEUtil.getInstance().disconnectBLE(device.mac);
+                    }
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void onCancelClick(DeviceCtlDialog dialog) {
+                    dialog.dismiss();
+                }
+            });
             dialog.show();
         });
+
+        binding.layoutDeviceR.setOnClickListener(v -> {
+            final BLEUtil.BLEDevice device = getPairedDevice(rightPairedDevices);
+            if (device == null) { return; }
+            String[] macChar = device.mac.split(":");
+            DeviceCtlDialog dialog = new DeviceCtlDialog(requireContext(), R.layout.dialog_device_ctl, false);
+            dialog.setTitle(String.format("Right Ear: %s(%s)", device.deviceName, macChar[4]+macChar[5]));
+            dialog.setOnClickListener(new DeviceCtlDialog.OnClickListener() {
+                @Override
+                public void onDisconnectClick(DeviceCtlDialog dialog) {
+                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
+                        BLEUtil.getInstance().disconnectBLE(device.mac);
+                    }
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void onRenameClick(DeviceCtlDialog dialog) {
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void onRemoveClick(DeviceCtlDialog dialog) {
+                    rightPairedDevices.remove(device);
+                    FileUtil.writePairedDevices(requireContext(), "Right",rightPairedDevices);
+                    binding.layoutDeviceR.setVisibility(View.GONE);
+                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
+                        BLEUtil.getInstance().disconnectBLE(device.mac);
+                    }
+                    dialog.dismiss();
+                }
+
+                @Override
+                public void onCancelClick(DeviceCtlDialog dialog) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+        });
+
+        binding.btnPersonalize.setOnClickListener(v -> requireActivity().finish());
     }
 
     private List<BLEDeviceEntity> initData() {
@@ -308,6 +385,13 @@ public class ConnectFragment extends Fragment {
         return false;
     }
 
+    private BLEUtil.BLEDevice getPairedDevice(HashSet<BLEUtil.BLEDevice> pairedDevices) {
+        for (BLEUtil.BLEDevice pairedDevice : pairedDevices) {
+            return pairedDevice;
+        }
+        return null;
+    }
+
     private final BLEUtil.JHBLEListener mBLEListener =  new BLEUtil.JHBLEListener() {
         boolean displayLoading = false;    // 是否需要等待BLE获取服务器完成
         String displayLoadingDeviceName;   // 正在连接设备的名字
@@ -320,8 +404,10 @@ public class ConnectFragment extends Fragment {
             mBleDevices = bleDevices;
             Log.d(TAG, "mBluetoothDevices size = " + mBleDevices.size());
 
+            leftConnected   = false;
+            rightConnected  = false;
             connectedCnt = 0;
-            // 先加头节点
+
             mScannedDeviceEntities.clear();
             mPairedDeviceEntities.clear();
 
@@ -404,7 +490,7 @@ public class ConnectFragment extends Fragment {
 //                        if (!BLEUtil.getInstance().isScanning()) { mUIHandler.post(IOSLoadingDialog.instance::dismissDialog); }
 //                    }
 
-                } else { // 更新配对设备列表, 肯定在配对过的设备里面，因为连接过程中已经记录了。
+                } else { // 更新配对设备列表, 肯定在配对过的设备里面，因为连接过程中已经记录了。 STATE_CONNECTED, STATE_GET_GATT_SERVICES_OVER
                     for (BLEDeviceEntity entity : mPairedDeviceEntities) {
                         if (entity.mac.equals(device.mac)) {
                             entity.connectStatus = device.connectStatus;
@@ -412,19 +498,24 @@ public class ConnectFragment extends Fragment {
                             entity.isScanned     = true;
                         }
                     }
-                    // 记录连接成功的设备个数
-                    if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER) {
-                        connectedCnt++;
-                    }
 
-//                    BLEDeviceEntity section = new BLEDeviceEntity(false);
-//                    section.section       = 1;
-//                    section.deviceName    = device.deviceName;
-//                    section.mac           = device.mac;
-//                    section.connectStatus = device.connectStatus;
-//                    section.devType       = device.devType;
-//                    section.isScanned     = true;
-//                    mPairedDeviceEntities.add(section);
+                    // 记录连接成功的设备个数,并读取一次电量
+                    if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-L")) {
+                        connectedCnt++;
+                        leftConnected = true;
+                        if ((!readLeftBat)) {
+                            readLeftBat = true;
+                            mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
+                        }
+
+                    } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
+                        connectedCnt++;
+                        rightConnected = true;
+                        if ((!readRightBat)) {
+                            readRightBat = true;
+                            mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
+                        }
+                    }
                 }
 
                 // 自动连接1: 保存扫描到的当前连接的设备 类型
@@ -455,6 +546,7 @@ public class ConnectFragment extends Fragment {
                         Log.d(TAG, "AutoConnect L - R type: " + leftType + " - " + rightType);
                         BLEUtil.getInstance().connectBLE(bleDevice.mac);
                         autoConnectLeft = false;
+                        readLeftBat = false;
                         break;
                     }
                 }
@@ -467,6 +559,7 @@ public class ConnectFragment extends Fragment {
                         Log.d(TAG, "AutoConnect L - R type: " + leftType + " - " + rightType);
                         BLEUtil.getInstance().connectBLE(bleDevice.mac);
                         autoConnectRight = false;
+                        readRightBat = false;
                         break;
                     }
                 }
@@ -479,10 +572,14 @@ public class ConnectFragment extends Fragment {
 
             // 更新 底部我的设备部分的UI
             mUIHandler.post(() -> {
+                // 第一次扫描时，为了快速可以交互，连接2个设备后，立即停止扫描。
                 if (scanCnt == 1 && connectedCnt == 2) {
+                    mUIHandler.removeCallbacks(dismissDialogRunnable);
                     BLEUtil.getInstance().scanLeDevice(false);
                     IOSLoadingDialog.instance.dismissDialog();
+                    binding.btnSearchDevice.setEnabled(true);
                 }
+
                 int pSize = mPairedDeviceEntities.size();
                 BLEDeviceEntity leftPairedDevice = null;
                 BLEDeviceEntity rightPairedDevice = null;
@@ -505,23 +602,49 @@ public class ConnectFragment extends Fragment {
                 }
 
                 if (leftPairedDevice != null) {
-                    binding.ivDeviceLStatus.setImageResource(leftPairedDevice.connectStatus == BLEUtil.STATE_CONNECTED
-                            || leftPairedDevice.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER
-                            ? R.drawable.icon_device_connected
-                            : R.drawable.icon_device_disconnected);
+                    binding.layoutDeviceL.setAlpha(leftConnected ? 1.0f : 0.5f);
+                    binding.ivDeviceLStatus.setImageResource(leftConnected ? R.drawable.icon_device_connected : R.drawable.icon_device_disconnected);
+                    binding.tvDeviceLName.setEnabled(leftConnected);
+                    if (!leftConnected) {
+                        binding.bvDeviceLBattery.setBattery(0f);
+                        binding.tvDeviceLBattery.setText("0%");
+                        binding.tvDeviceLBattery.setTextColor(0xFFE22732);
+                    }
                 }
+
                 if (rightPairedDevice != null) {
-                    binding.ivDeviceRStatus.setImageResource(rightPairedDevice.connectStatus == BLEUtil.STATE_CONNECTED
-                            || rightPairedDevice.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER
-                            ? R.drawable.icon_device_connected
-                            : R.drawable.icon_device_disconnected);
+                    binding.layoutDeviceR.setAlpha(rightConnected ? 1.0f : 0.5f);
+                    binding.ivDeviceRStatus.setImageResource(rightConnected ? R.drawable.icon_device_connected : R.drawable.icon_device_disconnected);
+                    binding.tvDeviceRName.setEnabled(rightConnected);
+                    if (!rightConnected) {
+                        binding.bvDeviceRBattery.setBattery(0f);
+                        binding.tvDeviceRBattery.setText("0%");
+                        binding.tvDeviceRBattery.setTextColor(0xFFE22732);
+                    }
                 }
             });
         }
 
         @Override
         public void onBatteryChanged(String deviceName, int value) {
+            Log.d(TAG, "onBatteryChanged " + deviceName + " " + value);
+            if (deviceName == null) { return; }
+            requireActivity().runOnUiThread(() -> {
+                if (deviceName.contains("-L")) {
+                    binding.bvDeviceLBattery.setBattery((float) value / 100.f);
+                    binding.tvDeviceLBattery.setText("" + value + "%");
+                    if (value < 10) {binding.tvDeviceLBattery.setTextColor(0xFFE22732);}
+                    else if (value < 30) {binding.tvDeviceLBattery.setTextColor(0xFFF06D06);}
+                    else { binding.tvDeviceLBattery.setTextColor(0xFF16DC8F); }
 
+                } else if (deviceName.contains("-R")) {
+                    binding.bvDeviceRBattery.setBattery((float) value / 100.f);
+                    binding.tvDeviceRBattery.setText("" + value + "%");
+                    if (value < 10) {binding.tvDeviceRBattery.setTextColor(0xFFE22732);}
+                    else if (value < 30) {binding.tvDeviceRBattery.setTextColor(0xFFF06D06);}
+                    else { binding.tvDeviceRBattery.setTextColor(0xFF16DC8F); }
+                }
+            });
         }
 
         @Override

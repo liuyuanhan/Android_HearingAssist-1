@@ -1,4 +1,7 @@
-<resources>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+
     <string name="app_name">HearingAssist</string>
     <string name="sound_control">Sound Control</string>
     <string name="hearing_check">Hearing Check</string>
@@ -36,6 +39,7 @@
     <string name="About">About</string>
 
     <!-- Connect Fragment -->
+    <string name="Device">Device</string>
     <string name="search_for_a_device">Search for a Device</string>
     <string name="no_devices_found">No devices found</string>
     <string name="tips_devices_tune_on">Make sure your Hearing Devices are tuned on</string>
@@ -47,7 +51,7 @@
     <string name="bt_scanning">Scanning</string>
     <string name="loc_service_permisson">Location Disable</string>
     <string name="tips_loc_service_permisson">Please turn on your location service, otherwise APP will not be able to use bluetooth!</string>
-    
+
     <string name="dialog_device_placeholder">Right Ear: G.SoundBuds-L(232E)</string>
     <string name="rename_device">Rename Device</string>
     <string name="remove_device">Remove Device</string>

@@ -7,6 +7,7 @@ import com.upixels.jh.hearingassist.databinding.ActivityHomeBinding;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.navigation.NavController;
@@ -17,12 +18,13 @@ import androidx.navigation.ui.NavigationUI;
 
 
 public class HomeActivity extends AppCompatActivity {
-
+    private final static String TAG = "HomeActivity";
     private AppBarConfiguration appBarConfiguration;
     private ActivityHomeBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "[onCreate]");
         super.onCreate(savedInstanceState);
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -33,5 +35,11 @@ public class HomeActivity extends AppCompatActivity {
         binding.ivMore.setOnClickListener(v -> {
             binding.drawerLayout.open();
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "[onDestroy]");
     }
 }

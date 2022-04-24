@@ -43,7 +43,7 @@
             android:orientation="vertical"/>
 
         <RelativeLayout
-            android:visibility="invisible"
+            android:visibility="visible"
             android:id="@+id/layout_left_device"
             android:layout_width="@dimen/rl_width"
             android:layout_height="72dp"
@@ -74,7 +74,7 @@
             <!-- 连接时显示 -->
             <TextView
                 android:visibility="invisible"
-                android:id="@+id/tv_left_connected"
+                android:id="@+id/tv_left_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -88,7 +88,7 @@
                 android:layout_width="33dp"
                 android:layout_height="18dp"
                 android:layout_marginBottom="12dp"
-                android:layout_alignStart="@id/tv_left_connected"
+                android:layout_alignStart="@id/tv_left_name"
                 android:layout_alignParentBottom="true"/>
             <TextView
                 android:visibility="invisible"
@@ -105,7 +105,7 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:visibility="invisible"
+            android:visibility="visible"
             android:id="@+id/layout_right_device"
             android:layout_width="@dimen/rl_width"
             android:layout_height="72dp"
@@ -137,7 +137,7 @@
             <!-- 连接时显示 -->
             <TextView
                 android:visibility="invisible"
-                android:id="@+id/tv_right_connected"
+                android:id="@+id/tv_right_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -151,7 +151,7 @@
                 android:layout_width="33dp"
                 android:layout_height="18dp"
                 android:layout_marginBottom="12dp"
-                android:layout_alignStart="@id/tv_right_connected"
+                android:layout_alignStart="@id/tv_right_name"
                 android:layout_alignParentBottom="true"/>
             <TextView
                 android:visibility="invisible"
@@ -223,7 +223,7 @@
 
         <Button
             android:id="@+id/btn_search_device"
-            android:visibility="visible"
+            android:visibility="gone"
             style="@style/LongButton"
             app:backgroundTint="@color/red_C7"
             app:iconTint="@color/white"

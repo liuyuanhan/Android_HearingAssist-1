@@ -21,16 +21,8 @@ import me.forrest.commonlib.util.DensityUtil;
 public class DeviceCtlDialog extends Dialog {
 
     private int resId;
-    private ImageView imageIv;
-    private TextView tv_title;
-    private TextView tv_sub_title;
-    private TextView tv_message;
-    private Button btn_confirm;
-    private Button btn_cancel;
-
     private String message;
     private String title;
-    private String btnText;
     private boolean canceledOnTouchOutside = true;
 
     public DeviceCtlDialog(Context context) {
@@ -73,14 +65,25 @@ public class DeviceCtlDialog extends Dialog {
      * 初始化界面的确定和取消监听器
      */
     private void initEvent() {
-
+        findViewById(R.id.tv_dialog_disconnect).setOnClickListener(v -> {
+            if (onClickListener != null) { onClickListener.onDisconnectClick(this); }
+        });
+        findViewById(R.id.tv_dialog_rename).setOnClickListener(v -> {
+            if (onClickListener != null) { onClickListener.onRenameClick(this); }
+        });
+        findViewById(R.id.tv_dialog_remove).setOnClickListener(v -> {
+            if (onClickListener != null) { onClickListener.onRemoveClick(this); }
+        });
+        findViewById(R.id.tv_dialog_cancel).setOnClickListener(v -> {
+            if (onClickListener != null) { onClickListener.onCancelClick(this); }
+        });
     }
 
     /**
      * 初始化界面控件的显示数据
      */
     public void refreshView() {
-
+        ((TextView)findViewById(R.id.tv_dialog_title)).setText(title);
     }
 
     @Override
@@ -107,29 +110,10 @@ public class DeviceCtlDialog extends Dialog {
     }
 
     public interface OnClickListener {
-        /**
-         * 点击确定按钮事件
-         */
-        void onConfirmClick(DeviceCtlDialog dialog);
-
+        void onDisconnectClick(DeviceCtlDialog dialog);
+        void onRenameClick(DeviceCtlDialog dialog);
+        void onRemoveClick(DeviceCtlDialog dialog);
         void onCancelClick(DeviceCtlDialog dialog);
-    }
-
-    public void hideBtnConfirm() {
-        this.btn_confirm.setVisibility(View.INVISIBLE);
-    }
-
-    public void showBtnConfirm() {
-        this.btn_confirm.setVisibility(View.VISIBLE);
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public DeviceCtlDialog setMessage(String message) {
-        this.message = message;
-        return this;
     }
 
     public String getTitle() {
@@ -140,11 +124,6 @@ public class DeviceCtlDialog extends Dialog {
         this.title = title;
         return this;
     }
-
-//    public AppUpdateInfoDialog setBtnText(String text) {
-//        this.btnText = text;
-//        return this;
-//    }
 
 }
 
