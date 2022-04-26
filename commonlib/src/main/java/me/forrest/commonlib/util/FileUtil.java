@@ -501,4 +501,48 @@ public class FileUtil {
         return false;
     }
 
+    // 保存一个配对设备 filename = "Left" or "Right"
+    public static String writePairedDevice(Context context, String fileName, BLEUtil.BLEDevice pairedDevice) {
+        final File dir = new File(context.getFilesDir(), DIR_NAME_DEVICES);
+        if (!dir.exists()) { dir.mkdir(); }
+        if (pairedDevice == null) { return writeToInternalFile(context, DIR_NAME_DEVICES + File.separator + fileName, ""); }
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(pairedDevice.deviceName).append(",").append(pairedDevice.mac).append("\n");
+        Log.d(TAG, "writePairedDevice : " + sb);
+        return writeToInternalFile(context, DIR_NAME_DEVICES + File.separator + fileName, sb.toString());
+    }
+
+    public static boolean readPairedDevice(Context context, String fileName, BLEUtil.BLEDevice pairedDevice) {
+        final File dir = new File(context.getFilesDir(), DIR_NAME_DEVICES);
+        if (!dir.exists()) { return false; }
+        final File file = new File(context.getFilesDir(), DIR_NAME_DEVICES + File.separator + fileName);
+        if (!file.exists()) { return false; }
+        FileInputStream fis;
+        byte[] data = new byte[128];
+        StringBuffer sb = new StringBuffer(512);
+        try {
+            fis = new FileInputStream(dir.getAbsoluteFile() + File.separator + fileName);
+            int len;
+            while( (len = fis.read(data)) > 0) {
+                sb.append(new String(data, 0, len));
+            }
+
+            String[] subStrings = sb.toString().split("\n"); // deviceName,mac
+            for (String deviceName_mac : subStrings) {
+                String[] subSubString = deviceName_mac.split(",");
+                if (subSubString.length == 2) {
+                    pairedDevice.deviceName = subSubString[0];
+                    pairedDevice.mac        = subSubString[1];
+                    pairedDevice.connectStatus = 0;
+                    return true;
+                }
+            }
+            return false;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

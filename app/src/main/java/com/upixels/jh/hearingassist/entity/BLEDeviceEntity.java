@@ -13,7 +13,7 @@ public class BLEDeviceEntity extends JSectionEntity {
     public String   deviceName;
     public int      connectStatus;
     public String   devType;        // 设备类型
-    public boolean  isScanned;
+    public boolean  isScanned;      // 标记是否是扫描到的，用于区分是扫描到的还是本地保存的设备
 
     public BLEDeviceEntity(boolean isHeader) {
         this.isHeader = isHeader;

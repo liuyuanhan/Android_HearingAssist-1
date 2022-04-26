@@ -9,9 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.upixels.jh.hearingassist.ConnectActivity;
+import com.upixels.jh.hearingassist.MainActivity;
 import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentHomeBinding;
 import com.upixels.jh.hearingassist.entity.BLEDeviceEntity;
+import com.upixels.jh.hearingassist.util.DeviceManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -40,9 +42,8 @@ public class HomeFragment extends Fragment {
     private boolean readRightBat; //是否读了一次电量
     private List<BLEUtil.BLEDevice> mBleDevices;
     private final List<BLEDeviceEntity> mScannedDeviceEntities =  new ArrayList<>(5); // 扫描到的设备
-    private final List<BLEDeviceEntity> mPairedDeviceEntities = new ArrayList<>(5);   // 配对过的设备
-    private HashSet<BLEUtil.BLEDevice> leftPairedDevices;
-    private HashSet<BLEUtil.BLEDevice> rightPairedDevices;
+    private BLEUtil.BLEDevice leftPairedDevice;
+    private BLEUtil.BLEDevice rightPairedDevice;
     private boolean autoConnectLeft;  // 是否需要主动连接左耳
     private boolean autoConnectRight; // 是否需要主动连接右耳
     private int connectedCnt = 0;
@@ -65,8 +66,6 @@ public class HomeFragment extends Fragment {
         initView();
         // 添加BLEUtil监听回调
         BLEUtil.getInstance().addJHBleListener(mBLEListener);
-
-
     }
 
     @Override
@@ -74,6 +73,9 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "[onStart]");
         super.onStart();
         visible = true;
+        DeviceManager.getInstance().readPairedDevice();
+        leftPairedDevice = DeviceManager.getInstance().getLeftPairedDevice();
+        rightPairedDevice = DeviceManager.getInstance().getRightPairedDevice();
         BLEUtil.getInstance().updateListenerForBLEDevices();
 //        requestPermissions();
     }
@@ -110,6 +112,10 @@ public class HomeFragment extends Fragment {
         binding.btnSearchDevice.setOnClickListener(v -> {
             startActivity(new Intent(requireContext(), ConnectActivity.class));
         });
+
+        binding.layoutSoundControl.setOnClickListener(v -> {
+            startActivity(new Intent(requireContext(), MainActivity.class));
+        });
     }
 
     @Override
@@ -118,38 +124,19 @@ public class HomeFragment extends Fragment {
         super.onDestroy();
     }
 
-    // 判断是否在配对过的记录里面
-    private boolean isPairedDevice(BLEUtil.BLEDevice device) {
-        if (device.deviceName.contains("-L")) {
-            for (BLEUtil.BLEDevice dev : leftPairedDevices) {
-                if (dev.mac.equals(device.mac)) {
-                    return true;
-                }
-            }
-        }
-
-        if (device.deviceName.contains("-R")) {
-            for (BLEUtil.BLEDevice dev : rightPairedDevices) {
-                if (dev.mac.equals(device.mac)) {
-                    return true;
-                }
+    // 判断是否扫描到配对过的设备
+    private boolean hasPairedDevice(BLEUtil.BLEDevice pDevice, List<BLEUtil.BLEDevice> deviceList) {
+        for (BLEUtil.BLEDevice device : deviceList) {
+            if (device.mac.equals(pDevice.mac)) {
+                return true;
             }
         }
         return false;
     }
 
-    private BLEUtil.BLEDevice getPairedDevice(HashSet<BLEUtil.BLEDevice> pairedDevices) {
-        for (BLEUtil.BLEDevice pairedDevice : pairedDevices) {
-            return pairedDevice;
-        }
-        return null;
-    }
-
     private final BLEUtil.JHBLEListener mBLEListener =  new BLEUtil.JHBLEListener() {
         boolean displayLoading = false;    // 是否需要等待BLE获取服务器完成
         String displayLoadingDeviceName;   // 正在连接设备的名字
-        private final ArrayList<BLEUtil.BLEDevice> candidateLeftBLEDeviceArray  = new ArrayList<>(10);   // 候选自动连接的设备
-        private final ArrayList<BLEUtil.BLEDevice> candidateRightBLEDeviceArray = new ArrayList<>(10);   // 候选自动连接的设备
 
         @Override
         public void updateBLEDevice(List<BLEUtil.BLEDevice> bleDevices) {
@@ -162,31 +149,7 @@ public class HomeFragment extends Fragment {
             connectedCnt = 0;
 
             mScannedDeviceEntities.clear();
-            mPairedDeviceEntities.clear();
 
-            candidateLeftBLEDeviceArray.clear();
-            candidateRightBLEDeviceArray.clear();
-            String leftType  = ""; // 连接的设备类型
-            String rightType = ""; // 连接的设备类型
-
-            // 保存配对过的设备
-            for(BLEUtil.BLEDevice device : leftPairedDevices) {
-                BLEDeviceEntity entity = new BLEDeviceEntity(false);
-                entity.section       = 0;
-                entity.deviceName    = device.deviceName;
-                entity.mac           = device.mac;
-                entity.connectStatus = device.connectStatus;
-                mPairedDeviceEntities.add(entity);
-            }
-
-            for(BLEUtil.BLEDevice device : rightPairedDevices) {
-                BLEDeviceEntity entity = new BLEDeviceEntity(false);
-                entity.section       = 0;
-                entity.deviceName    = device.deviceName;
-                entity.mac           = device.mac;
-                entity.connectStatus = device.connectStatus;
-                mPairedDeviceEntities.add(entity);
-            }
 
             for (BLEUtil.BLEDevice device: mBleDevices) {
                 Log.d(TAG, device.deviceName + " " + device.connectStatus);
@@ -203,7 +166,7 @@ public class HomeFragment extends Fragment {
                     entity.isScanned     = true;
                     mScannedDeviceEntities.add(entity);
 
-                    // 如果正在连接，保存相关信息
+                    // 如果正在连接
                     if (device.connectStatus == BLEUtil.STATE_CONNECTING) {
                         displayLoadingDeviceName = device.deviceName;
                         displayLoading = true;
@@ -212,20 +175,13 @@ public class HomeFragment extends Fragment {
                         mUIHandler.postDelayed(IOSLoadingDialog.instance::dismissDialog, 10000);
                     }
 
-                // 更新配对设备列表, 肯定在配对过的设备里面，因为连接过程中已经记录了。 STATE_CONNECTED, STATE_GET_GATT_SERVICES_OVER
+                // 更新配对设备列表 (STATE_CONNECTED, STATE_GET_GATT_SERVICES_OVER)
                 } else {
-                    for (BLEDeviceEntity entity : mPairedDeviceEntities) {
-                        if (entity.mac.equals(device.mac)) {
-                            entity.connectStatus = device.connectStatus;
-                            entity.devType       = device.devType;
-                            entity.isScanned     = true;
-                        }
-                    }
-
                     // 记录连接成功的设备个数,并读取一次电量
                     if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-L")) {
                         connectedCnt++;
                         leftConnected = true;
+                        leftPairedDevice = device;
                         if ((!readLeftBat)) {
                             readLeftBat = true;
                             mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
@@ -234,6 +190,7 @@ public class HomeFragment extends Fragment {
                     } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
                         connectedCnt++;
                         rightConnected = true;
+                        rightPairedDevice = device;
                         if ((!readRightBat)) {
                             readRightBat = true;
                             mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
@@ -241,51 +198,6 @@ public class HomeFragment extends Fragment {
                     }
                 }
 
-                // 自动连接1: 保存扫描到的当前连接的设备 类型
-                if (device.connectStatus != BLEUtil.STATE_DISCONNECTED) {
-                    if (device.deviceName.contains("-L")) {
-                        autoConnectLeft = false;
-                        leftType = device.devType;
-                    } else if (device.deviceName.contains("-R")) {
-                        autoConnectRight = false;
-                        rightType = device.devType;
-                    }
-                }
-
-                // 自动连接2: 添加候选需要连接的设备 -> 在配对过的设备列表里,且扫描到的设备中没连接成功
-                boolean isPairedFlag = isPairedDevice(device);
-                if (isPairedFlag && device.connectStatus == BLEUtil.STATE_DISCONNECTED && device.deviceName.contains("-L")) {
-                    candidateLeftBLEDeviceArray.add(device);
-                } else if (isPairedFlag && device.connectStatus == BLEUtil.STATE_DISCONNECTED && device.deviceName.contains("-R")) {
-                    candidateRightBLEDeviceArray.add(device);
-                }
-            }
-
-            // 自动连接3: 在配对的列表里，需要自动连接，连接状态是断开, 左右设备类型相同
-            if (autoConnectLeft) {
-                for(BLEUtil.BLEDevice bleDevice : candidateLeftBLEDeviceArray) {
-                    if (rightType.equals("") || bleDevice.devType.equals(rightType)) {
-                        leftType = bleDevice.devType;
-                        Log.d(TAG, "AutoConnect L - R type: " + leftType + " - " + rightType);
-                        BLEUtil.getInstance().connectBLE(bleDevice.mac);
-                        autoConnectLeft = false;
-                        readLeftBat = false;
-                        break;
-                    }
-                }
-            }
-
-            if (autoConnectRight) {
-                for(BLEUtil.BLEDevice bleDevice : candidateRightBLEDeviceArray) {
-                    if (leftType.equals("") || bleDevice.devType.equals(leftType)) {
-                        rightType = bleDevice.devType;
-                        Log.d(TAG, "AutoConnect L - R type: " + leftType + " - " + rightType);
-                        BLEUtil.getInstance().connectBLE(bleDevice.mac);
-                        autoConnectRight = false;
-                        readRightBat = false;
-                        break;
-                    }
-                }
             }
 
             // 更新 底部我的设备部分的UI
@@ -298,18 +210,7 @@ public class HomeFragment extends Fragment {
                     binding.btnSearchDevice.setEnabled(true);
                 }
 
-                int pSize = mPairedDeviceEntities.size();
-                BLEDeviceEntity leftPairedDevice = null;
-                BLEDeviceEntity rightPairedDevice = null;
-                for(BLEDeviceEntity deviceEntity: mPairedDeviceEntities) {
-                    if(deviceEntity.deviceName.contains("-L")) {
-                        leftPairedDevice = deviceEntity;
-                    } else if(deviceEntity.deviceName.contains("-R")) {
-                        rightPairedDevice = deviceEntity;
-                    }
-                }
-
-                if (pSize == 0) {
+                if (leftPairedDevice == null && rightPairedDevice == null) {
                     binding.btnSearchDevice.setVisibility(View.VISIBLE);
                     binding.layoutLeftDevice.setVisibility(View.GONE);
                     binding.layoutRightDevice.setVisibility(View.GONE);
@@ -323,12 +224,17 @@ public class HomeFragment extends Fragment {
                     binding.ivLeftDisconnected.setVisibility(leftConnected ? View.GONE : View.VISIBLE);
                     binding.tvLeftDisconnected.setVisibility(leftConnected ? View.GONE : View.VISIBLE);
                     binding.tvLeftName.setVisibility(!leftConnected ? View.GONE : View.VISIBLE);
-                    binding.tvLeftName.setText(getPairedDevice(leftPairedDevices).deviceName);
+                    binding.tvLeftName.setText(leftPairedDevice.deviceName);
                     binding.bvLeftBattery.setVisibility(!leftConnected ? View.GONE : View.VISIBLE);
                     binding.tvLeftBattery.setVisibility(!leftConnected ? View.GONE : View.VISIBLE);
                 }
                 if (rightPairedDevice != null) {
-
+                    binding.ivRightDisconnected.setVisibility(rightConnected ? View.GONE : View.VISIBLE);
+                    binding.tvRightDisconnected.setVisibility(rightConnected ? View.GONE : View.VISIBLE);
+                    binding.tvRightName.setVisibility(!rightConnected ? View.GONE : View.VISIBLE);
+                    binding.tvRightName.setText(rightPairedDevice.deviceName);
+                    binding.bvRightBattery.setVisibility(!rightConnected ? View.GONE : View.VISIBLE);
+                    binding.tvRightBattery.setVisibility(!rightConnected ? View.GONE : View.VISIBLE);
                 }
             });
         }
@@ -339,18 +245,18 @@ public class HomeFragment extends Fragment {
             if (deviceName == null) { return; }
             requireActivity().runOnUiThread(() -> {
                 if (deviceName.contains("-L")) {
-//                    binding.bvDeviceLBattery.setBattery((float) value / 100.f);
-//                    binding.tvDeviceLBattery.setText("" + value + "%");
-//                    if (value < 10) {binding.tvDeviceLBattery.setTextColor(0xFFE22732);}
-//                    else if (value < 30) {binding.tvDeviceLBattery.setTextColor(0xFFF06D06);}
-//                    else { binding.tvDeviceLBattery.setTextColor(0xFF16DC8F); }
+                    binding.bvLeftBattery.setBattery((float) value / 100.f);
+                    binding.tvLeftBattery.setText("" + value + "%");
+                    if (value < 10) {binding.tvLeftBattery.setTextColor(0xFFE22732);}
+                    else if (value < 30) {binding.tvLeftBattery.setTextColor(0xFFF06D06);}
+                    else { binding.tvLeftBattery.setTextColor(0xFF16DC8F); }
 
                 } else if (deviceName.contains("-R")) {
-//                    binding.bvDeviceRBattery.setBattery((float) value / 100.f);
-//                    binding.tvDeviceRBattery.setText("" + value + "%");
-//                    if (value < 10) {binding.tvDeviceRBattery.setTextColor(0xFFE22732);}
-//                    else if (value < 30) {binding.tvDeviceRBattery.setTextColor(0xFFF06D06);}
-//                    else { binding.tvDeviceRBattery.setTextColor(0xFF16DC8F); }
+                    binding.bvRightBattery.setBattery((float) value / 100.f);
+                    binding.tvRightBattery.setText("" + value + "%");
+                    if (value < 10) {binding.tvRightBattery.setTextColor(0xFFE22732);}
+                    else if (value < 30) {binding.tvRightBattery.setTextColor(0xFFF06D06);}
+                    else { binding.tvRightBattery.setTextColor(0xFF16DC8F); }
                 }
             });
         }

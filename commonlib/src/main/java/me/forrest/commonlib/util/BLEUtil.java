@@ -116,6 +116,11 @@ public class BLEUtil {
         public int     connectStatus;
         public String  devType;
         public boolean needAutoReconnect; // 需要自动重连
+        public String  alias;             // 别名
+
+        public BLEDevice() {
+
+        }
 
         public BLEDevice(String deviceName, String mac, int connectStatus, String devType) {
             this.deviceName    = deviceName;

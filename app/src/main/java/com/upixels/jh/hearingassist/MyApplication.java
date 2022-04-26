@@ -6,6 +6,8 @@ import android.util.Log;
 //import com.umeng.analytics.MobclickAgent;
 //import com.umeng.commonsdk.UMConfigure;
 
+import com.upixels.jh.hearingassist.util.DeviceManager;
+
 import java.util.HashSet;
 
 import androidx.annotation.NonNull;
@@ -39,6 +41,7 @@ public class MyApplication extends BaseApplication {
 //        }
 //        MultiLanguageUtil.init(this);
         BLEUtil.getInstance().init(getApplicationContext());
+        DeviceManager.getInstance().init(getApplicationContext());
     }
 
     @Override

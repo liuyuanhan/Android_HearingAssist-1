@@ -1,5 +1,6 @@
 package com.upixels.jh.hearingassist;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -34,6 +35,9 @@ public class HomeActivity extends AppCompatActivity {
     private void initView() {
         binding.ivMore.setOnClickListener(v -> {
             binding.drawerLayout.open();
+        });
+        binding.ivSettings.setOnClickListener( v -> {
+            startActivity(new Intent(this, ConnectActivity.class));
         });
     }
 

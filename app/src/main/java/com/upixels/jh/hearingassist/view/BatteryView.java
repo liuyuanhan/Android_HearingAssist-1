@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 
@@ -26,6 +27,7 @@ public class BatteryView extends View {
     private int W;
     private int dw;
     private int space;
+    private float bat;
 
     public BatteryView(Context context) {
         super(context);
@@ -86,6 +88,8 @@ public class BatteryView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        if (W == 0 ) { W = getWidth() - 3 * space; }
+        dw = (int)(bat * W);
         // 绘制背景
         rect.set(0, 0, getWidth(), getHeight()); // 99 54
         canvas.drawBitmap(bitmap, null, rect, null);
@@ -97,8 +101,7 @@ public class BatteryView extends View {
 
     // bat = [0.0, 1.0]
     public void setBattery(float bat) {
-        W = getWidth() - 3 * space;
-        dw = (int)(bat * W);
+        this.bat = bat;
         if (bat >= 0.3f) {
             paint.setColor(0xFF16DC8F);
             bitmap = bitmapBatNormal;
@@ -111,7 +114,6 @@ public class BatteryView extends View {
         } else { // == 0.0f
             bitmap = bitmapBatDisconnected;
         }
-
         postInvalidate();
     }
 }
