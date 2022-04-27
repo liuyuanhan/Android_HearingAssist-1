@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this);
         ViewPager2 viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
+        viewPager.setCurrentItem(1);
         TabLayout tabLayout = binding.tabLayout;
 
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
@@ -53,4 +54,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }).attach();
     }
+    
 }

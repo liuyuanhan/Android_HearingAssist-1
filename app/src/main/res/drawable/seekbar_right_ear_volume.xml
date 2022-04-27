@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--<layer-list xmlns:android="http://schemas.android.com/apk/res/android">-->
+<!--    <item android:id="@android:id/background">-->
+<!--        <shape>-->
+<!--            <solid android:color="#FFDFE5EA"/>-->
+<!--        </shape>-->
+<!--    </item>-->
+
+<!--    <item android:id="@android:id/secondaryProgress">-->
+<!--        <shape>-->
+<!--            <solid android:color="#FFFFFFFF"/>-->
+<!--        </shape>-->
+<!--&lt;!&ndash;        <scale android:scaleWidth="100%">&ndash;&gt;-->
+<!--&lt;!&ndash;            <selector>&ndash;&gt;-->
+<!--&lt;!&ndash;                <item android:state_enabled="false">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <color android:color="@android:color/transparent"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                </item>&ndash;&gt;-->
+<!--&lt;!&ndash;                <item android:drawable="@drawable/seekbar_progress_2"/>&ndash;&gt;-->
+<!--&lt;!&ndash;            </selector>&ndash;&gt;-->
+<!--&lt;!&ndash;        </scale>&ndash;&gt;-->
+<!--    </item>-->
+
+<!--    <item android:id="@android:id/progress">-->
+<!--        <shape>-->
+<!--            <solid android:color="@color/red_jh"/>-->
+<!--        </shape>-->
+<!--&lt;!&ndash;        <scale android:scaleWidth="100%">&ndash;&gt;-->
+<!--&lt;!&ndash;            <selector>&ndash;&gt;-->
+<!--&lt;!&ndash;                <item android:state_enabled="false">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <color android:color="@android:color/transparent"/>&ndash;&gt;-->
+<!--&lt;!&ndash;                </item>&ndash;&gt;-->
+<!--&lt;!&ndash;                <item android:drawable="@drawable/seekbar_progress"/>&ndash;&gt;-->
+<!--&lt;!&ndash;            </selector>&ndash;&gt;-->
+<!--&lt;!&ndash;        </scale>&ndash;&gt;-->
+<!--    </item>-->
+<!--</layer-list>-->
+
+<layer-list
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape>
+            <solid android:color="@color/white"/>
+            <corners android:radius="22dp"/>
+        </shape>
+    </item>
+    <item android:id="@android:id/secondaryProgress">
+        <clip>
+            <shape>
+                <solid android:color="#00000000"/>
+                <corners android:radius="22dp"/>
+            </shape>
+        </clip>
+    </item>
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape>
+                <solid android:color="@color/red_C7"/>
+                <corners android:radius="22dp"/>
+            </shape>
+        </clip>
+    </item>
+</layer-list>
