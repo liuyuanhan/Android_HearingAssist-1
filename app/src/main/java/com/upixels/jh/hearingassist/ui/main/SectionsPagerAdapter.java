@@ -35,6 +35,8 @@ public class SectionsPagerAdapter extends FragmentStateAdapter {
             return new ModeFragment();
         } else if (position == 1) {
             return VolumeFragment.newInstance("1", "2");
+        } else if (position == 2) {
+            return BandFragment.newInstance();
         }
         return PlaceholderFragment.newInstance(position+1);
     }
