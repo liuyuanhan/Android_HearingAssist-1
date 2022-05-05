@@ -13,4 +13,10 @@
     <dimen name="rl_width">160dp</dimen>
     <dimen name="list_item_spacing">16dp</dimen>
     <dimen name="list_item_spacing_half">8dp</dimen>
+
+    <!-- Band -->
+    <dimen name="band_seek_bar_h">150dp</dimen>
+    <dimen name="margin_top_2">280dp</dimen>
+    <dimen name="margin_bottom_hz_2">50dp</dimen>
+    <dimen name="margin_top_hz_2">90dp</dimen>
 </resources>

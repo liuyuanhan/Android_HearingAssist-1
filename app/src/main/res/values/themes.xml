@@ -116,7 +116,24 @@
     </style>
 
 
+    <style name="Widget.App.RadioButton.L" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.RadioButton.L</item>
+    </style>
 
+    <style name="ThemeOverlay.App.RadioButton.L" parent="">
+        <item name="android:buttonTint">@color/blue_09</item>
+        <item name="colorOnSurface">@color/blue_09</item>
+        <item name="colorSecondary">@color/blue_09</item>
+    </style>
 
+    <style name="Widget.App.RadioButton.R" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.RadioButton.R</item>
+    </style>
+
+    <style name="ThemeOverlay.App.RadioButton.R" parent="">
+        <item name="android:buttonTint">@color/red_C7</item>
+        <item name="colorOnSurface">@color/red_C7</item>
+        <item name="colorSecondary">@color/red_C7</item>
+    </style>
 
 </resources>

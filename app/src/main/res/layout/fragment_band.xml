@@ -69,9 +69,57 @@
             android:layout_marginEnd="16dp"
             android:layout_marginTop="12dp"/>
 
+        <TextView
+            android:id="@+id/tv_gain_250"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_250"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_250"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_250"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <TextView
+            android:id="@+id/tv_gain_500"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_500"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_500"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_500"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <TextView
+            android:id="@+id/tv_gain_1000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_1000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_1000"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_1000"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <TextView
+            android:id="@+id/tv_gain_1500"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_1500"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_1500"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_1500"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/sb_eq_250"
-            android:layout_width="140dp"
+            android:layout_width="@dimen/band_seek_bar_h"
             android:layout_height="30dp"
             app:layout_constraintTop_toTopOf="@id/view_border"
             app:layout_constraintStart_toStartOf="@id/view_border"
@@ -89,7 +137,7 @@
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/sb_eq_500"
-            android:layout_width="140dp"
+            android:layout_width="@dimen/band_seek_bar_h"
             android:layout_height="30dp"
             app:layout_constraintTop_toTopOf="@id/view_border"
             app:layout_constraintStart_toStartOf="@id/view_border"
@@ -107,7 +155,7 @@
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/sb_eq_1000"
-            android:layout_width="140dp"
+            android:layout_width="@dimen/band_seek_bar_h"
             android:layout_height="30dp"
             app:layout_constraintTop_toTopOf="@id/view_border"
             app:layout_constraintStart_toStartOf="@id/view_border"
@@ -125,8 +173,8 @@
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/sb_eq_1500"
-            android:layout_width="140dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/band_seek_bar_h"
+            android:layout_height="30dp"
             app:layout_constraintTop_toTopOf="@id/view_border"
             app:layout_constraintStart_toStartOf="@id/view_border"
             app:layout_constraintEnd_toEndOf="@id/view_border"
@@ -144,13 +192,227 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="@id/view_border"
             app:layout_constraintStart_toStartOf="@id/sb_eq_250"
             app:layout_constraintEnd_toEndOf="@id/sb_eq_250"
-            android:layout_marginTop="150dp"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_250"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
             android:textSize="14dp"
             android:text="250Hz"
             android:textColor="#606266"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_500"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_500"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_500"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="500Hz"
+            android:textColor="#606266"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_1000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_1000"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_1000"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="1KHz"
+            android:textColor="#606266"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_1500"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_1500"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_1500"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="1.5KHz"
+            android:textColor="#606266"/>
+
+
+        <TextView
+            android:id="@+id/tv_gain_2000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_2000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_2000"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_2000"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <TextView
+            android:id="@+id/tv_gain_3000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_3000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_3000"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_3000"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <TextView
+            android:id="@+id/tv_gain_4000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_4000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_4000"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_4000"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <TextView
+            android:id="@+id/tv_gain_6000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_6000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_6000"
+            app:layout_constraintBottom_toTopOf="@id/sb_eq_6000"
+            android:layout_marginBottom="@dimen/margin_bottom_hz_2"
+            android:textSize="14dp"
+            android:text="0"
+            android:textColor="@color/blue_09"/>
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/sb_eq_2000"
+            android:layout_width="@dimen/band_seek_bar_h"
+            android:layout_height="30dp"
+            app:layout_constraintStart_toStartOf="@id/view_border"
+            app:layout_constraintEnd_toEndOf="@id/view_border"
+            app:layout_constraintTop_toTopOf="@id/view_border"
+            android:layout_marginTop="@dimen/margin_top_2"
+            android:layout_marginEnd="206dp"
+            android:rotation="270"
+            android:thumb="@drawable/icon_thumb_90"
+            android:thumbOffset="0dp"
+            android:maxHeight="12dp"
+            android:minHeight="12dp"
+            android:max="10"
+            android:progressDrawable="@drawable/seekbar_ear_volume_l"
+            android:elevation="3dp"/>
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/sb_eq_3000"
+            android:layout_width="@dimen/band_seek_bar_h"
+            android:layout_height="30dp"
+            app:layout_constraintTop_toTopOf="@id/view_border"
+            app:layout_constraintStart_toStartOf="@id/view_border"
+            app:layout_constraintEnd_toEndOf="@id/view_border"
+            android:layout_marginTop="@dimen/margin_top_2"
+            android:layout_marginEnd="68dp"
+            android:rotation="270"
+            android:thumb="@drawable/icon_thumb_90"
+            android:thumbOffset="0dp"
+            android:maxHeight="12dp"
+            android:minHeight="12dp"
+            android:max="10"
+            android:progressDrawable="@drawable/seekbar_ear_volume_l"
+            android:elevation="3dp"/>
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/sb_eq_4000"
+            android:layout_width="@dimen/band_seek_bar_h"
+            android:layout_height="30dp"
+            app:layout_constraintTop_toTopOf="@id/view_border"
+            app:layout_constraintStart_toStartOf="@id/view_border"
+            app:layout_constraintEnd_toEndOf="@id/view_border"
+            android:layout_marginTop="@dimen/margin_top_2"
+            android:layout_marginStart="68dp"
+            android:rotation="270"
+            android:thumb="@drawable/icon_thumb_90"
+            android:thumbOffset="0dp"
+            android:maxHeight="12dp"
+            android:minHeight="12dp"
+            android:max="10"
+            android:progressDrawable="@drawable/seekbar_ear_volume_l"
+            android:elevation="3dp"/>
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/sb_eq_6000"
+            android:layout_width="@dimen/band_seek_bar_h"
+            android:layout_height="30dp"
+            app:layout_constraintTop_toTopOf="@id/view_border"
+            app:layout_constraintStart_toStartOf="@id/view_border"
+            app:layout_constraintEnd_toEndOf="@id/view_border"
+            android:layout_marginTop="@dimen/margin_top_2"
+            android:layout_marginStart="206dp"
+            android:rotation="270"
+            android:thumb="@drawable/icon_thumb_90"
+            android:thumbOffset="0dp"
+            android:maxHeight="12dp"
+            android:minHeight="12dp"
+            android:max="10"
+            android:progressDrawable="@drawable/seekbar_ear_volume_l"
+            android:elevation="3dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_2000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_2000"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_2000"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="2KHz"
+            android:textColor="#606266"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_3000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_3000"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_3000"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="3KHz"
+            android:textColor="#606266"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_4000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_4000"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_4000"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="4KHz"
+            android:textColor="#606266"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/sb_eq_6000"
+            app:layout_constraintEnd_toEndOf="@id/sb_eq_6000"
+            app:layout_constraintTop_toTopOf="@id/sb_eq_6000"
+            android:layout_marginTop="@dimen/margin_top_hz_2"
+            android:textSize="14dp"
+            android:text="6KHz"
+            android:textColor="#606266"/>
+
+        <Button
+            android:id="@+id/btn_audition"
+            android:visibility="visible"
+            style="@style/LongButton"
+            app:backgroundTint="@color/red_C7"
+            app:iconTint="@color/white"
+            android:textColor="@color/white"
+            android:layout_width="330dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="@string/Audition"
+            app:layout_constraintTop_toBottomOf="@id/view_border"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="10dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

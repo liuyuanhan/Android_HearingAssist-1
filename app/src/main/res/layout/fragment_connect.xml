@@ -186,7 +186,7 @@
 
         <Button
             android:id="@+id/btn_personalize"
-            android:visibility="gone"
+            android:visibility="visible"
             style="@style/LongButton"
             app:backgroundTint="@color/red_C7"
             app:iconTint="@color/white"
