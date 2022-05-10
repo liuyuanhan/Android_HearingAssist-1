@@ -3,12 +3,12 @@ package me.forrest.commonlib.jh;
 import me.forrest.commonlib.util.NumberUtil;
 
 public enum SceneMode {
-    // md DI0 volume
-    CUSTOM(   (byte)1,      (byte) 0,     (byte)0),
-    STANDARD( (byte)2,      (byte) 1,     (byte)0),
-    DENOISE(  (byte)3,      (byte) 2,     (byte)0),
-    OUTDOOR(  (byte)4,      (byte) 3,     (byte)0),
-    UNKNOWN(  (byte)-1,     (byte) 4,     (byte)0);
+    //               md           DI0            volume
+    CONVERSATION(   (byte)1,      (byte) 0,     (byte)0),
+    RESTAURANT(     (byte)2,      (byte) 1,     (byte)0),
+    OUTDOOR(        (byte)3,      (byte) 2,     (byte)0),
+    MUSIC(          (byte)4,      (byte) 3,     (byte)0),
+    UNKNOWN(        (byte)-1,     (byte) 4,     (byte)0);
 
     private String deviceName;
     private byte md;
@@ -66,13 +66,13 @@ public enum SceneMode {
     public static SceneMode mode(String deviceName, byte md, byte volume, byte type) {
         SceneMode sceneMode = UNKNOWN;
         if (md == 1) {
-            sceneMode = CUSTOM;
+            sceneMode = CONVERSATION;
         } else if (md == 2) {
-            sceneMode = STANDARD;
+            sceneMode = RESTAURANT;
         } else if (md == 3) {
-            sceneMode = DENOISE;
-        } else if (md == 4) {
             sceneMode = OUTDOOR;
+        } else if (md == 4) {
+            sceneMode = MUSIC;
         }
         sceneMode.setDeviceName(deviceName);
         sceneMode.setVolume(volume);

@@ -4,49 +4,48 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
+import androidx.transition.TransitionManager;
+import me.forrest.commonlib.jh.SceneMode;
+import me.forrest.commonlib.util.CommonUtil;
+import me.forrest.commonlib.util.DensityHelper;
+import me.forrest.commonlib.util.DensityUtil;
+import me.forrest.commonlib.view.IOSLoadingDialog;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 
+import com.upixels.jh.hearingassist.MainActivity;
 import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentVolumeBinding;
+import com.upixels.jh.hearingassist.util.DeviceManager;
+
+import java.util.Locale;
 
 
 public class VolumeFragment extends Fragment {
     private final static String TAG = VolumeFragment.class.getSimpleName();
 
-    private FragmentVolumeBinding binding;
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private FragmentVolumeBinding   binding;
+    private ConstraintLayout        layoutFragmentVolumeLeftRight;
+    private ConstraintLayout        layoutFragmentVolumeLeft;
+    private ConstraintLayout        layoutFragmentVolumeRight;
+    private ConstraintSet           constraintSetLeftRight;
+    private ConstraintSet           constraintSetLeft;
+    private ConstraintSet           constraintSetRight;
+    private int                     constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
 
     public VolumeFragment() {
-        // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment VolumeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static VolumeFragment newInstance(String param1, String param2) {
+    public static VolumeFragment newInstance() {
         VolumeFragment fragment = new VolumeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
         return fragment;
     }
 
@@ -54,10 +53,6 @@ public class VolumeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "[onCreate]");
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -71,18 +66,21 @@ public class VolumeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "[onViewCreated]");
         super.onViewCreated(view, savedInstanceState);
+        initView();
     }
 
     @Override
     public void onStart() {
         Log.d(TAG, "[onStart]");
         super.onStart();
+        DeviceManager.getInstance().addListener(deviceChangeListener);
     }
 
     @Override
     public void onResume() {
         Log.d(TAG, "[onResume]");
         super.onResume();
+        updateView(DeviceManager.getInstance().getLeftMode(), DeviceManager.getInstance().getRightMode());
     }
 
     @Override
@@ -95,6 +93,7 @@ public class VolumeFragment extends Fragment {
     public void onStop() {
         Log.d(TAG, "[onStop]");
         super.onStop();
+        DeviceManager.getInstance().removeListener(deviceChangeListener);
     }
 
     @Override
@@ -108,4 +107,154 @@ public class VolumeFragment extends Fragment {
         Log.d(TAG, "[onDestroy]");
         super.onDestroy();
     }
+
+    private void initView() {
+        constraintSetLeftRight = new ConstraintSet();
+        constraintSetLeft = new ConstraintSet();
+        constraintSetRight = new ConstraintSet();
+
+        layoutFragmentVolumeLeftRight = binding.layoutFragmentVolumeLR;
+        constraintSetLeftRight.clone(layoutFragmentVolumeLeftRight);
+        constraintSetLeft.clone(this.requireContext(), R.layout.fragment_volume_left);
+        constraintSetRight.clone(this.requireContext(), R.layout.fragment_volume_right);
+
+        binding.sbLeftVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        binding.sbRightVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", progress * 10));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+//                DeviceManager.getInstance().ctlMode()
+            }
+        });
+    }
+
+    private void updateView(SceneMode leftMode, SceneMode rightMode) {
+        Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
+        int resIdL = 0;
+        int resIdR = 0;
+        if (leftMode != null) {
+            switch (leftMode) {
+                case CONVERSATION:
+                    resIdL = R.drawable.icon_mode_conversation_blue;
+                    break;
+                case RESTAURANT:
+                    resIdL = R.drawable.icon_mode_restaurant_blue;
+                    break;
+                case OUTDOOR:
+                    resIdL = R.drawable.icon_mode_outdoor_blue;
+                    break;
+                case MUSIC:
+                    resIdL = R.drawable.icon_mode_music_blue;
+                    break;
+            }
+        }
+        if (rightMode != null) {
+            switch (rightMode) {
+                case CONVERSATION:
+                    resIdR = R.drawable.icon_mode_conversation_blue;
+                    break;
+                case RESTAURANT:
+                    resIdR = R.drawable.icon_mode_restaurant_blue;
+                    break;
+                case OUTDOOR:
+                    resIdR = R.drawable.icon_mode_outdoor_blue;
+                    break;
+                case MUSIC:
+                    resIdR = R.drawable.icon_mode_music_blue;
+                    break;
+            }
+        }
+
+        if (resIdL > 0 && resIdR > 0) {
+
+        } else if (resIdL > 0) {
+
+        } else if (resIdR > 0) {
+            constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
+            TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
+        }
+
+        if (resIdL > 0 && resIdR > 0) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutFragmentVolumeLeftRight);
+                TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l);
+            }
+
+            binding.ivModeL.setImageResource(resIdL);
+            binding.ivModeR.setImageResource(resIdR);
+            if (resIdL != resIdR) {
+                CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
+            }
+
+        } else if (resIdL > 0) {
+            if (constraintSetFlag != 1) {
+                constraintSetFlag = 1;
+                constraintSetLeft.applyTo(layoutFragmentVolumeLeftRight);
+                TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
+            }
+
+            binding.ivModeL.setImageResource(resIdL);
+            binding.sbLeftVolume.setProgress(leftMode.getVolume());
+            binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)leftMode.getVolume() / 10 * 100)));
+
+        } else if (resIdR > 0) {
+            if (constraintSetFlag != 2) {
+                constraintSetFlag = 2;
+                constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
+                TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
+            }
+
+            binding.ivModeR.setImageResource(resIdR);
+            binding.sbRightVolume.setProgress(rightMode.getVolume());
+            binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)rightMode.getVolume() / 10 * 100)));
+        }
+    }
+
+    private final DeviceManager.DeviceChangeListener deviceChangeListener = new DeviceManager.DeviceChangeListener() {
+
+        @Override
+        public void onReadingStatus(boolean isReading) {
+
+        }
+
+        @Override
+        public void onChangeBat(int leftBat, int rightBat) {
+
+        }
+
+        @Override
+        public void onChangeSceneMode(SceneMode leftMode, SceneMode rightMode) {
+            requireActivity().runOnUiThread(() -> updateView(leftMode, rightMode));
+        }
+    };
 }

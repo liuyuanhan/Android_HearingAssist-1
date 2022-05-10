@@ -6,15 +6,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.upixels.jh.hearingassist.databinding.FragmentModeBinding;
+import com.upixels.jh.hearingassist.databinding.FragmentFocusBinding;
+import com.upixels.jh.hearingassist.databinding.FragmentNoiseBinding;
 
-import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
-public class ModeFragment extends Fragment {
-    private static final String TAG = ModeFragment.class.getSimpleName();
-    private FragmentModeBinding binding;
+public class FocusFragment extends Fragment {
+    private final static String TAG = FocusFragment.class.getSimpleName();
+    private FragmentFocusBinding binding;
+
+    public static FocusFragment newInstance() {
+        return new FocusFragment();
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -26,7 +31,7 @@ public class ModeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "[onCreateView]");
-        binding = FragmentModeBinding.inflate(inflater, container, false);
+        binding = FragmentFocusBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -34,6 +39,7 @@ public class ModeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "[onViewCreated]");
         super.onViewCreated(view, savedInstanceState);
+        binding.btnNormal.setSelected(true);
     }
 
     @Override
@@ -71,6 +77,4 @@ public class ModeFragment extends Fragment {
         Log.d(TAG, "[onDestroy]");
         super.onDestroy();
     }
-
-
 }

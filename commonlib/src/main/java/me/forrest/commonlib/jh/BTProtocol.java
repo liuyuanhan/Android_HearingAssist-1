@@ -2,17 +2,10 @@ package me.forrest.commonlib.jh;
 
 import android.util.Log;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
-import io.reactivex.rxjava3.core.ObservableOnSubscribe;
-import io.reactivex.rxjava3.functions.Consumer;
 
 public class BTProtocol {
     private final static String TAG = "BTProtocol";
@@ -679,16 +672,16 @@ public class BTProtocol {
     public byte[] buildCMD_ReadModeFile(SceneMode mode) {
         byte md = 0;
         switch (mode) {
-            case CUSTOM:
+            case CONVERSATION:
                 md = 0;
                 break;
-            case STANDARD:
+            case RESTAURANT:
                 md = 1;
                 break;
-            case DENOISE:
+            case OUTDOOR:
                 md = 2;
                 break;
-            case OUTDOOR:
+            case MUSIC:
                 md = 3;
                 break;
         }
@@ -791,19 +784,19 @@ public class BTProtocol {
         byte md = 0;
         byte volume = 0;
         switch (mode) {
-            case CUSTOM:
+            case CONVERSATION:
                 md = 1;
                 volume = mode.getVolume();
                 break;
-            case STANDARD:
+            case RESTAURANT:
                 md = 2;
                 volume = mode.getVolume();
                 break;
-            case DENOISE:
+            case OUTDOOR:
                 md = 3;
                 volume = mode.getVolume();
                 break;
-            case OUTDOOR:
+            case MUSIC:
                 md = 4;
                 volume = mode.getVolume();
                 break;
@@ -819,16 +812,16 @@ public class BTProtocol {
         byte cmmd = 0x02;
         byte md  = 0;
         switch (mode) {
-            case CUSTOM:
+            case CONVERSATION:
                 md = 1;
                 break;
-            case STANDARD:
+            case RESTAURANT:
                 md = 2;
                 break;
-            case DENOISE:
+            case OUTDOOR:
                 md = 3;
                 break;
-            case OUTDOOR:
+            case MUSIC:
                 md = 4;
                 break;
             default:
@@ -945,13 +938,13 @@ public class BTProtocol {
                 int d11 = frame[18] & 0xff;
 
                 if (DI0 == 0x00) {
-                    fileContent.mode = SceneMode.CUSTOM;
+                    fileContent.mode = SceneMode.CONVERSATION;
                 } else if (DI0 == 0x01) {
-                    fileContent.mode = SceneMode.STANDARD;
+                    fileContent.mode = SceneMode.RESTAURANT;
                 } else if (DI0 == 0x02) {
-                    fileContent.mode = SceneMode.DENOISE;
-                } else if (DI0 == 0x03) {
                     fileContent.mode = SceneMode.OUTDOOR;
+                } else if (DI0 == 0x03) {
+                    fileContent.mode = SceneMode.MUSIC;
                 }
                 fileContent.NC1 = (byte) (d0 & 0x07);
                 fileContent.NC2 = (byte) (d1 >> 1);
@@ -989,19 +982,19 @@ public class BTProtocol {
 //                    self.rxSceneMode.accept( (name, SceneMode.mode(frame[7], 0), Read_Success) )
 
                 } else if (DI0 == 0x01) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 自定义模式: " + name + SceneMode.CUSTOM);
+                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 自定义模式: " + name + SceneMode.CONVERSATION);
 //                    self.rxSceneMode.accept( (name, .custom(frame[7]), Read_Success) )
 
                 } else if (DI0 == 0x02) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 标准模式:" + name +  SceneMode.STANDARD);
+                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 标准模式:" + name +  SceneMode.RESTAURANT);
 //                    self.rxSceneMode.accept( (name, .standard(frame[7]), Read_Success) )
 
                 } else if (DI0 == 0x03) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 降噪模式:" + name + SceneMode.DENOISE);
+                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 降噪模式:" + name + SceneMode.OUTDOOR);
 //                    self.rxSceneMode.accept( (name, .denoise(frame[7]), Read_Success) )
 
                 } else if (DI0 == 0x04) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 户外模式:" + name +  SceneMode.OUTDOOR);
+                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 户外模式:" + name +  SceneMode.MUSIC);
 //                    self.rxSceneMode.accept( (name, .outdoor(frame[7]), Read_Success) )
 
                 } else if (DI0 == (byte)0xFF) {

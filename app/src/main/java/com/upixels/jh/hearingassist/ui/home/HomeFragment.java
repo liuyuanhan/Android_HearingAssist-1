@@ -65,7 +65,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initView();
         // 添加BLEUtil监听回调
-        BLEUtil.getInstance().addJHBleListener(mBLEListener);
+//        BLEUtil.getInstance().addJHBleListener(mBLEListener);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class HomeFragment extends Fragment {
         DeviceManager.getInstance().readPairedDevice();
         leftPairedDevice = DeviceManager.getInstance().getLeftPairedDevice();
         rightPairedDevice = DeviceManager.getInstance().getRightPairedDevice();
-        BLEUtil.getInstance().updateListenerForBLEDevices();
+//        BLEUtil.getInstance().updateListenerForBLEDevices();
 //        requestPermissions();
     }
 
@@ -105,7 +105,7 @@ public class HomeFragment extends Fragment {
         super.onDestroyView();
         binding = null;
         // 删除BLEUtil监听
-        BLEUtil.getInstance().removeJHBLEListener(mBLEListener);
+//        BLEUtil.getInstance().removeJHBLEListener(mBLEListener);
     }
 
     private void initView() {
@@ -182,19 +182,19 @@ public class HomeFragment extends Fragment {
                         connectedCnt++;
                         leftConnected = true;
                         leftPairedDevice = device;
-                        if ((!readLeftBat)) {
-                            readLeftBat = true;
-                            mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
-                        }
+//                        if ((!readLeftBat)) {
+//                            readLeftBat = true;
+//                            mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
+//                        }
 
                     } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
                         connectedCnt++;
                         rightConnected = true;
                         rightPairedDevice = device;
-                        if ((!readRightBat)) {
-                            readRightBat = true;
-                            mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
-                        }
+//                        if ((!readRightBat)) {
+//                            readRightBat = true;
+//                            mUIHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
+//                        }
                     }
                 }
 

@@ -70,13 +70,13 @@ public class BTProtocolD58B {
         // 切换模式时，需要将场景模式转为 program进行设置
         public static byte SceneMode2prog(SceneMode sceneMode) {
             switch (sceneMode) {
-                case CUSTOM:
+                case CONVERSATION:
                     return 0;
-                case STANDARD:
+                case RESTAURANT:
                     return 1;
-                case DENOISE:
-                    return 2;
                 case OUTDOOR:
+                    return 2;
+                case MUSIC:
                     return 3;
             }
             return 0;
@@ -84,19 +84,19 @@ public class BTProtocolD58B {
 
         // 转为SceneMode 便于和W3统一处理
         public SceneMode D58BProgram2SceneMode() {
-            SceneMode sceneMode = SceneMode.CUSTOM;
+            SceneMode sceneMode = SceneMode.CONVERSATION;
             switch (this) {
                 case CUSTOM:
-                    sceneMode = SceneMode.CUSTOM;
+                    sceneMode = SceneMode.CONVERSATION;
                     break;
                 case STANDARD:
-                    sceneMode = SceneMode.STANDARD;
+                    sceneMode = SceneMode.RESTAURANT;
                     break;
                 case DENOISE:
-                    sceneMode = SceneMode.DENOISE;
+                    sceneMode = SceneMode.OUTDOOR;
                     break;
                 case OUTDOOR:
-                    sceneMode = SceneMode.OUTDOOR;
+                    sceneMode = SceneMode.MUSIC;
                     break;
             }
             sceneMode.setDeviceName(this.deviceName);

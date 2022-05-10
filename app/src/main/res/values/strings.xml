@@ -58,7 +58,7 @@
 
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
-
+    <string name="Configure">Configure</string>
 
     <string name="Connected">Connected</string>
     <string name="Connecting">Connecting</string>
@@ -70,6 +70,7 @@
     <string name="delete">Delete</string>
     <string name="Audition">Audition</string>
 
+    <!-- Loud -->
     <string name="Loud_Sound_Protection">Loud Sound Protection</string>
     <string name="No_Compression">No Compression</string>
     <string name="Low_Compression">Low Compression</string>
@@ -77,6 +78,23 @@
     <string name="High_Compression">High Compression</string>
     <string name="tips_loud_settings">This feature can compress the gain for loud sounds,such as slamming doors if they are too loud for you.</string>
 
+    <!-- Focus -->
+    <string name="Directional">Directional</string>
+    <string name="Normal_Mode">Normal Mode</string>
+    <string name="TV_Mode">TV Mode</string>
+    <string name="Meeting_Mode">Meeting Mode</string>
+    <string name="Face_to_Face_Mode">Face-to-face Mode</string>
+
+    <!-- Noise -->
+    <string name="Noise_Reduction">Noise Reduction</string>
+    <string name="OFF">OFF</string>
+    <string name="Mid_Reduction">Mid Reduction</string>
+    <string name="Medium_Reduction">Medium Compression</string>
+    <string name="High_Reduction">High Reduction</string>
+    <string name="tips_noise_settings">This feature reduces environmental noise for quiet environment.</string>
+
+    <string name="tips_mode_not_same">L and R mode is not the same, choose a mode please!</string>
+    <string name="tips_mode_sync">Sync Mode…</string>
     <string name="tips_bluetooth_permission">No bluetooth permission granted, the program cannot work!</string>
     <string name="tips_open_bt">Please turn on the bluetooth switch!</string>
     <string name="tips_connect_same_type">Please connect the same type of device!</string>

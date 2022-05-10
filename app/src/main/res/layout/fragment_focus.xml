@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.FocusFragment">
+
+    <TextView
+        android:id="@+id/tv_focus_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/Directional"
+        android:textColor="@color/black_toolbar_title"
+        android:textSize="17dp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_mode_R"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_focus_mode"
+        app:layout_constraintBottom_toBottomOf="@id/tv_focus_mode"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/icon_mode_conversation_nor"/>
+
+    <ImageView
+        android:id="@+id/iv_mode_L"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tv_focus_mode"
+        app:layout_constraintBottom_toBottomOf="@id/tv_focus_mode"
+        android:layout_marginEnd="56dp"
+        android:src="@drawable/icon_mode_conversation_blue"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_m"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <Button
+        android:id="@+id/btn_normal"
+        style="@style/ButtonFocus"
+        android:layout_width="@dimen/focus_btn_width"
+        android:layout_height="@dimen/focus_btn_height"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="6dp"
+        android:gravity="center"
+        android:text="@string/Normal_Mode"
+        app:icon="@drawable/icon_focus_normal"
+        app:iconTint="@null"
+        app:layout_constraintEnd_toEndOf="@id/guideline_m"
+        app:layout_constraintTop_toBottomOf="@id/tv_focus_mode" />
+
+    <Button
+        android:id="@+id/btn_tv"
+        style="@style/ButtonFocus"
+        android:layout_width="@dimen/focus_btn_width"
+        android:layout_height="@dimen/focus_btn_height"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/TV_Mode"
+        app:icon="@drawable/icon_focus_tv"
+        app:iconTint="@null"
+        app:layout_constraintStart_toEndOf="@id/guideline_m"
+        app:layout_constraintTop_toBottomOf="@id/tv_focus_mode" />
+
+    <Button
+        android:id="@+id/btn_meeting"
+        style="@style/ButtonFocus"
+        android:layout_width="@dimen/focus_btn_width"
+        android:layout_height="@dimen/focus_btn_height"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="6dp"
+        android:gravity="center"
+        android:text="@string/Meeting_Mode"
+        app:icon="@drawable/icon_focus_meeting"
+        app:iconTint="@null"
+        app:layout_constraintEnd_toEndOf="@id/guideline_m"
+        app:layout_constraintTop_toBottomOf="@id/btn_normal" />
+
+    <Button
+        android:id="@+id/btn_face_to_face"
+        style="@style/ButtonFocus"
+        android:layout_width="@dimen/focus_btn_width"
+        android:layout_height="@dimen/focus_btn_height"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:text="@string/Face_to_Face_Mode"
+        app:icon="@drawable/icon_focus_face_to_face"
+        app:iconTint="@null"
+        app:layout_constraintStart_toEndOf="@id/guideline_m"
+        app:layout_constraintTop_toBottomOf="@id/btn_tv" />
+
+
+    <Button
+        android:id="@+id/btn_configure"
+        android:visibility="visible"
+        style="@style/LongButton"
+        app:backgroundTint="@color/red_C7"
+        app:iconTint="@color/white"
+        android:textColor="@color/white"
+        android:layout_width="330dp"
+        android:layout_height="40dp"
+        android:gravity="center"
+        android:text="@string/Configure"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="12dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

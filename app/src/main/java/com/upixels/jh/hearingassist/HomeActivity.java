@@ -3,18 +3,15 @@ package com.upixels.jh.hearingassist;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.upixels.jh.hearingassist.databinding.ActivityHomeBinding;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.util.Log;
-import android.view.View;
 
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
+
+
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
+
 
 
 

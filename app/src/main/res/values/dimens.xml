@@ -19,4 +19,8 @@
     <dimen name="margin_top_2">280dp</dimen>
     <dimen name="margin_bottom_hz_2">50dp</dimen>
     <dimen name="margin_top_hz_2">90dp</dimen>
+
+    <!-- Focus -->
+    <dimen name="focus_btn_width">165dp</dimen>
+    <dimen name="focus_btn_height">128dp</dimen>
 </resources>
