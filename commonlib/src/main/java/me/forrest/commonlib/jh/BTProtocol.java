@@ -38,6 +38,11 @@ public class BTProtocol {
          normal, TV, meeting, face_to_face, unknown;
     }
 
+    // 根据MPO来获取Compression类型
+    public enum Compression {
+        No, Low, Medium, High, Unknown;
+    }
+
     // 场景降噪
     public enum SceneNR {
         off(0), home(1), restaurant(2), street(3);
@@ -266,25 +271,25 @@ public class BTProtocol {
             return 0;
         }
 
-        // 传递参数 转 MPO
-//    static func MPO2Value(mpo: UInt8) -> String {
-//        if mpo == 0 {
-//            return "MUO"
-//        } else if mpo == 1 {
-//            return "-4"
-//        } else if mpo == 2 {
-//            return "-8"
-//        } else if mpo == 3 {
-//            return "-12"
-//        } else if mpo == 4 {
-//            return "-16"
-//        } else if mpo == 5 {
-//            return "-20"
-//        } else if mpo == 6 {
-//            return "-24"
-//        }
-//        return ""
-//    }
+
+        public Compression MPO2Compression() {
+            if (MPO == 0) {
+                return Compression.No;
+            } else if (MPO == 1) {
+                return Compression.Low;
+            } else if (MPO == 2) {
+                return Compression.Medium;
+            } else if (MPO == 3) {
+                return Compression.High;
+            } else if (MPO == 4) {
+                return Compression.High;
+            } else if (MPO == 5) {
+                return Compression.High;
+            } else if (MPO == 6) {
+                return Compression.High;
+            }
+            return Compression.Unknown;
+        }
 
         // 通讯参数 转为 实际值
         public static int MPO2Value(byte mpo) {
@@ -579,7 +584,7 @@ public class BTProtocol {
         @Override
         public String toString() {
             return "ModeFileContent{" +
-                    "  mode=" + mode +
+                    "mode=" + mode +
                     ", NC1=" + NC1 +
                     ", NC2=" + NC2 +
                     ", NC3=" + NC3 +

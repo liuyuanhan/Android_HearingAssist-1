@@ -163,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
         public void onCtlFeedback(String leftResult, String rightResult) {
 
         }
+
+        @Override
+        public void onWriteFeedback(String leftResult, String rightResult) {
+
+        }
     };
 
     private final BLEUtil.JHBLEListener mBLEListener =  new BLEUtil.JHBLEListener() {

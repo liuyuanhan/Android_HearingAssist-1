@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/layout_loud_l_r"
+        android:id="@+id/layout_loud_l"
         android:paddingBottom="20dp">
 
         <TextView
@@ -35,20 +35,21 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="47dp"
             android:layout_marginStart="16dp"
-            android:background="@drawable/shape_view_bg_red"/>
+            android:background="@drawable/shape_view_bg_blue"/>
 
         <ImageView
             android:id="@+id/iv_L"
             android:layout_width="40dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="@id/view_bg_l_r"
+            app:layout_constraintEnd_toEndOf="@id/view_bg_l_r"
             app:layout_constraintTop_toTopOf="@id/view_bg_l_r"
             app:layout_constraintBottom_toBottomOf="@id/view_bg_l_r"
-            android:layout_marginStart="22dp"
             android:scaleType="centerInside"
             android:src="@drawable/icon_l_device"/>
 
         <ImageView
+            android:visibility="gone"
             android:id="@+id/iv_l_r"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -60,6 +61,7 @@
             android:src="@drawable/icon_l_r_connected"/>
 
         <ImageView
+            android:visibility="gone"
             android:id="@+id/iv_R"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -71,6 +73,7 @@
             android:src="@drawable/icon_r_device"/>
 
         <ImageView
+            android:visibility="invisible"
             android:id="@+id/iv_mode_R"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -204,6 +207,7 @@
             android:textStyle="bold"/>
 
         <RadioGroup
+            android:visibility="invisible"
             android:id="@+id/radioGroup_R"
             app:layout_constraintStart_toEndOf="@id/tv_no_compression"
             app:layout_constraintTop_toTopOf="@id/view_border"
@@ -239,6 +243,7 @@
 
         <TextView
             android:id="@+id/tv_r"
+            android:visibility="invisible"
             app:layout_constraintStart_toStartOf="@id/radioGroup_R"
             app:layout_constraintTop_toBottomOf="@id/radioGroup_R"
             android:layout_width="wrap_content"

@@ -48,6 +48,7 @@ public class DeviceManager {
     private int         connectedCnt = 0;
     private int         modeCnt;            //获取到的模式数量
     private int         modeFileCnt;
+    private int         writeFeedbackCnt;
     private int         ctlFeedbackCnt;
 
     private BLEUtil.BLEDevice leftPairedDevice;
@@ -78,6 +79,9 @@ public class DeviceManager {
 
         // 控制命令回调
         void onCtlFeedback(String leftResult, String rightResult);
+
+        // 写命令Feedback回调
+        void onWriteFeedback(String leftResult, String rightResult);
     }
 
     public void addListener(DeviceChangeListener listener) {
@@ -116,6 +120,14 @@ public class DeviceManager {
         workHandler.post(() -> {
             for (DeviceChangeListener l : listeners) {
                 l.onCtlFeedback(leftResult, rightResult);
+            }
+        });
+    }
+
+    private void updateListenerForOnWriteFeedback(String leftResult, String rightResult) {
+        workHandler.post(() -> {
+            for (DeviceChangeListener l : listeners) {
+                l.onWriteFeedback(leftResult, rightResult);
             }
         });
     }
@@ -271,7 +283,28 @@ public class DeviceManager {
         if (rightConnected) {
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
-        if (leftConnected || rightConnected) { updateListenerForOnReadingStatus(true); }
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
+        return resultL && resultR;
+    }
+
+    // 设置模式文件
+    public boolean writeModeFileForEQ(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
+        leftResult = null;
+        rightResult = null;
+        writeFeedbackCnt = 0;
+        boolean resultL = true;
+        boolean resultR = true;
+        if (leftConnected && leftContent != null) {
+            BTProtocol.ModeFileContent.copyEQ(leftModeFileContent, leftContent, "V2");
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.mode);
+            resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
+        }
+        if (rightConnected && rightContent != null) {
+            BTProtocol.ModeFileContent.copyEQ(rightModeFileContent, rightContent, "V2");
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.mode);
+            resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
+        }
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
         return resultL && resultR;
     }
     // *******************************************************************
@@ -451,6 +484,26 @@ public class DeviceManager {
                 updateListenerForOnCtlFeedback(leftResult, rightResult);
             }
         });
+
+        // 设置EQ成功
+        disposable3 = BTProtocol.share.writeFeedbackObservable.subscribe(result -> {
+            String[] name_isSuccess = result.split(",");
+            String name = name_isSuccess[0];
+            boolean isSuccess = Boolean.parseBoolean(name_isSuccess[1]);
+            if (name.contains("-L") && isSuccess) {
+                Log.d(TAG, name + " 写模式文件成功");
+                leftResult = result;
+                writeFeedbackCnt++;
+            } else if (name.contains("-R") && isSuccess) {
+                Log.d(TAG, name + " 写模式文件成功");
+                rightResult = result;
+                writeFeedbackCnt++;
+            }
+            if (writeFeedbackCnt == connectedCnt) {
+                updateListenerForOnWriteFeedback(leftResult, rightResult);
+                updateListenerForOnReadingStatus(false);
+            }
+        });
     }
 
     private void unInitRxListener() {
@@ -467,6 +520,11 @@ public class DeviceManager {
         if (disposable2 != null) {
             disposable2.dispose();
             disposable2 = null;
+        }
+
+        if (disposable3 != null) {
+            disposable3.dispose();
+            disposable3 = null;
         }
     }
 }

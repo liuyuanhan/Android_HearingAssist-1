@@ -22,7 +22,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="17dp"
             android:layout_marginStart="16dp"
-            android:background="@drawable/shape_view_bg_l_r"/>
+            android:background="@drawable/shape_view_bg_white"/>
 
         <ImageView
             android:id="@+id/iv_L"

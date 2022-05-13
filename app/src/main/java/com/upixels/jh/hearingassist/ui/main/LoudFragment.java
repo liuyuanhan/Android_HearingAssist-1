@@ -5,16 +5,38 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.RadioGroup;
 
+import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentLoudBinding;
+import com.upixels.jh.hearingassist.databinding.FragmentLoudLeftBinding;
+import com.upixels.jh.hearingassist.databinding.FragmentLoudRightBinding;
+import com.upixels.jh.hearingassist.util.DeviceManager;
 
-import androidx.fragment.app.Fragment;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.transition.TransitionManager;
+import me.forrest.commonlib.jh.BTProtocol;
+import me.forrest.commonlib.jh.SceneMode;
+import me.forrest.commonlib.util.CommonUtil;
 
-public class LoudFragment extends Fragment {
+public class LoudFragment extends BaseFragment {
     private final static String TAG = LoudFragment.class.getSimpleName();
     private FragmentLoudBinding binding;
+    private FragmentLoudLeftBinding leftBinding;
+    private FragmentLoudRightBinding rightBinding;
+    private ConstraintLayout            layoutLeftRight;
+    private ConstraintLayout            layoutLeft;
+    private ConstraintLayout            layoutRight;
+    private ConstraintSet               constraintSetLeftRight;
+    private ConstraintSet               constraintSetLeft;
+    private ConstraintSet               constraintSetRight;
+    private int                         constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
+
+    private boolean                     changeListenerIgnoreFlag;   // !! 需要UI监听器忽略该事件，因为主动设置RadioGroup时，监听器也会响应，进入了死循环
 
     public static LoudFragment newInstance() {
         return new LoudFragment();
@@ -31,6 +53,8 @@ public class LoudFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "[onCreateView]");
         binding = FragmentLoudBinding.inflate(inflater, container, false);
+        leftBinding = FragmentLoudLeftBinding.inflate(inflater, container, false);
+        rightBinding = FragmentLoudRightBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -38,6 +62,7 @@ public class LoudFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "[onViewCreated]");
         super.onViewCreated(view, savedInstanceState);
+        initView();
     }
 
     @Override
@@ -75,4 +100,286 @@ public class LoudFragment extends Fragment {
         Log.d(TAG, "[onDestroy]");
         super.onDestroy();
     }
+
+    private void initView() {
+        constraintSetLeftRight = new ConstraintSet();
+        constraintSetLeft = new ConstraintSet();
+        constraintSetRight = new ConstraintSet();
+
+        layoutLeftRight = binding.layoutLoudLR;
+        constraintSetLeftRight.clone(layoutLeftRight);
+
+        layoutLeft = leftBinding.layoutLoudL;
+        constraintSetLeft.clone(layoutLeft);
+
+        layoutRight = rightBinding.layoutLoudR;
+        constraintSetRight.clone(layoutRight);
+
+        binding.radioGroupL.setOnCheckedChangeListener(changeListener);
+        binding.radioGroupR.setOnCheckedChangeListener(changeListener);
+    }
+
+    // 改变 L R 按钮的UI状态
+    private void uiChangeLR(int connectCnt, String earType) {
+        if (connectCnt == 0) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
+
+        } else if (connectCnt == 2) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
+
+
+        } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
+            if (constraintSetFlag != 1) {
+                constraintSetFlag = 1;
+                constraintSetLeft.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
+
+        } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
+            if (constraintSetFlag != 2) {
+                constraintSetFlag = 2;
+                constraintSetRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
+        }
+    }
+
+    // 改变模式指示图标
+    private void uiChangeLRMode(SceneMode leftMode, SceneMode rightMode) {
+        int resIdL = 0;
+        int resIdR = 0;
+        if (leftMode != null) {
+            switch (leftMode) {
+                case CONVERSATION:
+                    resIdL = R.drawable.icon_mode_conversation_blue;
+                    break;
+                case RESTAURANT:
+                    resIdL = R.drawable.icon_mode_restaurant_blue;
+                    break;
+                case OUTDOOR:
+                    resIdL = R.drawable.icon_mode_outdoor_blue;
+                    break;
+                case MUSIC:
+                    resIdL = R.drawable.icon_mode_music_blue;
+                    break;
+            }
+        }
+        if (rightMode != null) {
+            switch (rightMode) {
+                case CONVERSATION:
+                    resIdR = R.drawable.icon_mode_conversation_nor;
+                    break;
+                case RESTAURANT:
+                    resIdR = R.drawable.icon_mode_restaurant_nor;
+                    break;
+                case OUTDOOR:
+                    resIdR = R.drawable.icon_mode_outdoor_nor;
+                    break;
+                case MUSIC:
+                    resIdR = R.drawable.icon_mode_music_nor;
+                    break;
+            }
+        }
+        if (resIdL > 0) { binding.ivModeL.setImageResource(resIdL); }
+        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+    }
+
+    private void uiChangeCompression(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
+        Log.d(TAG, "uiChangeCompression +");
+        changeListenerIgnoreFlag = true;
+        binding.tvNoCompression.setSelected(false);
+        binding.tvLowCompression.setSelected(false);
+        binding.tvMediumCompression.setSelected(false);
+        binding.tvHighCompression.setSelected(false);
+        if (leftContent != null) {
+            BTProtocol.Compression compL = leftContent.MPO2Compression();
+            switch (compL) {
+                case No:
+                    binding.rbLNo.setChecked(true);
+                    binding.tvNoCompression.setSelected(true);
+                    break;
+                case Low:
+                    binding.rbLLow.setChecked(true);
+                    binding.tvLowCompression.setSelected(true);
+                    break;
+                case Medium:
+                    binding.rbLMedium.setChecked(true);
+                    binding.tvMediumCompression.setSelected(true);
+                    break;
+                case High:
+                    binding.rbLHigh.setChecked(true);
+                    binding.tvHighCompression.setSelected(true);
+                    break;
+                case Unknown:
+                    binding.rbLNo.setChecked(false);
+                    binding.rbLLow.setChecked(false);
+                    binding.rbLMedium.setChecked(false);
+                    binding.rbLHigh.setChecked(false);
+                    break;
+            }
+        }
+
+        if (rightContent != null) {
+            BTProtocol.Compression compR = rightContent.MPO2Compression();
+            switch (compR) {
+                case No:
+                    binding.rbRNo.setChecked(true);
+                    binding.tvNoCompression.setSelected(true);
+                    break;
+                case Low:
+                    binding.rbRLow.setChecked(true);
+                    binding.tvLowCompression.setSelected(true);
+                    break;
+                case Medium:
+                    binding.rbRMedium.setChecked(true);
+                    binding.tvMediumCompression.setSelected(true);
+                    break;
+                case High:
+                    binding.rbRHigh.setChecked(true);
+                    binding.tvHighCompression.setSelected(true);
+                    break;
+                case Unknown:
+                    binding.rbRNo.setChecked(false);
+                    binding.rbRLow.setChecked(false);
+                    binding.rbRMedium.setChecked(false);
+                    binding.rbRHigh.setChecked(false);
+                    break;
+            }
+        }
+        changeListenerIgnoreFlag = false;
+        Log.d(TAG, "uiChangeCompression -");
+    }
+
+    public final RadioGroup.OnCheckedChangeListener changeListener =  new RadioGroup.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(RadioGroup group, int checkedId) {
+            if (changeListenerIgnoreFlag) { return; }
+            binding.tvNoCompression.setSelected(false);
+            binding.tvLowCompression.setSelected(false);
+            binding.tvMediumCompression.setSelected(false);
+            binding.tvHighCompression.setSelected(false);
+            if (checkedId == binding.rbLNo.getId() && binding.rbLNo.isChecked()) {
+                leftContent.MPO = 0;
+            } else if (checkedId == binding.rbLLow.getId() && binding.rbLLow.isChecked() ) {
+                leftContent.MPO = 1;
+            } else if (checkedId == binding.rbLMedium.getId() && binding.rbLMedium.isChecked() ) {
+                leftContent.MPO = 2;
+            } else if (checkedId == binding.rbLHigh.getId() && binding.rbLHigh.isChecked() ) {
+                leftContent.MPO = 3;
+            } else if (checkedId== binding.rbRNo.getId() && binding.rbRNo.isChecked() ) {
+                rightContent.MPO = 0;
+            } else if (checkedId == binding.rbRLow.getId() && binding.rbRLow.isChecked() ) {
+                rightContent.MPO = 1;
+            } else if (checkedId == binding.rbRMedium.getId() && binding.rbRMedium.isChecked() ) {
+                rightContent.MPO = 2;
+            } else if (checkedId == binding.rbRHigh.getId() && binding.rbRHigh.isChecked() ) {
+                rightContent.MPO = 3;
+            }
+            if (leftContent != null) {
+                Log.d(TAG, "changeListener leftContentMPO = " + leftContent.MPO);
+//                binding.tvNoCompression.setSelected(leftContent.MPO == 0);
+//                binding.tvLowCompression.setSelected(leftContent.MPO == 1);
+//                binding.tvMediumCompression.setSelected(leftContent.MPO == 2);
+//                binding.tvHighCompression.setSelected(leftContent.MPO == 3);
+            }
+            if (rightContent != null) {
+                Log.d(TAG, "changeListener rightContentMPO = " + rightContent.MPO);
+//                binding.tvNoCompression.setSelected(rightContent.MPO == 0);
+//                binding.tvLowCompression.setSelected(rightContent.MPO == 1);
+//                binding.tvMediumCompression.setSelected(rightContent.MPO == 2);
+//                binding.tvHighCompression.setSelected(rightContent.MPO == 3);
+            }
+        }
+    };
+
+    private final CompoundButton.OnCheckedChangeListener changeListener0 = (buttonView, isChecked) -> {
+        binding.tvNoCompression.setSelected(false);
+        binding.tvLowCompression.setSelected(false);
+        binding.tvMediumCompression.setSelected(false);
+        binding.tvHighCompression.setSelected(false);
+        if (buttonView.getId() == binding.rbLNo.getId()) {
+            leftContent.MPO = 0;
+        } else if (buttonView.getId() == binding.rbLLow.getId()) {
+            leftContent.MPO = 1;
+        } else if (buttonView.getId() == binding.rbLMedium.getId()) {
+            leftContent.MPO = 2;
+        } else if (buttonView.getId() == binding.rbLHigh.getId()) {
+            leftContent.MPO = 3;
+        } else if (buttonView.getId() == binding.rbRNo.getId()) {
+            rightContent.MPO = 0;
+        } else if (buttonView.getId() == binding.rbRLow.getId()) {
+            rightContent.MPO = 1;
+        } else if (buttonView.getId() == binding.rbRMedium.getId()) {
+            rightContent.MPO = 2;
+        } else if (buttonView.getId() == binding.rbRHigh.getId()) {
+            rightContent.MPO = 3;
+        }
+        if (leftContent != null) {
+            Log.d(TAG, "changeListener leftContentMPO = " + leftContent.MPO);
+            binding.tvNoCompression.setSelected(leftContent.MPO == 0);
+            binding.tvLowCompression.setSelected(leftContent.MPO == 1);
+            binding.tvMediumCompression.setSelected(leftContent.MPO == 2);
+            binding.tvHighCompression.setSelected(leftContent.MPO == 3);
+        }
+        if (rightContent != null) {
+            Log.d(TAG, "changeListener rightContentMPO = " + rightContent.MPO);
+            binding.tvNoCompression.setSelected(rightContent.MPO == 0);
+            binding.tvLowCompression.setSelected(rightContent.MPO == 1);
+            binding.tvMediumCompression.setSelected(rightContent.MPO == 2);
+            binding.tvHighCompression.setSelected(rightContent.MPO == 3);
+        }
+    };
+
+    @Override
+    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
+        Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
+        int cnt = 0;
+        if (leftMode != null) { cnt++; }
+        if (rightMode != null) { cnt++; }
+        uiChangeLRMode(leftMode, rightMode);
+        if (cnt == 2) {
+            if (leftMode == rightMode) {
+                uiChangeLR(cnt, null);
+                DeviceManager.getInstance().readModeFile(leftMode);
+            } else {
+                CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
+            }
+
+        } else if (cnt == 1) {
+            if (leftMode != null) {
+                uiChangeLR(1, DeviceManager.EAR_TYPE_LEFT);
+                DeviceManager.getInstance().readModeFile(leftMode);
+            } else {
+                uiChangeLR(1, DeviceManager.EAR_TYPE_RIGHT);
+                DeviceManager.getInstance().readModeFile(rightMode);
+            }
+
+        } else {
+            uiChangeLR(0, null);
+        }
+    }
+
+    @Override
+    protected void updateModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
+        Log.d(TAG, "updateModeFile leftContent = " + leftContent + " rightContent = " + rightContent);
+        this.leftContent = leftContent;
+        this.rightContent = rightContent;
+        int cnt = 0;
+        if (leftContent != null) { cnt++; }
+        if (rightContent != null) { cnt++; }
+        uiChangeCompression(leftContent, rightContent);
+    }
+
 }

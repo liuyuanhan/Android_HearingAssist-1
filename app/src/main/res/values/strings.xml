@@ -99,6 +99,7 @@
     <string name="tips_open_bt">Please turn on the bluetooth switch!</string>
     <string name="tips_connect_same_type">Please connect the same type of device!</string>
     <string name="tips_not_scanned_device">The Device is not scanned, please rescan it!</string>
+    <string name="tips_configure_ok">Configure OK</string>
 
     <string name="title_activity_first">HomeActivity</string>
     <!-- Strings used for fragments for navigation -->

@@ -20,20 +20,18 @@ import com.upixels.jh.hearingassist.util.DeviceManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.transition.TransitionManager;
 import me.forrest.commonlib.jh.BTProtocol;
 import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.CommonUtil;
-import me.forrest.commonlib.util.DensityHelper;
 
 public class BandFragment extends BaseFragment implements View.OnTouchListener {
     private final static String TAG = BandFragment.class.getSimpleName();
-    private FragmentBandBinding         binding;
-    private FragmentBandLeftBinding     leftBinding;
-    private FragmentBandRightBinding    rightBinding;
+    private FragmentBandBinding binding;
+    private FragmentBandLeftBinding leftBinding;
+    private FragmentBandRightBinding rightBinding;
     private ConstraintLayout            layoutLeftRight;
     private ConstraintLayout            layoutLeft;
     private ConstraintLayout            layoutRight;
@@ -42,10 +40,8 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
     private ConstraintSet               constraintSetRight;
     private int                         constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
 
+    private boolean                     changeListenerIgnoreFlag;   // !! 需要UI监听器忽略该事件，因为主动设置Seekbar时，监听器也会响应，进入了死循环
 
-    private BTProtocol.ModeFileContent leftContent;
-    private BTProtocol.ModeFileContent rightContent;
-    private BTProtocol.ModeFileContent curContent;
 
     public static BandFragment newInstance() {
         return new BandFragment();
@@ -161,12 +157,15 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
 //                cnt = 0;
 //            }
             Log.d(TAG, "curContent " + curContent.toString());
+            DeviceManager.getInstance().writeModeFileForEQ(leftContent, rightContent);
         });
     }
     int cnt = 0;
 
     // UI更新 Seekbar
     private void uiChangeSetSeekbarEnable(boolean enable, BTProtocol.ModeFileContent content) {
+        Log.d(TAG, "uiChangeSetSeekbarEnable +");
+        changeListenerIgnoreFlag = true;
         binding.sbEq250.setEnabled(enable);
         binding.sbEq500.setEnabled(enable);
         binding.sbEq1000.setEnabled(enable);
@@ -226,7 +225,9 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
             binding.sbEq6000.getProgressDrawable().setBounds(bounds250);
             binding.sbEq6000.setProgress(content.EQ11);
             binding.tvGain6000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ11)));
+            Log.d(TAG, "uiChangeSetSeekbarEnable -");
         }
+        changeListenerIgnoreFlag = false;
     }
 
     // 改变 L R 按钮的UI状态
@@ -236,7 +237,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
                 constraintSetFlag = 0;
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_l_r); // ConstrainSet 只能改变约束不能改变背景颜色
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
             }
             binding.ivL.setBackground(null);
             binding.ivR.setBackground(null);
@@ -248,7 +249,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
                 constraintSetFlag = 0;
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_l_r);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white);
                 binding.ivL.setBackgroundResource(R.drawable.selector_band_drawable_l);
                 binding.ivR.setBackgroundResource(R.drawable.selector_band_drawable_r);
             }
@@ -263,7 +264,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
                 constraintSetFlag = 0;
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_l_r);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white);
                 binding.ivL.setBackgroundResource(R.drawable.selector_band_drawable_l);
                 binding.ivR.setBackgroundResource(R.drawable.selector_band_drawable_r);
             }
@@ -278,7 +279,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
                 constraintSetFlag = 1;
                 constraintSetLeft.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
                 binding.ivL.setBackground(null);
             }
             binding.ivL.setOnClickListener(null); // 单个设备 也不需要点击
@@ -297,7 +298,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         }
     }
 
-    private View.OnClickListener lrListener = new View.OnClickListener() {
+    private final View.OnClickListener lrListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (v.getId() == R.id.iv_L) {
@@ -310,9 +311,10 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         }
     };
 
-    private SeekBar.OnSeekBarChangeListener changeListener = new SeekBar.OnSeekBarChangeListener() {
+    private final SeekBar.OnSeekBarChangeListener changeListener = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (changeListenerIgnoreFlag) { return; }
             Log.d(TAG, "onProgressChanged progress = " + progress);
             if (seekBar.getId() == R.id.sb_eq_250) {
                 curContent.EQ1 = (byte) progress;
@@ -452,6 +454,22 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
             uiChangeSetSeekbarEnable(true, rightContent);
         } else {
             uiChangeLR(0, null);
+        }
+    }
+
+    @Override
+    protected void updateWriteFeedback(String leftResult, String rightResult) {
+        Log.d(TAG, "updateCtlFeedback leftResult = " + leftResult + " rightResult = " + rightResult);
+        boolean isSuccessL = true;
+        boolean isSuccessR = true;
+        if (leftResult != null) {
+            isSuccessL = Boolean.parseBoolean(leftResult.split(",")[1]);
+        }
+        if (rightResult != null) {
+            isSuccessR = Boolean.parseBoolean(rightResult.split(",")[1]);
+        }
+        if (isSuccessL && isSuccessR) {
+            CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_configure_ok));
         }
     }
 }

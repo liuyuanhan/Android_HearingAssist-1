@@ -6,22 +6,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
-import androidx.fragment.app.Fragment;
 import androidx.transition.TransitionManager;
 import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.CommonUtil;
-import me.forrest.commonlib.util.DensityHelper;
-import me.forrest.commonlib.util.DensityUtil;
-import me.forrest.commonlib.view.IOSLoadingDialog;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
-import com.upixels.jh.hearingassist.MainActivity;
 import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentVolumeBinding;
 import com.upixels.jh.hearingassist.util.DeviceManager;
@@ -32,7 +26,7 @@ import java.util.Locale;
 public class VolumeFragment extends BaseFragment {
     private final static String TAG = VolumeFragment.class.getSimpleName();
 
-    private FragmentVolumeBinding   binding;
+    private FragmentVolumeBinding binding;
     private ConstraintLayout        layoutFragmentVolumeLeftRight;
     private ConstraintLayout        layoutFragmentVolumeLeft;
     private ConstraintLayout        layoutFragmentVolumeRight;
@@ -192,27 +186,17 @@ public class VolumeFragment extends BaseFragment {
             }
         }
 
-//        if (resIdL > 0 && resIdR > 0) {
-//
-//        } else if (resIdL > 0) {
-//
-//        } else if (resIdR > 0) {
-//            constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
-//            TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-//            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
-//        }
-
         if (resIdL > 0 && resIdR > 0) {
             if (constraintSetFlag != 0) {
                 constraintSetFlag = 0;
                 constraintSetLeftRight.applyTo(layoutFragmentVolumeLeftRight);
                 TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l);
             }
 
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
             binding.ivModeL.setImageResource(resIdL);
             binding.ivModeR.setImageResource(resIdR);
-            if (resIdL != resIdR) {
+            if (leftMode != rightMode) {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
             }
 
@@ -221,9 +205,9 @@ public class VolumeFragment extends BaseFragment {
                 constraintSetFlag = 1;
                 constraintSetLeft.applyTo(layoutFragmentVolumeLeftRight);
                 TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
             }
 
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
             binding.ivModeL.setImageResource(resIdL);
             binding.sbLeftVolume.setProgress(leftMode.getVolume());
             binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)leftMode.getVolume() / 10 * 100)));
@@ -233,9 +217,9 @@ public class VolumeFragment extends BaseFragment {
                 constraintSetFlag = 2;
                 constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
                 TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
             }
 
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
             binding.ivModeR.setImageResource(resIdR);
             binding.sbRightVolume.setProgress(rightMode.getVolume());
             binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)rightMode.getVolume() / 10 * 100)));

@@ -16,6 +16,7 @@
         <entry key="app/src/main/res/drawable/seekbar_right_ear_volume.xml" value="0.216" />
         <entry key="app/src/main/res/drawable/selector_band_drawable_l.xml" value="0.241" />
         <entry key="app/src/main/res/drawable/selector_band_drawable_r.xml" value="0.192" />
+        <entry key="app/src/main/res/drawable/selector_loud_bg.xml" value="0.2505" />
         <entry key="app/src/main/res/drawable/shape_band_l.xml" value="0.33" />
         <entry key="app/src/main/res/drawable/shape_band_l_nor.xml" value="0.241" />
         <entry key="app/src/main/res/drawable/shape_band_l_r.xml" value="0.213" />
@@ -33,6 +34,8 @@
         <entry key="app/src/main/res/drawable/shape_my_device.xml" value="0.269" />
         <entry key="app/src/main/res/drawable/shape_radius.xml" value="0.3175" />
         <entry key="app/src/main/res/drawable/shape_right_radius.xml" value="0.3175" />
+        <entry key="app/src/main/res/drawable/shape_view_bg_l_r.xml" value="0.343" />
+        <entry key="app/src/main/res/drawable/shape_view_bg_red.xml" value="0.255" />
         <entry key="app/src/main/res/drawable/tabs_indicator.xml" value="0.2705" />
         <entry key="app/src/main/res/layout/activity_connect.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/activity_first.xml" value="0.3055555555555556" />
@@ -54,6 +57,8 @@
         <entry key="app/src/main/res/layout/fragment_focus.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/fragment_loud.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_loud_left.xml" value="0.3055555555555556" />
+        <entry key="app/src/main/res/layout/fragment_loud_right.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.34375" />
         <entry key="app/src/main/res/layout/fragment_mode.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/fragment_noise.xml" value="0.3055555555555556" />
