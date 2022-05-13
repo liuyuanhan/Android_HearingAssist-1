@@ -130,11 +130,13 @@ public class MainActivity extends AppCompatActivity {
         boolean showLoading = false;
         @Override
         public void onReadingStatus(boolean isReading) {
+            Log.d(TAG, "onReadingStatus " + isReading);
             if (!showLoading && isReading) {
                 showLoading = true;
                 IOSLoadingDialog.instance.setOnTouchOutside(true).showDialog(getSupportFragmentManager(), "");
             } else if (showLoading && !isReading) {
                 IOSLoadingDialog.instance.dismissDialog();
+                showLoading = false;
             }
         }
 
@@ -145,10 +147,21 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onChangeSceneMode(SceneMode leftMode, SceneMode rightMode) {
+            Log.d(TAG, "onChangeSceneMode");
             if (leftMode != null && rightMode != null && leftMode != rightMode) {
                 IOSLoadingDialog.instance.dismiss();
                 CommonUtil.showToast(MainActivity.this, getString(R.string.tips_mode_not_same));
             }
+        }
+
+        @Override
+        public void onChangeModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
+
+        }
+
+        @Override
+        public void onCtlFeedback(String leftResult, String rightResult) {
+
         }
     };
 

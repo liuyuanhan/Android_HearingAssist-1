@@ -29,7 +29,7 @@ import com.upixels.jh.hearingassist.util.DeviceManager;
 import java.util.Locale;
 
 
-public class VolumeFragment extends Fragment {
+public class VolumeFragment extends BaseFragment {
     private final static String TAG = VolumeFragment.class.getSimpleName();
 
     private FragmentVolumeBinding   binding;
@@ -73,14 +73,12 @@ public class VolumeFragment extends Fragment {
     public void onStart() {
         Log.d(TAG, "[onStart]");
         super.onStart();
-        DeviceManager.getInstance().addListener(deviceChangeListener);
     }
 
     @Override
     public void onResume() {
         Log.d(TAG, "[onResume]");
         super.onResume();
-        updateView(DeviceManager.getInstance().getLeftMode(), DeviceManager.getInstance().getRightMode());
     }
 
     @Override
@@ -93,7 +91,6 @@ public class VolumeFragment extends Fragment {
     public void onStop() {
         Log.d(TAG, "[onStop]");
         super.onStop();
-        DeviceManager.getInstance().removeListener(deviceChangeListener);
     }
 
     @Override
@@ -131,7 +128,9 @@ public class VolumeFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                String leftMac = DeviceManager.getInstance().getLeftMac();
+                leftMode.setVolume((byte) seekBar.getProgress());
+                DeviceManager.getInstance().ctlVolume(leftMac, leftMode);
             }
         });
 
@@ -148,12 +147,15 @@ public class VolumeFragment extends Fragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-//                DeviceManager.getInstance().ctlMode()
+                String rightMac = DeviceManager.getInstance().getRightMac();
+                rightMode.setVolume((byte) seekBar.getProgress());
+                DeviceManager.getInstance().ctlVolume(rightMac, rightMode);
             }
         });
     }
 
-    private void updateView(SceneMode leftMode, SceneMode rightMode) {
+    @Override
+    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
         Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
         int resIdL = 0;
         int resIdR = 0;
@@ -176,29 +178,29 @@ public class VolumeFragment extends Fragment {
         if (rightMode != null) {
             switch (rightMode) {
                 case CONVERSATION:
-                    resIdR = R.drawable.icon_mode_conversation_blue;
+                    resIdR = R.drawable.icon_mode_conversation_nor;
                     break;
                 case RESTAURANT:
-                    resIdR = R.drawable.icon_mode_restaurant_blue;
+                    resIdR = R.drawable.icon_mode_restaurant_nor;
                     break;
                 case OUTDOOR:
-                    resIdR = R.drawable.icon_mode_outdoor_blue;
+                    resIdR = R.drawable.icon_mode_outdoor_nor;
                     break;
                 case MUSIC:
-                    resIdR = R.drawable.icon_mode_music_blue;
+                    resIdR = R.drawable.icon_mode_music_nor;
                     break;
             }
         }
 
-        if (resIdL > 0 && resIdR > 0) {
-
-        } else if (resIdL > 0) {
-
-        } else if (resIdR > 0) {
-            constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
-            TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
-        }
+//        if (resIdL > 0 && resIdR > 0) {
+//
+//        } else if (resIdL > 0) {
+//
+//        } else if (resIdR > 0) {
+//            constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
+//            TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
+//            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
+//        }
 
         if (resIdL > 0 && resIdR > 0) {
             if (constraintSetFlag != 0) {
@@ -240,21 +242,4 @@ public class VolumeFragment extends Fragment {
         }
     }
 
-    private final DeviceManager.DeviceChangeListener deviceChangeListener = new DeviceManager.DeviceChangeListener() {
-
-        @Override
-        public void onReadingStatus(boolean isReading) {
-
-        }
-
-        @Override
-        public void onChangeBat(int leftBat, int rightBat) {
-
-        }
-
-        @Override
-        public void onChangeSceneMode(SceneMode leftMode, SceneMode rightMode) {
-            requireActivity().runOnUiThread(() -> updateView(leftMode, rightMode));
-        }
-    };
 }

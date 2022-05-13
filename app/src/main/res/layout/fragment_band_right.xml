@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/layout_band_l_r"
+        android:id="@+id/layout_band_r"
         android:paddingBottom="20dp">
 
         <View
@@ -22,29 +22,29 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="17dp"
             android:layout_marginStart="16dp"
-            android:background="@drawable/shape_view_bg_l_r"/>
+            android:background="@drawable/shape_device_l_r"/>
 
         <ImageView
+            android:visibility="gone"
             android:id="@+id/iv_L"
-            android:layout_width="80dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
             app:layout_constraintStart_toStartOf="@id/view_bg_l_r"
             app:layout_constraintTop_toTopOf="@id/view_bg_l_r"
             app:layout_constraintBottom_toBottomOf="@id/view_bg_l_r"
+            android:layout_marginStart="22dp"
             android:scaleType="centerInside"
-            android:background="@drawable/selector_band_drawable_l"
             android:src="@drawable/icon_l_device"/>
 
         <ImageView
             android:id="@+id/iv_R"
-            android:layout_width="80dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
+            app:layout_constraintStart_toStartOf="@id/view_bg_l_r"
             app:layout_constraintEnd_toEndOf="@id/view_bg_l_r"
             app:layout_constraintTop_toTopOf="@id/view_bg_l_r"
             app:layout_constraintBottom_toBottomOf="@id/view_bg_l_r"
             android:scaleType="centerInside"
-            android:background="@drawable/selector_band_drawable_r"
-            android:layout_alignParentEnd="true"
             android:src="@drawable/icon_r_device"/>
 
         <ImageView
@@ -58,6 +58,7 @@
             android:src="@drawable/icon_mode_conversation_nor"/>
 
         <ImageView
+            android:visibility="invisible"
             android:id="@+id/iv_mode_L"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -67,6 +68,7 @@
             android:layout_marginEnd="56dp"
             android:src="@drawable/icon_mode_conversation_blue"/>
 
+        <!-- ** -->
         <View
             android:id="@+id/view_border"
             android:layout_width="match_parent"
@@ -140,7 +142,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -158,7 +160,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -176,7 +178,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -194,7 +196,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <TextView
@@ -309,7 +311,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -327,7 +329,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -345,7 +347,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -363,7 +365,7 @@
             android:maxHeight="12dp"
             android:minHeight="12dp"
             android:max="15"
-            android:progressDrawable="@drawable/seekbar_band_l"
+            android:progressDrawable="@drawable/seekbar_band_r"
             android:elevation="3dp"/>
 
         <TextView
@@ -431,4 +433,5 @@
             android:layout_marginTop="10dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.core.widget.NestedScrollView>

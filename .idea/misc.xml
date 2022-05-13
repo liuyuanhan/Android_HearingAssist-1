@@ -7,12 +7,22 @@
         <entry key="../../../../../../.gradle/caches/transforms-3/46711a511d3e1cd7acb3e23e0cab2c15/transformed/material-1.4.0/res/drawable/mtrl_tabs_default_indicator.xml" value="0.2705" />
         <entry key="../../../../../../Library/Android/platforms/android-30/data/res/drawable/control_background_40dp_material.xml" value="0.2865" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.2675" />
+        <entry key="app/src/main/res/drawable/seekbar_band_l.xml" value="0.244" />
+        <entry key="app/src/main/res/drawable/seekbar_band_r.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/seekbar_ear_volume.xml" value="0.216" />
+        <entry key="app/src/main/res/drawable/seekbar_ear_volume_l.xml" value="0.3415" />
+        <entry key="app/src/main/res/drawable/seekbar_ear_volume_r.xml" value="0.244" />
         <entry key="app/src/main/res/drawable/seekbar_left_ear_volume.xml" value="0.216" />
         <entry key="app/src/main/res/drawable/seekbar_right_ear_volume.xml" value="0.216" />
+        <entry key="app/src/main/res/drawable/selector_band_drawable_l.xml" value="0.241" />
+        <entry key="app/src/main/res/drawable/selector_band_drawable_r.xml" value="0.192" />
         <entry key="app/src/main/res/drawable/shape_band_l.xml" value="0.33" />
+        <entry key="app/src/main/res/drawable/shape_band_l_nor.xml" value="0.241" />
         <entry key="app/src/main/res/drawable/shape_band_l_r.xml" value="0.213" />
+        <entry key="app/src/main/res/drawable/shape_band_l_sel.xml" value="0.241" />
         <entry key="app/src/main/res/drawable/shape_band_r.xml" value="0.33" />
+        <entry key="app/src/main/res/drawable/shape_band_r_nor.xml" value="0.192" />
+        <entry key="app/src/main/res/drawable/shape_band_r_sel.xml" value="0.192" />
         <entry key="app/src/main/res/drawable/shape_border.xml" value="0.2355" />
         <entry key="app/src/main/res/drawable/shape_bottom_sheet_dialog.xml" value="0.1745" />
         <entry key="app/src/main/res/drawable/shape_device_l.xml" value="0.329" />
@@ -32,7 +42,11 @@
         <entry key="app/src/main/res/layout/content_home.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/dialog_device_ctl.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/dialog_loc_service.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/fragment_band.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/fragment_band.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_band_l.xml" value="0.21557971014492755" />
+        <entry key="app/src/main/res/layout/fragment_band_left.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_band_r.xml" value="0.3055555555555556" />
+        <entry key="app/src/main/res/layout/fragment_band_right.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/fragment_connect.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/fragment_device_ctl_dialog_list_dialog.xml" value="0.29305555555555557" />
         <entry key="app/src/main/res/layout/fragment_device_ctl_dialog_list_dialog_item.xml" value="0.3055555555555556" />

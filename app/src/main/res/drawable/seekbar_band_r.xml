@@ -37,25 +37,29 @@
 
 <layer-list
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@android:id/background">
+    <item
+        android:id="@android:id/background">
         <shape>
-            <solid android:color="@color/white"/>
-            <corners android:radius="22dp"/>
+            <solid android:color="#FFDFE5EA"/>
+            <corners android:radius="12dp"/>
         </shape>
     </item>
+
     <item android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
                 <solid android:color="#00000000"/>
-                <corners android:radius="22dp"/>
+                <corners android:radius="12dp"/>
             </shape>
         </clip>
     </item>
-    <item android:id="@android:id/progress">
+
+    <item
+        android:id="@android:id/progress">
         <clip>
             <shape>
                 <solid android:color="@color/red_C7"/>
-                <corners android:radius="22dp"/>
+                <corners android:radius="12dp"/>
             </shape>
         </clip>
     </item>
