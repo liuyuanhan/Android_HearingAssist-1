@@ -2,20 +2,14 @@ package com.upixels.jh.hearingassist.ui.main;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
-import com.upixels.jh.hearingassist.databinding.FragmentLoudBinding;
-import com.upixels.jh.hearingassist.databinding.FragmentNoiseBinding;
+import com.upixels.jh.hearingassist.util.DeviceManager;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import me.forrest.commonlib.jh.BTProtocol;
 
-public class NoiseFragment extends Fragment {
-    private final static String TAG = NoiseFragment.class.getSimpleName();
-    private FragmentNoiseBinding binding;
+
+public class NoiseFragment extends LNBaseFragment {
 
     public static NoiseFragment newInstance() {
         return new NoiseFragment();
@@ -23,57 +17,48 @@ public class NoiseFragment extends Fragment {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "[onCreate]");
+        TAG = "NoiseFragment";
         super.onCreate(savedInstanceState);
     }
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "[onCreateView]");
-        binding = FragmentNoiseBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    protected void setHeardAid(String earType, int index) {
+        BTProtocol.Noise noise;
+        switch (index) {
+            case 0:
+                noise = BTProtocol.Noise.Off;
+                break;
+            case 1:
+                noise = BTProtocol.Noise.Mid;
+                break;
+            case 2:
+                noise = BTProtocol.Noise.Medium;
+                break;
+            case 3:
+                noise = BTProtocol.Noise.High;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + index);
+        }
+        DeviceManager.getInstance().writeModeFileForNoise(earType, noise);
     }
 
+    // 在子类重写 Noise 和 Loud 需要获取的 模式文件的内容不同
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "[onViewCreated]");
-        super.onViewCreated(view, savedInstanceState);
+    protected void updateModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
+        Log.d(TAG, "updateModeFile leftContent = " + leftContent + " rightContent = " + rightContent);
+        int indexL = -1;
+        int indexR = -1;
+        this.leftContent = leftContent;
+        this.rightContent = rightContent;
+        int cnt = 0;
+        if (leftContent != null) { cnt++; indexL = leftContent.getNoise().ordinal(); }
+        if (rightContent != null) { cnt++; indexR = rightContent.getNoise().ordinal(); }
+        if (cnt != 2) { isActionCombined = false; } // 只获取到了一个模式文件，肯定不需要同步动作
+        this.checkedIndexL = indexL;
+        this.checkedIndexR = indexR;
+        uiChangeTextView(indexL, indexR);
     }
 
-    @Override
-    public void onStart() {
-        Log.d(TAG, "[onStart]");
-        super.onStart();
-    }
 
-    @Override
-    public void onResume() {
-        Log.d(TAG, "[onResume]");
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        Log.d(TAG, "[onPause]");
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        Log.d(TAG, "[onStop]");
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroyView() {
-        Log.d(TAG, "[onDestroyView]");
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(TAG, "[onDestroy]");
-        super.onDestroy();
-    }
 }

@@ -34,13 +34,17 @@ public class BTProtocol {
     public final static float[] EQ_GAIN_4000 = new float[]{5f, 6.5f, 8.5f, 10.5f, 12.75f, 15f, 16.25f, 18.75f, 19.25f, 22f, 24f, 25f, 30f, 29.5f, 31.5f, 32.75f};
     public final static float[] EQ_GAIN_6000 = new float[]{5f, 6.5f, 8.5f, 10.5f, 12.75f, 15f, 16.25f, 18.75f, 19.25f, 22f, 24f, 25f, 30f, 29.5f, 31.5f, 32.75f};
 
-    public enum DirectionalMode {
+    public enum Directional {
          normal, TV, meeting, face_to_face, unknown;
     }
 
-    // 根据MPO来获取Compression类型
-    public enum Compression {
+    // 根据MPO来获取Loud类型
+    public enum Loud {
         No, Low, Medium, High, Unknown;
+    }
+
+    public enum Noise {
+        Off, Mid, Medium, High, Unknown;
     }
 
     // 场景降噪
@@ -107,7 +111,7 @@ public class BTProtocol {
         // 一对一模式:  27      27    6/6                           -28(1)      -12(9)
         // BLE发送时按照协议放在对于的位上即可 《增加方向性功能说明》
         // 将方向模式转为需要传递的参数值
-        public void directionalMode_to_PG(DirectionalMode dm) {
+        public void directionalMode_to_PG(Directional dm) {
             switch (dm) {
                 case normal:
                     this.PG1 = 6;
@@ -137,21 +141,35 @@ public class BTProtocol {
         }
 
         // 将PG参数值 转 实际方向模式
-        public DirectionalMode PG_to_directionalMode()  {
+        public Directional PG_to_directionalMode()  {
             if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 1 && this.EQ2 == 6) {
-                return DirectionalMode.normal;
+                return Directional.normal;
             } else if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 4 && this.EQ2 == 10) {
-                return DirectionalMode.TV;
+                return Directional.TV;
             } else if (this.PG1 == 6 && this.PG2 == 5 && this.EQ1 == 1 &&this.EQ2 == 8) {
-                return DirectionalMode.meeting;
+                return Directional.meeting;
             } else if (this.PG1 == 6 && this.PG2 == 6 && this.EQ1 == 1 && this.EQ2 == 9) {
-                return DirectionalMode.face_to_face;
+                return Directional.face_to_face;
             } else {
-                return DirectionalMode.unknown;
+                return Directional.unknown;
             }
         }
 
-        public void D58B_directionalMode_to_PG(DirectionalMode dm) {
+        public Directional getDirectional() {
+            if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 1 && this.EQ2 == 6) {
+                return Directional.normal;
+            } else if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 4 && this.EQ2 == 10) {
+                return Directional.TV;
+            } else if (this.PG1 == 6 && this.PG2 == 5 && this.EQ1 == 1 &&this.EQ2 == 8) {
+                return Directional.meeting;
+            } else if (this.PG1 == 6 && this.PG2 == 6 && this.EQ1 == 1 && this.EQ2 == 9) {
+                return Directional.face_to_face;
+            } else {
+                return Directional.unknown;
+            }
+        }
+
+        public void D58B_directionalMode_to_PG(Directional dm) {
             switch (dm) {
                 case normal:
                     this.PG1 = 4; // 21 15 -24 -16
@@ -271,24 +289,24 @@ public class BTProtocol {
             return 0;
         }
 
-
-        public Compression MPO2Compression() {
+        // mpo 转 Loud
+        public Loud getLoud() {
             if (MPO == 0) {
-                return Compression.No;
+                return Loud.No;
             } else if (MPO == 1) {
-                return Compression.Low;
+                return Loud.Low;
             } else if (MPO == 2) {
-                return Compression.Medium;
+                return Loud.Medium;
             } else if (MPO == 3) {
-                return Compression.High;
+                return Loud.High;
             } else if (MPO == 4) {
-                return Compression.High;
+                return Loud.High;
             } else if (MPO == 5) {
-                return Compression.High;
+                return Loud.High;
             } else if (MPO == 6) {
-                return Compression.High;
+                return Loud.High;
             }
-            return Compression.Unknown;
+            return Loud.Unknown;
         }
 
         // 通讯参数 转为 实际值
@@ -384,6 +402,52 @@ public class BTProtocol {
             return "";
         }
 
+        // NR 转 传递参数
+        public byte value2NR(String value) {
+            if (value.equals("OFF")) {
+                return 0;
+            } else if (value.equals("LOW")) {
+                return 1;
+            } else if (value.equals("Mid")) {
+                return 2;
+            } else if (value.equals("High")) {
+                return 3;
+            }
+            return 0;
+        }
+
+        // NR 转 Noise
+        public Noise getNoise() {
+            if (NR == 0) {
+                return Noise.Off;
+            } else if (NR == 1) {
+                return Noise.Mid;
+            } else if (NR == 2) {
+                return Noise.Medium;
+            } else if (NR == 3) {
+                return Noise.High;
+            } else {
+                return Noise.Unknown;
+            }
+        }
+
+        public void setNoise(Noise noise) {
+            switch (noise) {
+                case Off:
+                    NR = 0;
+                    break;
+                case Mid:
+                    NR = 1;
+                    break;
+                case Medium:
+                    NR = 2;
+                    break;
+                case High:
+                    NR = 3;
+                    break;
+            }
+        }
+
         public static void copyEQ(ModeFileContent out, ModeFileContent in, String version) {
             if (version.equals("V1")) {
                 out.EQ1 = in.EQ1;
@@ -409,18 +473,33 @@ public class BTProtocol {
             }
         }
 
-        // NR 转 传递参数
-        public byte value2NR(String value) {
-            if (value.equals("OFF")) {
-                return 0;
-            } else if (value.equals("LOW")) {
-                return 1;
-            } else if (value.equals("Mid")) {
-                return 2;
-            } else if (value.equals("High")) {
-                return 3;
+        public void setDirectional(Directional directional) {
+            switch (directional) {
+                case normal:
+                    PG1 = 6;
+                    PG2 = 1;
+                    EQ1 = 1;
+                    EQ2 = 6;
+                    break;
+                case TV:
+                    PG1 = 6;
+                    PG2 = 1;
+                    EQ1 = 4;
+                    EQ2 = 10;
+                    break;
+                case meeting:
+                    PG1 = 6;
+                    PG2 = 5;
+                    EQ1 = 1;
+                    EQ2 = 8;
+                    break;
+                case face_to_face:
+                    PG1 = 6;
+                    PG2 = 6;
+                    EQ1 = 1;
+                    EQ2 = 9;
+                    break;
             }
-            return 0;
         }
 
         private static int findElementInArray(float element, float[] array) {

@@ -5,16 +5,15 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
 import me.forrest.commonlib.jh.BTProtocol;
 import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.BLEUtil;
 import me.forrest.commonlib.util.FileUtil;
-import me.forrest.commonlib.view.IOSLoadingDialog;
 
 public class DeviceManager {
     private static final String TAG = DeviceManager.class.getSimpleName();
@@ -27,6 +26,7 @@ public class DeviceManager {
 
     public static final String EAR_TYPE_LEFT  = "left";
     public static final String EAR_TYPE_RIGHT = "right";
+    public static final String EAR_TYPE_BOTH  = "both";
 
     private Context     context;
     private boolean     leftConnected;
@@ -89,7 +89,14 @@ public class DeviceManager {
     }
 
     public void removeListener(DeviceChangeListener listener) {
-        listeners.remove(listener);
+//        listeners.remove(listener);
+        Iterator<DeviceChangeListener> it = listeners.iterator();
+        while (it.hasNext()) {
+            if (it.next() == listener ) {
+                it.remove();
+                break;
+            }
+        }
     }
 
     private void updateListenerForOnReadingStatus(boolean isReading) {
@@ -210,7 +217,7 @@ public class DeviceManager {
         }
     }
 
-    // ************************ 协议进一步的封装 ************************
+    // ++++++++++++++++++++++++++ 协议进一步的封装 ++++++++++++++++++++++++++
     // 读取模式和音量
     public boolean readModeVolume(String mac) {
         byte[] data = BTProtocol.share.buildCMD_ReadModeVolume((byte) 0xFF);
@@ -269,18 +276,33 @@ public class DeviceManager {
 
     // 读取模式文件
     public boolean readModeFile(SceneMode mode) {
-        leftModeFileContent = null;
-        rightModeFileContent = null;
-        mutableLeftModeFileContent = null;
-        mutableRightModeFileContent = null;
-        modeFileCnt = 0;
+        // 判断是否需要再次读模式，如果存在模式文件，且模式文件中的模式与要读取的模式相同就不需要再读了。
+        boolean needReadLeftFlag = leftConnected;
+        boolean needReadRightFlag = rightConnected;
+        if (leftConnected && leftModeFileContent != null && leftModeFileContent.mode == mode) {
+            needReadLeftFlag = false;
+        }
+        if (rightConnected && rightModeFileContent != null && rightModeFileContent.mode == mode) {
+            needReadRightFlag = false;
+        }
+        if (!needReadLeftFlag && !needReadRightFlag) {
+            updateListenerForOnChangeModeFile(leftModeFileContent, rightModeFileContent);
+            return true;
+        }
+
         boolean resultL = true;
         boolean resultR = true;
         byte[] data = BTProtocol.share.buildCMD_ReadModeFile(mode);
         if (leftConnected) {
+            leftModeFileContent = null;
+            mutableLeftModeFileContent = null;
             resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
+            if (modeFileCnt > 0) { modeFileCnt--; }
         }
         if (rightConnected) {
+            rightModeFileContent = null;
+            mutableRightModeFileContent = null;
+            if (modeFileCnt > 0) { modeFileCnt--; }
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
         if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
@@ -307,7 +329,49 @@ public class DeviceManager {
         if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
         return resultL && resultR;
     }
-    // *******************************************************************
+
+    // 设置Directional
+    public boolean writeModeFileForDirectional(BTProtocol.Directional directional) {
+        leftResult = null;
+        rightResult = null;
+        writeFeedbackCnt = 0;
+        boolean resultL = true;
+        boolean resultR = true;
+        if (leftConnected) {
+            leftModeFileContent.setDirectional(directional);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.mode);
+            resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
+        }
+        if (rightConnected) {
+            rightModeFileContent.setDirectional(directional);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.mode);
+            resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
+        }
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
+        return resultL && resultR;
+    }
+
+    // 设置Noise
+    public boolean writeModeFileForNoise(String earType, BTProtocol.Noise noise) {
+        leftResult = null;
+        rightResult = null;
+        writeFeedbackCnt = 0;
+        boolean resultL = true;
+        boolean resultR = true;
+        if (leftConnected && (earType.equals(EAR_TYPE_LEFT) || earType.equals(EAR_TYPE_BOTH))) {
+            leftModeFileContent.setNoise(noise);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.mode);
+            resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
+        }
+        if (rightConnected && (earType.equals(EAR_TYPE_RIGHT) || earType.equals(EAR_TYPE_BOTH))) {
+            rightModeFileContent.setNoise(noise);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.mode);
+            resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
+        }
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
+        return resultL && resultR;
+    }
+    // ----------------------------------------------------------------------------------
 
     private final BLEUtil.JHBLEListener mBLEListener =  new BLEUtil.JHBLEListener() {
 

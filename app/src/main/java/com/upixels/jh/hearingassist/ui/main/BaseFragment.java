@@ -15,10 +15,11 @@ public abstract class BaseFragment extends Fragment {
     protected BTProtocol.ModeFileContent    rightContent;
     protected BTProtocol.ModeFileContent    curContent;
 
+    protected boolean                       isActionCombined = true;  // 是否一起动作
+
     @Override
     public void onStart() {
         super.onStart();
-        DeviceManager.getInstance().addListener(deviceChangeListener);
     }
 
     @Override
@@ -26,18 +27,19 @@ public abstract class BaseFragment extends Fragment {
         super.onResume();
         leftMode = DeviceManager.getInstance().getLeftMode();
         rightMode = DeviceManager.getInstance().getRightMode();
+        DeviceManager.getInstance().addListener(deviceChangeListener);
         updateView(leftMode, rightMode);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        DeviceManager.getInstance().removeListener(deviceChangeListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        DeviceManager.getInstance().removeListener(deviceChangeListener);
     }
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 
 import com.upixels.jh.hearingassist.R;
@@ -25,9 +24,9 @@ import me.forrest.commonlib.util.CommonUtil;
 
 public class LoudFragment extends BaseFragment {
     private final static String TAG = LoudFragment.class.getSimpleName();
-    private FragmentLoudBinding binding;
-    private FragmentLoudLeftBinding leftBinding;
-    private FragmentLoudRightBinding rightBinding;
+    private FragmentLoudBinding         binding;
+    private FragmentLoudLeftBinding     leftBinding;
+    private FragmentLoudRightBinding    rightBinding;
     private ConstraintLayout            layoutLeftRight;
     private ConstraintLayout            layoutLeft;
     private ConstraintLayout            layoutRight;
@@ -37,6 +36,8 @@ public class LoudFragment extends BaseFragment {
     private int                         constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
 
     private boolean                     changeListenerIgnoreFlag;   // !! 需要UI监听器忽略该事件，因为主动设置RadioGroup时，监听器也会响应，进入了死循环
+    private boolean                     leftRBIgnoreFlag;
+    private boolean                     rightRBIgnoreFlag;
 
     public static LoudFragment newInstance() {
         return new LoudFragment();
@@ -120,7 +121,7 @@ public class LoudFragment extends BaseFragment {
     }
 
     // 改变 L R 按钮的UI状态
-    private void uiChangeLR(int connectCnt, String earType) {
+    private void uiChangeLRButton(int connectCnt, String earType) {
         if (connectCnt == 0) {
             if (constraintSetFlag != 0) {
                 constraintSetFlag = 0;
@@ -157,7 +158,7 @@ public class LoudFragment extends BaseFragment {
     }
 
     // 改变模式指示图标
-    private void uiChangeLRMode(SceneMode leftMode, SceneMode rightMode) {
+    private void uiChangeLRModeImage(SceneMode leftMode, SceneMode rightMode) {
         int resIdL = 0;
         int resIdR = 0;
         if (leftMode != null) {
@@ -204,7 +205,7 @@ public class LoudFragment extends BaseFragment {
         binding.tvMediumCompression.setSelected(false);
         binding.tvHighCompression.setSelected(false);
         if (leftContent != null) {
-            BTProtocol.Compression compL = leftContent.MPO2Compression();
+            BTProtocol.Loud compL = leftContent.getLoud();
             switch (compL) {
                 case No:
                     binding.rbLNo.setChecked(true);
@@ -215,24 +216,27 @@ public class LoudFragment extends BaseFragment {
                     binding.tvLowCompression.setSelected(true);
                     break;
                 case Medium:
-                    binding.rbLMedium.setChecked(true);
-                    binding.tvMediumCompression.setSelected(true);
+//                    binding.rbLMedium.setChecked(true);
+//                    binding.tvMediumCompression.setSelected(true);
                     break;
                 case High:
-                    binding.rbLHigh.setChecked(true);
-                    binding.tvHighCompression.setSelected(true);
+//                    binding.rbLHigh.setChecked(true);
+//                    binding.tvHighCompression.setSelected(true);
                     break;
                 case Unknown:
                     binding.rbLNo.setChecked(false);
                     binding.rbLLow.setChecked(false);
-                    binding.rbLMedium.setChecked(false);
-                    binding.rbLHigh.setChecked(false);
+//                    binding.rbLMedium.setChecked(false);
+//                    binding.rbLHigh.setChecked(false);
                     break;
             }
+            binding.radioGroupL.setOnCheckedChangeListener(changeListener);
+        } else {
+            binding.radioGroupL.setOnCheckedChangeListener(null);
         }
 
         if (rightContent != null) {
-            BTProtocol.Compression compR = rightContent.MPO2Compression();
+            BTProtocol.Loud compR = rightContent.getLoud();
             switch (compR) {
                 case No:
                     binding.rbRNo.setChecked(true);
@@ -243,102 +247,136 @@ public class LoudFragment extends BaseFragment {
                     binding.tvLowCompression.setSelected(true);
                     break;
                 case Medium:
-                    binding.rbRMedium.setChecked(true);
+//                    binding.rbRMedium.setChecked(true);
                     binding.tvMediumCompression.setSelected(true);
                     break;
                 case High:
-                    binding.rbRHigh.setChecked(true);
+//                    binding.rbRHigh.setChecked(true);
                     binding.tvHighCompression.setSelected(true);
                     break;
                 case Unknown:
                     binding.rbRNo.setChecked(false);
                     binding.rbRLow.setChecked(false);
-                    binding.rbRMedium.setChecked(false);
-                    binding.rbRHigh.setChecked(false);
+//                    binding.rbRMedium.setChecked(false);
+//                    binding.rbRHigh.setChecked(false);
                     break;
             }
+            binding.radioGroupR.setOnCheckedChangeListener(changeListener);
+        } else {
+            binding.radioGroupR.setOnCheckedChangeListener(null);
         }
         changeListenerIgnoreFlag = false;
         Log.d(TAG, "uiChangeCompression -");
     }
 
     public final RadioGroup.OnCheckedChangeListener changeListener =  new RadioGroup.OnCheckedChangeListener() {
+
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
             if (changeListenerIgnoreFlag) { return; }
+            if (rightRBIgnoreFlag || leftRBIgnoreFlag ) { // 防止调用setChecked时又触发监听器
+                rightRBIgnoreFlag = false;
+                leftRBIgnoreFlag = false;
+                return;
+            }
+
+//            if (checkedId == binding.rbLNo.getId() && binding.rbLNo.isChecked()) {  // 点击左耳按钮
+//                leftContent.MPO = 0;
+//                if (isActionCombined) {
+//                    rightContent.MPO = 0;
+//                    rightRBIgnoreFlag = true;
+//                    binding.rbRNo.setChecked(true);
+//                }
+//
+//            } else if (checkedId == binding.rbLLow.getId() && binding.rbLLow.isChecked() ) {
+//                leftContent.MPO = 1;
+//                if (isActionCombined) {
+//                    rightContent.MPO = 1;
+//                    rightRBIgnoreFlag = true;
+//                    binding.rbRLow.setChecked(true);
+//                }
+//
+//            } else if (checkedId == binding.rbLMedium.getId() && binding.rbLMedium.isChecked() ) {
+//                leftContent.MPO = 2;
+//                if (isActionCombined) {
+//                    rightContent.MPO = 2;
+//                    rightRBIgnoreFlag = true;
+//                    binding.rbRMedium.setChecked(true);
+//                }
+//
+//            } else if (checkedId == binding.rbLHigh.getId() && binding.rbLHigh.isChecked() ) {
+//                leftContent.MPO = 3;
+//                if (isActionCombined) {
+//                    rightContent.MPO = 3;
+//                    rightRBIgnoreFlag = true;
+//                    binding.rbRHigh.setChecked(true);
+//                }
+//
+//            } else if (checkedId== binding.rbRNo.getId() && binding.rbRNo.isChecked() ) { // 点击右耳按钮
+//                rightContent.MPO = 0;
+//                if (isActionCombined) {
+//                    leftContent.MPO = 0;
+//                    leftRBIgnoreFlag = true;
+//                    binding.rbLNo.setChecked(true);
+//                }
+//
+//            } else if (checkedId == binding.rbRLow.getId() && binding.rbRLow.isChecked() ) {
+//                rightContent.MPO = 1;
+//                if (isActionCombined) {
+//                    leftContent.MPO = 1;
+//                    leftRBIgnoreFlag = true;
+//                    binding.rbLLow.setChecked(true);
+//                }
+//
+//            } else if (checkedId == binding.rbRMedium.getId() && binding.rbRMedium.isChecked() ) {
+//                rightContent.MPO = 2;
+//                if (isActionCombined) {
+//                    leftContent.MPO = 2;
+//                    leftRBIgnoreFlag = true;
+//                    binding.rbLMedium.setChecked(true);
+//                }
+//
+//            } else if (checkedId == binding.rbRHigh.getId() && binding.rbRHigh.isChecked() ) {
+//                rightContent.MPO = 3;
+//                if (isActionCombined) {
+//                    leftContent.MPO = 3;
+//                    leftRBIgnoreFlag = true;
+//                    binding.rbLHigh.setChecked(true);
+//                }
+//            }
+
             binding.tvNoCompression.setSelected(false);
             binding.tvLowCompression.setSelected(false);
             binding.tvMediumCompression.setSelected(false);
             binding.tvHighCompression.setSelected(false);
-            if (checkedId == binding.rbLNo.getId() && binding.rbLNo.isChecked()) {
-                leftContent.MPO = 0;
-            } else if (checkedId == binding.rbLLow.getId() && binding.rbLLow.isChecked() ) {
-                leftContent.MPO = 1;
-            } else if (checkedId == binding.rbLMedium.getId() && binding.rbLMedium.isChecked() ) {
-                leftContent.MPO = 2;
-            } else if (checkedId == binding.rbLHigh.getId() && binding.rbLHigh.isChecked() ) {
-                leftContent.MPO = 3;
-            } else if (checkedId== binding.rbRNo.getId() && binding.rbRNo.isChecked() ) {
-                rightContent.MPO = 0;
-            } else if (checkedId == binding.rbRLow.getId() && binding.rbRLow.isChecked() ) {
-                rightContent.MPO = 1;
-            } else if (checkedId == binding.rbRMedium.getId() && binding.rbRMedium.isChecked() ) {
-                rightContent.MPO = 2;
-            } else if (checkedId == binding.rbRHigh.getId() && binding.rbRHigh.isChecked() ) {
-                rightContent.MPO = 3;
-            }
+            boolean isSelectedLNo     = false;
+            boolean isSelectedLLow    = false;
+            boolean isSelectedLMedium = false;
+            boolean isSelectedLHigh   = false;
+            String test = "";
             if (leftContent != null) {
-                Log.d(TAG, "changeListener leftContentMPO = " + leftContent.MPO);
-//                binding.tvNoCompression.setSelected(leftContent.MPO == 0);
-//                binding.tvLowCompression.setSelected(leftContent.MPO == 1);
-//                binding.tvMediumCompression.setSelected(leftContent.MPO == 2);
-//                binding.tvHighCompression.setSelected(leftContent.MPO == 3);
+                isSelectedLNo     = leftContent.MPO == 0;
+                isSelectedLLow    = leftContent.MPO == 1;
+                isSelectedLMedium = leftContent.MPO == 2;
+                isSelectedLHigh   = leftContent.MPO >= 3;
+                test = "leftContent.MPO = " + leftContent.MPO;
             }
+            boolean isSelectedRNo     = false;
+            boolean isSelectedRLow    = false;
+            boolean isSelectedRMedium = false;
+            boolean isSelectedRHigh   = false;
             if (rightContent != null) {
-                Log.d(TAG, "changeListener rightContentMPO = " + rightContent.MPO);
-//                binding.tvNoCompression.setSelected(rightContent.MPO == 0);
-//                binding.tvLowCompression.setSelected(rightContent.MPO == 1);
-//                binding.tvMediumCompression.setSelected(rightContent.MPO == 2);
-//                binding.tvHighCompression.setSelected(rightContent.MPO == 3);
+                isSelectedRNo     = rightContent.MPO == 0;
+                isSelectedRLow    = rightContent.MPO == 1;
+                isSelectedRMedium = rightContent.MPO == 2;
+                isSelectedRHigh   = rightContent.MPO >= 3;
+                test = test + " rightContent.MPO = " + rightContent.MPO;
             }
-        }
-    };
-
-    private final CompoundButton.OnCheckedChangeListener changeListener0 = (buttonView, isChecked) -> {
-        binding.tvNoCompression.setSelected(false);
-        binding.tvLowCompression.setSelected(false);
-        binding.tvMediumCompression.setSelected(false);
-        binding.tvHighCompression.setSelected(false);
-        if (buttonView.getId() == binding.rbLNo.getId()) {
-            leftContent.MPO = 0;
-        } else if (buttonView.getId() == binding.rbLLow.getId()) {
-            leftContent.MPO = 1;
-        } else if (buttonView.getId() == binding.rbLMedium.getId()) {
-            leftContent.MPO = 2;
-        } else if (buttonView.getId() == binding.rbLHigh.getId()) {
-            leftContent.MPO = 3;
-        } else if (buttonView.getId() == binding.rbRNo.getId()) {
-            rightContent.MPO = 0;
-        } else if (buttonView.getId() == binding.rbRLow.getId()) {
-            rightContent.MPO = 1;
-        } else if (buttonView.getId() == binding.rbRMedium.getId()) {
-            rightContent.MPO = 2;
-        } else if (buttonView.getId() == binding.rbRHigh.getId()) {
-            rightContent.MPO = 3;
-        }
-        if (leftContent != null) {
-            Log.d(TAG, "changeListener leftContentMPO = " + leftContent.MPO);
-            binding.tvNoCompression.setSelected(leftContent.MPO == 0);
-            binding.tvLowCompression.setSelected(leftContent.MPO == 1);
-            binding.tvMediumCompression.setSelected(leftContent.MPO == 2);
-            binding.tvHighCompression.setSelected(leftContent.MPO == 3);
-        }
-        if (rightContent != null) {
-            Log.d(TAG, "changeListener rightContentMPO = " + rightContent.MPO);
-            binding.tvNoCompression.setSelected(rightContent.MPO == 0);
-            binding.tvLowCompression.setSelected(rightContent.MPO == 1);
-            binding.tvMediumCompression.setSelected(rightContent.MPO == 2);
-            binding.tvHighCompression.setSelected(rightContent.MPO == 3);
+            Log.d(TAG, test);
+            binding.tvNoCompression.setSelected(isSelectedLNo || isSelectedRNo);
+            binding.tvLowCompression.setSelected(isSelectedLLow || isSelectedRLow);
+            binding.tvMediumCompression.setSelected(isSelectedLMedium || isSelectedRMedium);
+            binding.tvHighCompression.setSelected(isSelectedLHigh || isSelectedRHigh);
         }
     };
 
@@ -348,10 +386,10 @@ public class LoudFragment extends BaseFragment {
         int cnt = 0;
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
-        uiChangeLRMode(leftMode, rightMode);
+        uiChangeLRModeImage(leftMode, rightMode);
         if (cnt == 2) {
             if (leftMode == rightMode) {
-                uiChangeLR(cnt, null);
+                uiChangeLRButton(cnt, null);
                 DeviceManager.getInstance().readModeFile(leftMode);
             } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
@@ -359,27 +397,22 @@ public class LoudFragment extends BaseFragment {
 
         } else if (cnt == 1) {
             if (leftMode != null) {
-                uiChangeLR(1, DeviceManager.EAR_TYPE_LEFT);
+                uiChangeLRButton(1, DeviceManager.EAR_TYPE_LEFT);
                 DeviceManager.getInstance().readModeFile(leftMode);
             } else {
-                uiChangeLR(1, DeviceManager.EAR_TYPE_RIGHT);
+                uiChangeLRButton(1, DeviceManager.EAR_TYPE_RIGHT);
                 DeviceManager.getInstance().readModeFile(rightMode);
             }
 
         } else {
-            uiChangeLR(0, null);
+            uiChangeLRButton(0, null);
         }
+        uiChangeCompression(leftContent, rightContent);
     }
 
     @Override
     protected void updateModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
-        Log.d(TAG, "updateModeFile leftContent = " + leftContent + " rightContent = " + rightContent);
-        this.leftContent = leftContent;
-        this.rightContent = rightContent;
-        int cnt = 0;
-        if (leftContent != null) { cnt++; }
-        if (rightContent != null) { cnt++; }
-        uiChangeCompression(leftContent, rightContent);
+
     }
 
 }

@@ -182,13 +182,13 @@
                 android:layout_height="36dp"/>
             <RadioButton
                 style="@style/Widget.App.RadioButton.L"
-                android:id="@+id/rb_l_medium"
+                android:id="@+id/rb_l_set_2"
                 android:layout_width="wrap_content"
                 android:layout_marginTop="18dp"
                 android:layout_height="36dp" />
             <RadioButton
                 style="@style/Widget.App.RadioButton.L"
-                android:id="@+id/rb_l_high"
+                android:id="@+id/rb_l_set_3"
                 android:layout_marginTop="18dp"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"/>
@@ -230,13 +230,13 @@
                 android:layout_height="36dp"/>
             <RadioButton
                 style="@style/Widget.App.RadioButton.R"
-                android:id="@+id/rb_r_medium"
+                android:id="@+id/rb_r_set_2"
                 android:layout_width="wrap_content"
                 android:layout_marginTop="18dp"
                 android:layout_height="36dp" />
             <RadioButton
                 style="@style/Widget.App.RadioButton.R"
-                android:id="@+id/rb_r_high"
+                android:id="@+id/rb_r_set_3"
                 android:layout_marginTop="18dp"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"/>

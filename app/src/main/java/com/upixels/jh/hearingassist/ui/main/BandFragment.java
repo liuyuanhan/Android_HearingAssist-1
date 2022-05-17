@@ -459,7 +459,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
 
     @Override
     protected void updateWriteFeedback(String leftResult, String rightResult) {
-        Log.d(TAG, "updateCtlFeedback leftResult = " + leftResult + " rightResult = " + rightResult);
+        Log.d(TAG, "updateWriteFeedback leftResult = " + leftResult + " rightResult = " + rightResult);
         boolean isSuccessL = true;
         boolean isSuccessR = true;
         if (leftResult != null) {
