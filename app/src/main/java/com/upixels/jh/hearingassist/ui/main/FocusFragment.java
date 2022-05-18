@@ -8,19 +8,20 @@ import android.view.ViewGroup;
 
 import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentFocusBinding;
-import com.upixels.jh.hearingassist.databinding.FragmentNoiseBinding;
 import com.upixels.jh.hearingassist.util.DeviceManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.CommonUtil;
 
 public class FocusFragment extends BaseFragment {
-    private final static String TAG = FocusFragment.class.getSimpleName();
-    private FragmentFocusBinding binding;
+    private final static String         TAG = FocusFragment.class.getSimpleName();
+    private FragmentFocusBinding        binding;
+
+    protected int                       checkedIndexL;
+    protected int                       checkedIndexR;
 
     public static FocusFragment newInstance() {
         return new FocusFragment();
@@ -116,110 +117,103 @@ public class FocusFragment extends BaseFragment {
         }
     };
 
-    // 改变Directional图标
-    private void uiChangeDirectional(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
-        binding.btnNormal.setSelected(false);
-        binding.btnTv.setSelected(false);
-        binding.btnMeeting.setSelected(false);
-        binding.btnFaceToFace.setSelected(false);
-        if(leftContent != null) {
-            switch (leftContent.getDirectional()) {
-                case normal:
-                    binding.btnNormal.setSelected(true);
-                    break;
-                case TV:
-                    binding.btnTv.setSelected(true);
-                    break;
-                case meeting:
-                    binding.btnMeeting.setSelected(true);
-                    break;
-                case face_to_face:
-                    binding.btnFaceToFace.setSelected(true);
-                    break;
-                case unknown:
-                    break;
-            }
-        }
-
-        if (rightContent != null) {
-            switch (rightContent.getDirectional()) {
-                case normal:
-                    binding.btnNormal.setSelected(true);
-                    break;
-                case TV:
-                    binding.btnTv.setSelected(true);
-                    break;
-                case meeting:
-                    binding.btnMeeting.setSelected(true);
-                    break;
-                case face_to_face:
-                    binding.btnFaceToFace.setSelected(true);
-                    break;
-                case unknown:
-                    break;
-            }
-        }
-    }
-
     // 改变模式指示图标
-    private void uiChangeLRModeImage(SceneMode leftMode, SceneMode rightMode) {
+    private void uiChangeLRModeImage(AIDMode leftMode, AIDMode rightMode) {
         int resIdL = 0;
         int resIdR = 0;
         if (leftMode != null) {
-            switch (leftMode) {
-                case CONVERSATION:
+            switch (leftMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdL = R.drawable.icon_mode_conversation_blue;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdL = R.drawable.icon_mode_restaurant_blue;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdL = R.drawable.icon_mode_outdoor_blue;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdL = R.drawable.icon_mode_music_blue;
                     break;
             }
         }
         if (rightMode != null) {
-            switch (rightMode) {
-                case CONVERSATION:
+            switch (rightMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdR = R.drawable.icon_mode_conversation_nor;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdR = R.drawable.icon_mode_restaurant_nor;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdR = R.drawable.icon_mode_outdoor_nor;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdR = R.drawable.icon_mode_music_nor;
                     break;
             }
         }
-        if (resIdL > 0) {
-            binding.ivModeL.setImageResource(resIdL);
-            binding.ivModeL.setVisibility(View.VISIBLE);
-        } else {
-            binding.ivModeL.setVisibility(View.INVISIBLE);
+        if (resIdL > 0) {binding.ivModeL.setImageResource(resIdL);}
+        binding.ivModeL.setVisibility(resIdL > 0 ? View.VISIBLE : View.INVISIBLE);
+        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+        binding.ivModeR.setVisibility(resIdR > 0 ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    // 改变Directional图标
+    private void uiChangeDirectional(int indexL, int indexR) {
+        Log.d(TAG, "uiChangeDirectional indexL = " + indexL + " indexR = " + indexR);
+        binding.btnNormal.setSelected(false);
+        binding.btnTv.setSelected(false);
+        binding.btnMeeting.setSelected(false);
+        binding.btnFaceToFace.setSelected(false);
+        if(indexL >= 0) {
+            switch (indexL) {
+                case 0:
+                    binding.btnNormal.setSelected(true);
+                    break;
+                case 1:
+                    binding.btnTv.setSelected(true);
+                    break;
+                case 2:
+                    binding.btnMeeting.setSelected(true);
+                    break;
+                case 3:
+                    binding.btnFaceToFace.setSelected(true);
+                    break;
+                case 4:
+                    break;
+            }
         }
-        if (resIdR > 0) {
-            binding.ivModeR.setImageResource(resIdR);
-            binding.ivModeR.setVisibility(View.VISIBLE);
-        } else {
-            binding.ivModeL.setVisibility(View.INVISIBLE);
+
+        if (indexR >= 0) {
+            switch (indexR) {
+                case 0:
+                    binding.btnNormal.setSelected(true);
+                    break;
+                case 1:
+                    binding.btnTv.setSelected(true);
+                    break;
+                case 2:
+                    binding.btnMeeting.setSelected(true);
+                    break;
+                case 3:
+                    binding.btnFaceToFace.setSelected(true);
+                    break;
+                case 4:
+                    break;
+            }
         }
     }
 
     @Override
-    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
+    protected void updateView(AIDMode leftMode, AIDMode rightMode) {
         Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
         int cnt = 0;
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
         uiChangeLRModeImage(leftMode, rightMode);
         if (cnt == 2) {
-            if (leftMode == rightMode) {
+            if (leftMode.getMode() == rightMode.getMode()) {
                 DeviceManager.getInstance().readModeFile(leftMode);
             } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
@@ -233,7 +227,7 @@ public class FocusFragment extends BaseFragment {
                 DeviceManager.getInstance().readModeFile(rightMode);
             }
         }
-        uiChangeDirectional(leftContent, rightContent);
+        uiChangeDirectional(-1, -1);
     }
 
     @Override
@@ -241,10 +235,14 @@ public class FocusFragment extends BaseFragment {
         Log.d(TAG, "updateModeFile leftContent = " + leftContent + " rightContent = " + rightContent);
         this.leftContent = leftContent;
         this.rightContent = rightContent;
+        int indexL = -1;
+        int indexR = -1;
         int cnt = 0;
-        if (leftContent != null) { cnt++; }
-        if (rightContent != null) { cnt++; }
-        uiChangeDirectional(leftContent, rightContent);
+        if (leftContent != null) { cnt++; indexL = leftContent.getDirectional().ordinal(); }
+        if (rightContent != null) { cnt++; indexR = rightContent.getDirectional().ordinal(); }
+        this.checkedIndexL = indexL;
+        this.checkedIndexR = indexR;
+        uiChangeDirectional(indexL, indexR);
     }
 
     @Override

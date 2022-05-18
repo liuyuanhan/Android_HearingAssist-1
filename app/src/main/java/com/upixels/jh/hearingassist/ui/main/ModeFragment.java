@@ -10,12 +10,10 @@ import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentModeBinding;
 import com.upixels.jh.hearingassist.util.DeviceManager;
 
-import androidx.fragment.app.Fragment;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import me.forrest.commonlib.jh.SceneMode;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.util.CommonUtil;
-import me.forrest.commonlib.view.IOSLoadingDialog;
 
 public class ModeFragment extends BaseFragment {
     private static final String TAG = ModeFragment.class.getSimpleName();
@@ -79,59 +77,67 @@ public class ModeFragment extends BaseFragment {
     }
 
     private void initUIListener() {
-        binding.btnConversation.setOnClickListener( l -> {
-            DeviceManager.getInstance().ctlMode(SceneMode.CONVERSATION);
-            uiChange(SceneMode.CONVERSATION);
-        });
-
-        binding.btnRestaurant.setOnClickListener( l -> {
-            DeviceManager.getInstance().ctlMode(SceneMode.RESTAURANT);
-            uiChange(SceneMode.RESTAURANT);
-        });
-
-        binding.btnOurDoor.setOnClickListener(l -> {
-            DeviceManager.getInstance().ctlMode(SceneMode.OUTDOOR);
-            uiChange(SceneMode.OUTDOOR);
-        });
-
-        binding.btnMusic.setOnClickListener( l -> {
-            DeviceManager.getInstance().ctlMode(SceneMode.MUSIC);
-            uiChange(SceneMode.MUSIC);
-        });
+        binding.btnConversation.setOnClickListener(clickListener);
+        binding.btnRestaurant.setOnClickListener(clickListener);
+        binding.btnOurDoor.setOnClickListener(clickListener);
+        binding.btnMusic.setOnClickListener(clickListener);
     }
 
-    private void uiChange(SceneMode sceneMode) {
+    private final View.OnClickListener clickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AIDMode aidMode = null;
+            if (v == binding.btnConversation) {
+                aidMode = new AIDMode(AIDMode.CONVERSATION);
+            } else if (v == binding.btnRestaurant) {
+                aidMode = new AIDMode(AIDMode.RESTAURANT);
+            } else if (v == binding.btnOurDoor) {
+                aidMode = new AIDMode(AIDMode.OUTDOOR);
+            } else if (v == binding.btnMusic) {
+                aidMode = new AIDMode(AIDMode.MUSIC);
+            }
+            if (aidMode != null) {
+                DeviceManager.getInstance().ctlMode(aidMode);
+                uiChange(aidMode);
+            }
+        }
+    };
+
+    private void uiChange(AIDMode sceneMode) {
         binding.btnConversation.setSelected(false);
         binding.btnRestaurant.setSelected(false);
         binding.btnOurDoor.setSelected(false);
         binding.btnMusic.setSelected(false);
-        switch (sceneMode) {
-            case CONVERSATION:
+        switch (sceneMode.getMode()) {
+            case AIDMode.CONVERSATION:
                 binding.btnConversation.setSelected(true);
                 break;
-            case RESTAURANT:
+            case AIDMode.RESTAURANT:
                 binding.btnRestaurant.setSelected(true);
                 break;
-            case OUTDOOR:
+            case AIDMode.OUTDOOR:
                 binding.btnOurDoor.setSelected(true);
                 break;
-            case MUSIC:
+            case AIDMode.MUSIC:
                 binding.btnMusic.setSelected(true);
                 break;
         }
     }
     
     @Override
-    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
+    protected void updateView(AIDMode leftMode, AIDMode rightMode) {
         Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
-        if (leftMode != null && rightMode != null && leftMode != rightMode) {
+        if (leftMode != null && rightMode != null && leftMode.getMode() != rightMode.getMode()) {
             CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
-        } else if (leftMode != null && leftMode == rightMode) {
+            uiChange(new AIDMode(AIDMode.UNKNOWN));
+        } else if (leftMode != null && rightMode != null && leftMode.getMode() == rightMode.getMode()) {
+            uiChange(leftMode);
+        } else if (leftMode != null && rightMode == null) {
             uiChange(leftMode);
         } else if (leftMode == null && rightMode != null) {
             uiChange(rightMode);
         } else {
-            uiChange(SceneMode.UNKNOWN);
+            uiChange(new AIDMode(AIDMode.UNKNOWN));
         }
     }
 
@@ -147,7 +153,7 @@ public class ModeFragment extends BaseFragment {
             isSuccessR = Boolean.parseBoolean(rightResult.split(",")[1]);
         }
         if (isSuccessL && isSuccessR) {
-            DeviceManager.getInstance().readModeVolume();
+            DeviceManager.getInstance().readModeVolume(true);
         }
     }
 }

@@ -1,16 +1,17 @@
 package com.upixels.jh.hearingassist.ui.main;
 
+import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.util.DeviceManager;
 
 import androidx.fragment.app.Fragment;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.SceneMode;
 
 public abstract class BaseFragment extends Fragment {
     private boolean isVisible       = false;
 
-    protected SceneMode                     leftMode;
-    protected SceneMode                     rightMode;
+    protected AIDMode                       leftMode;
+    protected AIDMode                       rightMode;
     protected BTProtocol.ModeFileContent    leftContent;
     protected BTProtocol.ModeFileContent    rightContent;
     protected BTProtocol.ModeFileContent    curContent;
@@ -45,7 +46,7 @@ public abstract class BaseFragment extends Fragment {
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     //               ***  子类根据需要重写一下方法 ***
     // 更新模式变化，子类重写该方法
-    protected void updateView(SceneMode leftMode, SceneMode rightMode) {}
+    protected void updateView(AIDMode leftMode, AIDMode rightMode) {}
 
     // 更新控制回调，子类重写该方法
     protected void updateCtlFeedback(String leftResult, String rightResult) {}
@@ -58,6 +59,11 @@ public abstract class BaseFragment extends Fragment {
     private final DeviceManager.DeviceChangeListener deviceChangeListener = new DeviceManager.DeviceChangeListener() {
 
         @Override
+        public void onConnectStatus(boolean leftConnected, boolean rightConnected) {
+
+        }
+
+        @Override
         public void onReadingStatus(boolean isReading) {
 
         }
@@ -68,7 +74,7 @@ public abstract class BaseFragment extends Fragment {
         }
 
         @Override
-        public void onChangeSceneMode(SceneMode leftMode, SceneMode rightMode) {
+        public void onChangeSceneMode(AIDMode leftMode, AIDMode rightMode) {
             BaseFragment.this.leftMode = leftMode;
             BaseFragment.this.rightMode = rightMode;
             requireActivity().runOnUiThread(() -> updateView(leftMode, rightMode));

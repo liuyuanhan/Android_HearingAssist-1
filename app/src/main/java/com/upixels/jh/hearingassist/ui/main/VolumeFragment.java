@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.transition.TransitionManager;
-import me.forrest.commonlib.jh.SceneMode;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.util.CommonUtil;
 
 import android.util.Log;
@@ -26,10 +26,10 @@ import java.util.Locale;
 public class VolumeFragment extends BaseFragment {
     private final static String TAG = VolumeFragment.class.getSimpleName();
 
-    private FragmentVolumeBinding binding;
-    private ConstraintLayout        layoutFragmentVolumeLeftRight;
-    private ConstraintLayout        layoutFragmentVolumeLeft;
-    private ConstraintLayout        layoutFragmentVolumeRight;
+    private FragmentVolumeBinding   binding;
+    private ConstraintLayout        layoutLeftRight;
+    private ConstraintLayout        layoutLeft;
+    private ConstraintLayout        layoutRight;
     private ConstraintSet           constraintSetLeftRight;
     private ConstraintSet           constraintSetLeft;
     private ConstraintSet           constraintSetRight;
@@ -104,15 +104,15 @@ public class VolumeFragment extends BaseFragment {
         constraintSetLeft = new ConstraintSet();
         constraintSetRight = new ConstraintSet();
 
-        layoutFragmentVolumeLeftRight = binding.layoutFragmentVolumeLR;
-        constraintSetLeftRight.clone(layoutFragmentVolumeLeftRight);
+        layoutLeftRight = binding.layoutFragmentVolumeLR;
+        constraintSetLeftRight.clone(layoutLeftRight);
         constraintSetLeft.clone(this.requireContext(), R.layout.fragment_volume_left);
         constraintSetRight.clone(this.requireContext(), R.layout.fragment_volume_right);
 
         binding.sbLeftVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+                binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", progress * 10));
             }
 
             @Override
@@ -148,81 +148,129 @@ public class VolumeFragment extends BaseFragment {
         });
     }
 
-    @Override
-    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
-        Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
+    private void uiListenerEnable(boolean enable) {
+        binding.sbLeftVolume.setEnabled(enable);
+        binding.sbRightVolume.setEnabled(enable);
+    }
+
+    // 改变 L / R 按钮的UI状态
+    protected void uiChangeLRButton(int connectCnt, String earType) {
+        if (connectCnt == 0) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
+
+        } else if (connectCnt == 2) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
+
+
+        } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
+            if (constraintSetFlag != 1) {
+                constraintSetFlag = 1;
+                constraintSetLeft.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
+
+        } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
+            if (constraintSetFlag != 2) {
+                constraintSetFlag = 2;
+                constraintSetRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+            }
+            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
+        }
+    }
+
+    // 改变模式指示图标
+    protected void uiChangeLRModeImage(AIDMode leftMode, AIDMode rightMode) {
         int resIdL = 0;
         int resIdR = 0;
         if (leftMode != null) {
-            switch (leftMode) {
-                case CONVERSATION:
+            switch (leftMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdL = R.drawable.icon_mode_conversation_blue;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdL = R.drawable.icon_mode_restaurant_blue;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdL = R.drawable.icon_mode_outdoor_blue;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdL = R.drawable.icon_mode_music_blue;
                     break;
             }
         }
         if (rightMode != null) {
-            switch (rightMode) {
-                case CONVERSATION:
+            switch (rightMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdR = R.drawable.icon_mode_conversation_nor;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdR = R.drawable.icon_mode_restaurant_nor;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdR = R.drawable.icon_mode_outdoor_nor;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdR = R.drawable.icon_mode_music_nor;
                     break;
             }
         }
+        if (resIdL > 0) { binding.ivModeL.setImageResource(resIdL); }
+        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+    }
 
-        if (resIdL > 0 && resIdR > 0) {
-            if (constraintSetFlag != 0) {
-                constraintSetFlag = 0;
-                constraintSetLeftRight.applyTo(layoutFragmentVolumeLeftRight);
-                TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-            }
-
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
-            binding.ivModeL.setImageResource(resIdL);
-            binding.ivModeR.setImageResource(resIdR);
-            if (leftMode != rightMode) {
-                CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
-            }
-
-        } else if (resIdL > 0) {
-            if (constraintSetFlag != 1) {
-                constraintSetFlag = 1;
-                constraintSetLeft.applyTo(layoutFragmentVolumeLeftRight);
-                TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-            }
-
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
-            binding.ivModeL.setImageResource(resIdL);
+    protected void uiChangeTextView(int volumeL, int volumeR) {
+        Log.d(TAG, "uiChangeTextView + volumeL = " + volumeL + " volumeR = "+volumeR);
+        if (volumeL >= 0) {
             binding.sbLeftVolume.setProgress(leftMode.getVolume());
             binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)leftMode.getVolume() / 10 * 100)));
-
-        } else if (resIdR > 0) {
-            if (constraintSetFlag != 2) {
-                constraintSetFlag = 2;
-                constraintSetRight.applyTo(layoutFragmentVolumeLeftRight);
-                TransitionManager.beginDelayedTransition(layoutFragmentVolumeLeftRight);
-            }
-
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
-            binding.ivModeR.setImageResource(resIdR);
+        }
+        if (volumeR >= 0) {
             binding.sbRightVolume.setProgress(rightMode.getVolume());
             binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)rightMode.getVolume() / 10 * 100)));
+        }
+        Log.d(TAG, "uiChangeTextView -");
+    }
+
+    @Override
+    protected void updateView(AIDMode leftMode, AIDMode rightMode) {
+        Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
+        int cnt = 0;
+        int volumeL = -1;
+        int volumeR = -1;
+        if (leftMode != null) { cnt++; volumeL = leftMode.getVolume(); }
+        if (rightMode != null) { cnt++; volumeR = rightMode.getVolume(); }
+        uiChangeLRModeImage(leftMode, rightMode);
+        uiChangeTextView(volumeL, volumeR);
+        if (cnt > 0) { uiListenerEnable(true); }
+        if (cnt == 2) {
+            if (leftMode.getMode() == rightMode.getMode()) {
+                uiChangeLRButton(cnt, null);
+            } else {
+                CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
+                uiListenerEnable(false);
+            }
+
+        } else if (cnt == 1) {
+            if (leftMode != null) {
+                uiChangeLRButton(1, DeviceManager.EAR_TYPE_LEFT);
+            } else {
+                uiChangeLRButton(1, DeviceManager.EAR_TYPE_RIGHT);
+            }
+
+        } else {
+            uiChangeLRButton(0, null);
         }
     }
 

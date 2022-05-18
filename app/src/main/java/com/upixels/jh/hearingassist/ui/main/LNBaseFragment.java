@@ -18,8 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.transition.TransitionManager;
-import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.SceneMode;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.util.CommonUtil;
 
 /**
@@ -29,23 +28,23 @@ import me.forrest.commonlib.util.CommonUtil;
  */
 public class LNBaseFragment extends BaseFragment {
     protected static String TAG = "";
-    private FragmentLnBaseBinding       binding;
-    private FragmentLnBaseLeftBinding   leftBinding;
-    private FragmentLnBaseRightBinding  rightBinding;
-    private ConstraintLayout            layoutLeftRight;
-    private ConstraintLayout            layoutLeft;
-    private ConstraintLayout            layoutRight;
-    private ConstraintSet               constraintSetLeftRight;
-    private ConstraintSet               constraintSetLeft;
-    private ConstraintSet               constraintSetRight;
-    private int                         constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
+    protected FragmentLnBaseBinding         binding;
+    protected FragmentLnBaseLeftBinding     leftBinding;
+    protected FragmentLnBaseRightBinding    rightBinding;
+    private ConstraintLayout                layoutLeftRight;
+    private ConstraintLayout                layoutLeft;
+    private ConstraintLayout                layoutRight;
+    private ConstraintSet                   constraintSetLeftRight;
+    private ConstraintSet                   constraintSetLeft;
+    private ConstraintSet                   constraintSetRight;
+    private int                             constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
 
-    private boolean                     changeListenerIgnoreFlag;   // !! 需要UI监听器忽略该事件，因为主动设置RadioGroup时，监听器也会响应，进入了死循环
-    private boolean                     leftRBIgnoreFlag;
-    private boolean                     rightRBIgnoreFlag;
+    private boolean                         changeListenerIgnoreFlag;   // !! 需要UI监听器忽略该事件，因为主动设置RadioGroup时，监听器也会响应，进入了死循环
+    private boolean                         leftRBIgnoreFlag;
+    private boolean                         rightRBIgnoreFlag;
 
-    protected int                       checkedIndexL;
-    protected int                       checkedIndexR;
+    protected int                           checkedIndexL;
+    protected int                           checkedIndexR;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -162,37 +161,37 @@ public class LNBaseFragment extends BaseFragment {
     }
 
     // 改变模式指示图标
-    protected void uiChangeLRModeImage(SceneMode leftMode, SceneMode rightMode) {
+    protected void uiChangeLRModeImage(AIDMode leftMode, AIDMode rightMode) {
         int resIdL = 0;
         int resIdR = 0;
         if (leftMode != null) {
-            switch (leftMode) {
-                case CONVERSATION:
+            switch (leftMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdL = R.drawable.icon_mode_conversation_blue;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdL = R.drawable.icon_mode_restaurant_blue;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdL = R.drawable.icon_mode_outdoor_blue;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdL = R.drawable.icon_mode_music_blue;
                     break;
             }
         }
         if (rightMode != null) {
-            switch (rightMode) {
-                case CONVERSATION:
+            switch (rightMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdR = R.drawable.icon_mode_conversation_nor;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdR = R.drawable.icon_mode_restaurant_nor;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdR = R.drawable.icon_mode_outdoor_nor;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdR = R.drawable.icon_mode_music_nor;
                     break;
             }
@@ -375,14 +374,14 @@ public class LNBaseFragment extends BaseFragment {
     };
 
     @Override
-    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
+    protected void updateView(AIDMode leftMode, AIDMode rightMode) {
         Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
         int cnt = 0;
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
         uiChangeLRModeImage(leftMode, rightMode);
         if (cnt == 2) {
-            if (leftMode == rightMode) {
+            if (leftMode.getMode() == rightMode.getMode()) {
                 uiChangeLRButton(cnt, null);
                 DeviceManager.getInstance().readModeFile(leftMode);
             } else {

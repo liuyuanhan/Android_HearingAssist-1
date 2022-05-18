@@ -2,6 +2,10 @@ package me.forrest.commonlib.util;
 
 public class NumberUtil {
 
+//    public static int BIT(int n) {
+//        return 1 << n;
+//    }
+
     /**
      * 55,55,55,55,55,55,55,55 ==> [55, 55, ...]
      * @param intString 输入的整数字符串

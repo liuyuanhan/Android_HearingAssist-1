@@ -8,10 +8,11 @@ import android.util.Log;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.rxjava3.disposables.Disposable;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.BLEUtil;
 import me.forrest.commonlib.util.FileUtil;
 
@@ -28,28 +29,28 @@ public class DeviceManager {
     public static final String EAR_TYPE_RIGHT = "right";
     public static final String EAR_TYPE_BOTH  = "both";
 
-    private Context     context;
-    private boolean     leftConnected;
-    private boolean     rightConnected;
-    private boolean     readLeftBat;  //是否读了一次电量
-    private boolean     readRightBat; //是否读了一次电量
-    private int         leftBat;
-    private int         rightBat;
-    private SceneMode   leftMode;
-    private SceneMode   rightMode;
-    private String      leftMac;
-    private String      rightMac;
-    private String      leftResult;
-    private String      rightResult;
+    private Context                    context;
+    private boolean                    leftConnected;
+    private boolean                    rightConnected;
+    private boolean                    readLeftBat;  //是否读了一次电量
+    private boolean                    readRightBat; //是否读了一次电量
+    private int                        leftBat;
+    private int                        rightBat;
+    private AIDMode                     leftMode;
+    private AIDMode                     rightMode;
+    private String                     leftMac;
+    private String                     rightMac;
+    private String                     leftResult;
+    private String                     rightResult;
     private BTProtocol.ModeFileContent leftModeFileContent;
     private BTProtocol.ModeFileContent rightModeFileContent;
     private BTProtocol.ModeFileContent mutableLeftModeFileContent;
     private BTProtocol.ModeFileContent mutableRightModeFileContent;
-    private int         connectedCnt = 0;
-    private int         modeCnt;            //获取到的模式数量
-    private int         modeFileCnt;
-    private int         writeFeedbackCnt;
-    private int         ctlFeedbackCnt;
+    private int                        connectedCnt;       // 用两个bit表示 0000 0011
+    private int                        modeCnt;            //获取到的模式数量 用两个bit表示 0000 0011
+    private int                        modeFileCnt;
+    private int                        writeFeedbackCnt;
+    private int                        ctlFeedbackCnt;
 
     private BLEUtil.BLEDevice leftPairedDevice;
     private BLEUtil.BLEDevice rightPairedDevice;
@@ -67,12 +68,15 @@ public class DeviceManager {
     private final List<DeviceChangeListener> listeners = new LinkedList<>();
 
     public interface DeviceChangeListener {
+        // 连接状态回调
+        void onConnectStatus(boolean leftConnected, boolean rightConnected);
+
         // 是否正在读数过程中，用于UI显示圆圈
         void onReadingStatus(boolean isReading);
         // 电量变化回调
         void onChangeBat(int leftBat, int rightBat);
         // 模式变化回调
-        void onChangeSceneMode(SceneMode leftMode, SceneMode rightMode);
+        void onChangeSceneMode(AIDMode leftMode, AIDMode rightMode);
 
         // 模式文件变化回调
         void onChangeModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent);
@@ -99,6 +103,14 @@ public class DeviceManager {
         }
     }
 
+    private void updateListenerForOnConnectStatus(boolean leftConnected, boolean rightConnected) {
+        workHandler.post(() -> {
+            for (DeviceChangeListener l : listeners) {
+                l.onConnectStatus(leftConnected, rightConnected);
+            }
+        });
+    }
+
     private void updateListenerForOnReadingStatus(boolean isReading) {
         workHandler.post(() -> {
             for (DeviceChangeListener l : listeners) {
@@ -107,7 +119,7 @@ public class DeviceManager {
         });
     }
 
-    private void updateListenerForOnChangeSceneMode(SceneMode leftMode, SceneMode rightMode) {
+    private void updateListenerForOnChangeSceneMode(AIDMode leftMode, AIDMode rightMode) {
         workHandler.post(() -> {
             for (DeviceChangeListener l : listeners) {
                 l.onChangeSceneMode(leftMode, rightMode);
@@ -137,6 +149,10 @@ public class DeviceManager {
                 l.onWriteFeedback(leftResult, rightResult);
             }
         });
+    }
+
+    private final static int BIT(int n) {
+        return 1 << n;
     }
 
     private DeviceManager() {}
@@ -173,19 +189,19 @@ public class DeviceManager {
         return rightBat;
     }
 
-    public void setLeftMode(SceneMode leftMode) {
+    public void setLeftMode(AIDMode leftMode) {
         this.leftMode = leftMode;
     }
 
-    public void setRightMode(SceneMode rightMode) {
+    public void setRightMode(AIDMode rightMode) {
         this.rightMode = rightMode;
     }
 
-    public SceneMode getLeftMode() {
+    public AIDMode getLeftMode() {
         return this.leftMode;
     }
 
-    public SceneMode getRightMode() {
+    public AIDMode getRightMode() {
         return this.rightMode;
     }
 
@@ -225,33 +241,39 @@ public class DeviceManager {
         return result;
     }
 
-    public boolean readModeVolume() {
+    // forceRead: 是否强制读取模式和音量
+    public boolean readModeVolume(boolean forceRead) {
         modeCnt = 0;
         boolean resultL = true;
         boolean resultR = true;
         byte[] data = BTProtocol.share.buildCMD_ReadModeVolume((byte) 0xFF);
-        if (leftConnected) {
+        if (leftConnected && (forceRead || leftMode == null)) {
+            Log.d(TAG, "读取 左耳 当前模式 及 档位 ");
+            modeCnt = modeCnt & ~BIT(0);
             resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
         }
-        if (rightConnected) {
+        if (rightConnected && (forceRead || rightMode == null)) {
+            Log.d(TAG, "读取 右耳 当前模式 及 档位 ");
+            modeCnt = modeCnt & ~BIT(1);
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
         return resultL && resultR;
     }
 
-    public boolean readModeFile(String mac, SceneMode mode) {
+    public boolean readModeFile(String mac, AIDMode mode) {
         byte[] data = BTProtocol.share.buildCMD_ReadModeFile(mode);
         return BLEUtil.getInstance().writeCharacteristic(mac, data);
     }
 
     // 控制模式
-    public boolean ctlMode(String mac, SceneMode mode) {
+    public boolean ctlMode(String mac, AIDMode mode) {
         byte[] data = BTProtocol.share.buildCMD_CtlMode(mode);
         return BLEUtil.getInstance().writeCharacteristic(mac, data);
     }
 
     // 控制模式
-    public boolean ctlMode(SceneMode mode) {
+    public boolean ctlMode(AIDMode mode) {
         leftResult = null;
         rightResult = null;
         ctlFeedbackCnt =0;
@@ -269,20 +291,20 @@ public class DeviceManager {
     }
 
     // 控制音量
-    public boolean ctlVolume(String mac, SceneMode mode) {
+    public boolean ctlVolume(String mac, AIDMode mode) {
         byte[] data = BTProtocol.share.buildCMD_CtlVC(mode);
         return BLEUtil.getInstance().writeCharacteristic(mac, data);
     }
 
     // 读取模式文件
-    public boolean readModeFile(SceneMode mode) {
+    public boolean readModeFile(AIDMode mode) {
         // 判断是否需要再次读模式，如果存在模式文件，且模式文件中的模式与要读取的模式相同就不需要再读了。
         boolean needReadLeftFlag = leftConnected;
         boolean needReadRightFlag = rightConnected;
-        if (leftConnected && leftModeFileContent != null && leftModeFileContent.mode == mode) {
+        if (leftConnected && leftModeFileContent != null && leftModeFileContent.aidMode.getMode() == mode.getMode()) {
             needReadLeftFlag = false;
         }
-        if (rightConnected && rightModeFileContent != null && rightModeFileContent.mode == mode) {
+        if (rightConnected && rightModeFileContent != null && rightModeFileContent.aidMode.getMode() == mode.getMode()) {
             needReadRightFlag = false;
         }
         if (!needReadLeftFlag && !needReadRightFlag) {
@@ -296,13 +318,13 @@ public class DeviceManager {
         if (leftConnected) {
             leftModeFileContent = null;
             mutableLeftModeFileContent = null;
+            modeFileCnt = modeFileCnt & ~BIT(0);
             resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
-            if (modeFileCnt > 0) { modeFileCnt--; }
         }
         if (rightConnected) {
             rightModeFileContent = null;
             mutableRightModeFileContent = null;
-            if (modeFileCnt > 0) { modeFileCnt--; }
+            modeFileCnt = modeFileCnt & ~BIT(1);
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
         if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
@@ -313,17 +335,18 @@ public class DeviceManager {
     public boolean writeModeFileForEQ(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
         leftResult = null;
         rightResult = null;
-        writeFeedbackCnt = 0;
         boolean resultL = true;
         boolean resultR = true;
         if (leftConnected && leftContent != null) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(0);
             BTProtocol.ModeFileContent.copyEQ(leftModeFileContent, leftContent, "V2");
-            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.mode);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.aidMode);
             resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
         }
         if (rightConnected && rightContent != null) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(1);
             BTProtocol.ModeFileContent.copyEQ(rightModeFileContent, rightContent, "V2");
-            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.mode);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.aidMode);
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
         if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
@@ -334,17 +357,40 @@ public class DeviceManager {
     public boolean writeModeFileForDirectional(BTProtocol.Directional directional) {
         leftResult = null;
         rightResult = null;
-        writeFeedbackCnt = 0;
         boolean resultL = true;
         boolean resultR = true;
         if (leftConnected) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(0);
             leftModeFileContent.setDirectional(directional);
-            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.mode);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.aidMode);
             resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
         }
         if (rightConnected) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(1);
             rightModeFileContent.setDirectional(directional);
-            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.mode);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.aidMode);
+            resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
+        }
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
+        return resultL && resultR;
+    }
+
+    // 设置Noise
+    public boolean writeModeFileForLoud(String earType, BTProtocol.Loud loud) {
+        leftResult = null;
+        rightResult = null;
+        boolean resultL = true;
+        boolean resultR = true;
+        if (leftConnected && (earType.equals(EAR_TYPE_LEFT) || earType.equals(EAR_TYPE_BOTH))) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(0);
+            leftModeFileContent.setLoud(loud);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.aidMode);
+            resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
+        }
+        if (rightConnected && (earType.equals(EAR_TYPE_RIGHT) || earType.equals(EAR_TYPE_BOTH))) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(1);
+            rightModeFileContent.setLoud(loud);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.aidMode);
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
         if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
@@ -355,17 +401,18 @@ public class DeviceManager {
     public boolean writeModeFileForNoise(String earType, BTProtocol.Noise noise) {
         leftResult = null;
         rightResult = null;
-        writeFeedbackCnt = 0;
         boolean resultL = true;
         boolean resultR = true;
         if (leftConnected && (earType.equals(EAR_TYPE_LEFT) || earType.equals(EAR_TYPE_BOTH))) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(0);
             leftModeFileContent.setNoise(noise);
-            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.mode);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(leftModeFileContent, leftModeFileContent.aidMode);
             resultL = BLEUtil.getInstance().writeCharacteristic(leftMac, data);
         }
         if (rightConnected && (earType.equals(EAR_TYPE_RIGHT) || earType.equals(EAR_TYPE_BOTH))) {
+            writeFeedbackCnt = writeFeedbackCnt & ~BIT(1);
             rightModeFileContent.setNoise(noise);
-            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.mode);
+            byte[] data = BTProtocol.share.buildCMD_WriteModeFile(rightModeFileContent, rightModeFileContent.aidMode);
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
         if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
@@ -388,59 +435,58 @@ public class DeviceManager {
             delay           = 0;
 
             for (BLEUtil.BLEDevice device: mBleDevices) {
-                Log.d(TAG, device.deviceName + " " + device.connectStatus);
+                Log.d(TAG, device.deviceName + " ConnectStatus = " + device.connectStatus);
                 // 如果正在连接
                 if (device.connectStatus == BLEUtil.STATE_CONNECTING) {
                     if (device.deviceName.contains("-L")) {
                         readLeftBat = false;
                         leftBat = 0;
+                        leftMode = null;
                     } else if (device.deviceName.contains("-R")) {
                         readRightBat = false;
                         rightBat = 0;
+                        rightMode = null;
                     }
 
                 }  else if (device.connectStatus == BLEUtil.STATE_CONNECTED || device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER) {
 
                     // 记录连接成功的设备个数,并读取一次电量
                     if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-L")) {
-                        connectedCnt++;
+                        connectedCnt = connectedCnt | BIT(0);
                         leftConnected = true;
                         leftPairedDevice = device;
                         leftMac = device.mac;
-                        delay = !readLeftBat ? 1500 : 500; // 如果没读电量，先读电量，再读模式音量
+                        delay = !readLeftBat ? 1500 : 500; // 如果没读电量，先读电量
                         if (!readLeftBat) {
                             readLeftBat = true;
                             Log.d(TAG, "读取 左耳 电量");
                             workHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
                         }
 
-                        updateListenerForOnReadingStatus(true);
-                        workHandler.postDelayed(() -> {
-                            Log.d(TAG, "读取 左耳 当前模式 及 档位 ");
-                            modeCnt = modeCnt > 0 ? modeCnt - 1 : 0;
-                            leftMode = null;
-                            DeviceManager.getInstance().readModeVolume(leftMac);
-                        }, delay);
-
                     } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
-                        connectedCnt++;
+                        connectedCnt = connectedCnt | BIT(1);
                         rightConnected = true;
                         rightPairedDevice = device;
                         rightMac = device.mac;
-                        delay = !readRightBat ? 1500 : 500; // 如果没读电量，先读电量，再读模式音量
+                        delay = !readRightBat ? 1500 : 500; // 如果没读电量，先读电量
                         if ((!readRightBat)) {
                             readRightBat = true;
                             workHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
                         }
-                        updateListenerForOnReadingStatus(true);
-                        workHandler.postDelayed(() -> {
-                            Log.d(TAG, "读取 右耳 当前模式 及 档位 ");
-                            modeCnt = modeCnt > 0 ? modeCnt - 1 : 0;
-                            rightMode = null;
-                            DeviceManager.getInstance().readModeVolume(rightMac);
-                        }, delay);
                     }
-                }
+
+                } /* else if (device.connectStatus == BLEUtil.STATE_RECONNECTING) {
+                    if (device.deviceName.contains("-L")) {
+                        readLeftBat = false;
+                        leftBat = 0;
+                        leftMode = null;
+                    } else if (device.deviceName.contains("-R")) {
+                        readRightBat = false;
+                        rightBat = 0;
+                        rightMode = null;
+                    }
+                } */
+                updateListenerForOnConnectStatus(leftConnected, rightConnected);
             }
         }
 
@@ -463,44 +509,29 @@ public class DeviceManager {
 
     private void initRxListener() {
         // 带有一个Consumer参数的方法表示下游只关心onNext事件
-        disposable0 = BTProtocol.share.sceneModeObservable.subscribe(sceneMode -> {
-                    Log.d(TAG, "获取模式成功 " + sceneMode);
-                    if (sceneMode.getDeviceName().contains("-L")) {
-                        if(sceneMode.getType() == BTProtocol.Read_Success ) {
-                            modeCnt++;
+        disposable0 = BTProtocol.share.sceneModeObservable.subscribe(aidMode -> {
+                    Log.d(TAG, "获取模式成功 " + aidMode);
+                    if (aidMode.getDeviceName().contains("-L")) {
+                        if(aidMode.getType() == BTProtocol.Read_Success ) {
+                            modeCnt = modeCnt | BIT(0);
                         }
-                        leftMode = sceneMode;
-//                        Log.d(TAG, "L 获取模式文件");
-//                        DeviceManager.getInstance().setLeftMode(leftMode);
-//                        DeviceManager.getInstance().readModeFile(leftMac, leftMode);
+                        leftMode = aidMode;
 
-                    } else if (sceneMode.getDeviceName().contains("-R")) {
-                        if(sceneMode.getType() == BTProtocol.Read_Success ) {
-                            modeCnt++;
+                    } else if (aidMode.getDeviceName().contains("-R")) {
+                        if(aidMode.getType() == BTProtocol.Read_Success ) {
+                            modeCnt = modeCnt | BIT(1);
                         }
-                        rightMode = sceneMode;
-//                        Log.d(TAG, "R 获取模式文件");
-//                        DeviceManager.getInstance().setRightMode(rightMode);
-//                        DeviceManager.getInstance().readModeFile(rightMac, rightMode);
+                        rightMode = aidMode;
                     }
 
-                    if (sceneMode.getType() == BTProtocol.Read_Success) {
+                    Log.d(TAG, String.format(Locale.getDefault(), "modeCnt(%d) connectedCnt(%d)", modeCnt, connectedCnt));
+                    if (aidMode.getType() == BTProtocol.Read_Success) {
                         if (modeCnt == connectedCnt) {
                             updateListenerForOnChangeSceneMode(leftMode, rightMode);
                             updateListenerForOnReadingStatus(false);
                         }
-//                        if (modeCnt == connectedCnt && modeCnt == 2 && leftMode != rightMode) {
-//                            IOSLoadingDialog.instance.dismiss();
-//                            CommonUtil.showToast(this, getString(R.string.tips_mode_not_same));
-//                        } else if (modeCnt == connectedCnt) {
-//                            IOSLoadingDialog.instance.dismiss();
-//                            runOnUiThread(() -> {
-//                                Fragment fragment = getSupportFragmentManager().findFragmentByTag("f"+binding.viewPager.getCurrentItem());
-//                                Log.d(TAG, "fragment = " + fragment);
-//                            });
-//                        }
 
-                    } else if (sceneMode.getType() == BTProtocol.Report_Success) {
+                    } else if (aidMode.getType() == BTProtocol.Report_Success) {
 //                        if (connectedCnt == 2 && leftMode != rightMode) {
 //                            if (sceneMode.getDeviceName().contains("-L")) {
 //                                syncMode(sceneMode, "-R");
@@ -516,18 +547,19 @@ public class DeviceManager {
 
         // 获取模式文件
         disposable1 = BTProtocol.share.modeFileContentObservable.subscribe(modeFileContent -> {
-                    if (modeFileContent.mode.getDeviceName().contains("-L")) {
-                        Log.d(TAG, modeFileContent.mode.getDeviceName() + " 获取模式文件成功");
+                    if (modeFileContent.aidMode.getDeviceName().contains("-L")) {
+                        Log.d(TAG, modeFileContent.aidMode.getDeviceName() + " 获取模式文件成功");
                         leftModeFileContent = modeFileContent;
                         mutableLeftModeFileContent = modeFileContent;
-                        modeFileCnt++;
+                        modeFileCnt = modeFileCnt | BIT(0);
 
-                    } else if (modeFileContent.mode.getDeviceName().contains("-R")) {
-                        Log.d(TAG, modeFileContent.mode.getDeviceName() + " 获取模式文件成功");
+                    } else if (modeFileContent.aidMode.getDeviceName().contains("-R")) {
+                        Log.d(TAG, modeFileContent.aidMode.getDeviceName() + " 获取模式文件成功");
                         rightModeFileContent = modeFileContent;
                         mutableRightModeFileContent = modeFileContent;
-                        modeFileCnt++;
+                        modeFileCnt = modeFileCnt | BIT(1);
                     }
+                    Log.d(TAG, String.format(Locale.getDefault(), "modeFileCnt(%d) connectedCnt(%d)", modeFileCnt, connectedCnt));
                     if (modeFileCnt == connectedCnt) {
                         updateListenerForOnChangeModeFile(mutableLeftModeFileContent, mutableRightModeFileContent);
                         updateListenerForOnReadingStatus(false);
@@ -539,10 +571,10 @@ public class DeviceManager {
             String[] strings = result.split(",");
             if (strings[0].contains("-L")) {
                 leftResult = result;
-                ctlFeedbackCnt++;
+                ctlFeedbackCnt = ctlFeedbackCnt | BIT(0);
             } else if (strings[0].contains("-R")) {
                 rightResult = result;
-                ctlFeedbackCnt++;
+                ctlFeedbackCnt = ctlFeedbackCnt | BIT(1);
             }
             if (ctlFeedbackCnt == connectedCnt) {
                 updateListenerForOnCtlFeedback(leftResult, rightResult);
@@ -557,11 +589,11 @@ public class DeviceManager {
             if (name.contains("-L") && isSuccess) {
                 Log.d(TAG, name + " 写模式文件成功");
                 leftResult = result;
-                writeFeedbackCnt++;
+                writeFeedbackCnt = writeFeedbackCnt | BIT(0);
             } else if (name.contains("-R") && isSuccess) {
                 Log.d(TAG, name + " 写模式文件成功");
                 rightResult = result;
-                writeFeedbackCnt++;
+                writeFeedbackCnt = writeFeedbackCnt | BIT(1);
             }
             if (writeFeedbackCnt == connectedCnt) {
                 updateListenerForOnWriteFeedback(leftResult, rightResult);

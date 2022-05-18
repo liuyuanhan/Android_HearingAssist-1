@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.BTProtocolD58B;
+import me.forrest.commonlib.jh.BTProtocol;;
 
 public class BLEUtil {
 
@@ -607,7 +606,7 @@ public class BLEUtil {
 
                     // D58B 专用特征uuid
                     } else if (uuid.contains(D58B_Volume_Level_Char_UUID) || uuid.contains(D58B_Program_Char_UUID) || uuid.contains(D58B_RPS_Read_Char_UUID)) {
-                        BTProtocolD58B.share.checkAndPraseFeedback(uuid, gatt.getDevice().getName(), characteristic.getValue(), BTProtocol.Read_Success);
+                       // BTProtocolD58B.share.checkAndPraseFeedback(uuid, gatt.getDevice().getName(), characteristic.getValue(), BTProtocol.Read_Success);
 
                     } else if (uuid.contains(D58B_Battery_Level_Char_UUID)) {
                         updateListenerForBattery(gatt.getDevice().getName(), characteristic.getValue()[0]);
@@ -626,7 +625,7 @@ public class BLEUtil {
 //                }
                 String uuid = characteristic.getUuid().toString();
                 if (uuid.contains(D58B_Volume_Level_Char_UUID) || uuid.contains(D58B_Program_Char_UUID) || uuid.contains(D58B_RPS_Read_Char_UUID)) {
-                    BTProtocolD58B.share.checkAndPraseFeedback(uuid, gatt.getDevice().getName(), characteristic.getValue(), BTProtocol.Write_Success);
+                    //BTProtocolD58B.share.checkAndPraseFeedback(uuid, gatt.getDevice().getName(), characteristic.getValue(), BTProtocol.Write_Success);
                 }
             }
 
@@ -647,7 +646,7 @@ public class BLEUtil {
 
                 // D58B 专用特征uuid
                 } else if (uuid.contains(D58B_Volume_Level_Char_UUID) || uuid.contains(D58B_Program_Char_UUID) || uuid.contains(D58B_RPS_Read_Char_UUID)) {
-                    BTProtocolD58B.share.checkAndPraseFeedback(uuid, gatt.getDevice().getName(), characteristic.getValue(), BTProtocol.Report_Success);
+                    //BTProtocolD58B.share.checkAndPraseFeedback(uuid, gatt.getDevice().getName(), characteristic.getValue(), BTProtocol.Report_Success);
 
                 } else if (uuid.contains(D58B_Battery_Level_Char_UUID)) {
                     updateListenerForBattery(gatt.getDevice().getName(), characteristic.getValue()[0]);

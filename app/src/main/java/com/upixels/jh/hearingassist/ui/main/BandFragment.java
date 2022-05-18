@@ -23,8 +23,8 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.transition.TransitionManager;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.CommonUtil;
 
 public class BandFragment extends BaseFragment implements View.OnTouchListener {
@@ -162,142 +162,6 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
     }
     int cnt = 0;
 
-    // UI更新 Seekbar
-    private void uiChangeSetSeekbarEnable(boolean enable, BTProtocol.ModeFileContent content) {
-        Log.d(TAG, "uiChangeSetSeekbarEnable +");
-        changeListenerIgnoreFlag = true;
-        binding.sbEq250.setEnabled(enable);
-        binding.sbEq500.setEnabled(enable);
-        binding.sbEq1000.setEnabled(enable);
-        binding.sbEq1500.setEnabled(enable);
-        binding.sbEq2000.setEnabled(enable);
-        binding.sbEq3000.setEnabled(enable);
-        binding.sbEq4000.setEnabled(enable);
-        binding.sbEq6000.setEnabled(enable);
-        curContent = null;
-        if (enable) {
-            curContent = content;
-            Drawable drawable;
-            Rect bounds250 = binding.sbEq250.getProgressDrawable().getBounds();
-            int resId = 0;
-            if (content.mode.getDeviceName().contains("-L")) {
-                resId = R.drawable.seekbar_band_l;
-            } else {
-                resId = R.drawable.seekbar_band_r;
-            }
-
-            binding.sbEq250.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq250.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq250.setProgress(content.EQ1);
-            binding.tvGain250.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ1)));
-
-            binding.sbEq500.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq500.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq500.setProgress(content.EQ2);
-            binding.tvGain500.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ2)));
-
-            binding.sbEq1000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq1000.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq1000.setProgress(content.EQ3);
-            binding.tvGain1000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ3)));
-
-            binding.sbEq1500.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq1500.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq1500.setProgress(content.EQ4);
-            binding.tvGain1500.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ4)));
-
-            binding.sbEq2000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq2000.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq2000.setProgress(content.EQ5);
-            binding.tvGain2000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ5)));
-
-            binding.sbEq3000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq3000.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq3000.setProgress(content.EQ7);
-            binding.tvGain3000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ7)));
-
-            binding.sbEq4000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq4000.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq4000.setProgress(content.EQ9);
-            binding.tvGain4000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ9)));
-
-            binding.sbEq6000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
-            binding.sbEq6000.getProgressDrawable().setBounds(bounds250);
-            binding.sbEq6000.setProgress(content.EQ11);
-            binding.tvGain6000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ11)));
-            Log.d(TAG, "uiChangeSetSeekbarEnable -");
-        }
-        changeListenerIgnoreFlag = false;
-    }
-
-    // 改变 L R 按钮的UI状态
-    private void uiChangeLR(int connectCnt, String earType) {
-        if (connectCnt == 0) {
-            if (constraintSetFlag != 0) {
-                constraintSetFlag = 0;
-                constraintSetLeftRight.applyTo(layoutLeftRight);
-                TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
-            }
-            binding.ivL.setBackground(null);
-            binding.ivR.setBackground(null);
-            binding.ivL.setOnClickListener(null); // 未连接不可点击
-            binding.ivR.setOnClickListener(null);
-
-        } else if (connectCnt == 2 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
-            if (constraintSetFlag != 0) {
-                constraintSetFlag = 0;
-                constraintSetLeftRight.applyTo(layoutLeftRight);
-                TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white);
-                binding.ivL.setBackgroundResource(R.drawable.selector_band_drawable_l);
-                binding.ivR.setBackgroundResource(R.drawable.selector_band_drawable_r);
-            }
-            binding.ivL.setOnClickListener(lrListener);
-            binding.ivR.setOnClickListener(lrListener);
-            binding.ivL.setSelected(true);
-            binding.ivR.setSelected(false);
-
-
-        } else if (connectCnt == 2 && earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
-            if (constraintSetFlag != 0) {
-                constraintSetFlag = 0;
-                constraintSetLeftRight.applyTo(layoutLeftRight);
-                TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white);
-                binding.ivL.setBackgroundResource(R.drawable.selector_band_drawable_l);
-                binding.ivR.setBackgroundResource(R.drawable.selector_band_drawable_r);
-            }
-            binding.ivL.setOnClickListener(lrListener);
-            binding.ivR.setOnClickListener(lrListener);
-            binding.ivL.setSelected(false);
-            binding.ivR.setSelected(true);
-        }
-
-        else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
-            if (constraintSetFlag != 1) {
-                constraintSetFlag = 1;
-                constraintSetLeft.applyTo(layoutLeftRight);
-                TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
-                binding.ivL.setBackground(null);
-            }
-            binding.ivL.setOnClickListener(null); // 单个设备 也不需要点击
-            binding.ivR.setOnClickListener(null);
-
-        } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
-            if (constraintSetFlag != 2) {
-                constraintSetFlag = 2;
-                constraintSetRight.applyTo(layoutLeftRight);
-                TransitionManager.beginDelayedTransition(layoutLeftRight);
-                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
-                binding.ivR.setBackground(null);
-            }
-            binding.ivL.setOnClickListener(null); // 单个设备 也不需要点击
-            binding.ivR.setOnClickListener(null);
-        }
-    }
-
     private final View.OnClickListener lrListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -373,68 +237,208 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         return true;
     }
 
-    @Override
-    protected void updateView(SceneMode leftMode, SceneMode rightMode) {
-        Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
+    // UI更新 Seekbar
+    private void uiChangeSetSeekbarEnable(boolean enable, BTProtocol.ModeFileContent content) {
+        Log.d(TAG, "uiChangeSetSeekbarEnable +");
+        changeListenerIgnoreFlag = true;
+        binding.sbEq250.setEnabled(enable);
+        binding.sbEq500.setEnabled(enable);
+        binding.sbEq1000.setEnabled(enable);
+        binding.sbEq1500.setEnabled(enable);
+        binding.sbEq2000.setEnabled(enable);
+        binding.sbEq3000.setEnabled(enable);
+        binding.sbEq4000.setEnabled(enable);
+        binding.sbEq6000.setEnabled(enable);
+        curContent = null;
+        if (enable) {
+            curContent = content;
+            Rect bounds250 = binding.sbEq250.getProgressDrawable().getBounds();
+            int resId = 0;
+            if (content.aidMode.getDeviceName().contains("-L")) {
+                resId = R.drawable.seekbar_band_l;
+            } else {
+                resId = R.drawable.seekbar_band_r;
+            }
+
+            binding.sbEq250.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq250.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq250.setProgress(content.EQ1);
+            binding.tvGain250.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ1)));
+
+            binding.sbEq500.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq500.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq500.setProgress(content.EQ2);
+            binding.tvGain500.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ2)));
+
+            binding.sbEq1000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq1000.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq1000.setProgress(content.EQ3);
+            binding.tvGain1000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ3)));
+
+            binding.sbEq1500.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq1500.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq1500.setProgress(content.EQ4);
+            binding.tvGain1500.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ4)));
+
+            binding.sbEq2000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq2000.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq2000.setProgress(content.EQ5);
+            binding.tvGain2000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ5)));
+
+            binding.sbEq3000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq3000.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq3000.setProgress(content.EQ7);
+            binding.tvGain3000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ7)));
+
+            binding.sbEq4000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq4000.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq4000.setProgress(content.EQ9);
+            binding.tvGain4000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ9)));
+
+            binding.sbEq6000.setProgressDrawable(AppCompatResources.getDrawable(requireContext(), resId));
+            binding.sbEq6000.getProgressDrawable().setBounds(bounds250);
+            binding.sbEq6000.setProgress(content.EQ11);
+            binding.tvGain6000.setText(String.valueOf(BTProtocol.ModeFileContent.EQ2Value(content.EQ11)));
+        }
+        changeListenerIgnoreFlag = false;
+        Log.d(TAG, "uiChangeSetSeekbarEnable -");
+    }
+
+    // 改变 L R 按钮的UI状态
+    private void uiChangeLRButton(int connectCnt, String earType) {
+        Log.d(TAG, "uiChangeLRButton connectCnt = " + connectCnt + " earType = " + earType);
+        if (connectCnt == 0) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
+            }
+            binding.ivL.setBackground(null);
+            binding.ivR.setBackground(null);
+            binding.ivL.setOnClickListener(null); // 未连接不可点击
+            binding.ivR.setOnClickListener(null);
+            binding.ivL.setSelected(false);
+            binding.ivR.setSelected(false);
+        }
+
+        else if (connectCnt == 2 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white);
+            }
+            binding.ivL.setBackgroundResource(R.drawable.selector_band_drawable_l);
+            binding.ivR.setBackgroundResource(R.drawable.selector_band_drawable_r);
+            binding.ivL.setOnClickListener(lrListener);
+            binding.ivR.setOnClickListener(lrListener);
+            binding.ivL.setSelected(true);
+            binding.ivR.setSelected(false);
+        }
+
+        else if (connectCnt == 2 && earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
+            if (constraintSetFlag != 0) {
+                constraintSetFlag = 0;
+                constraintSetLeftRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white);
+            }
+            binding.ivL.setBackgroundResource(R.drawable.selector_band_drawable_l);
+            binding.ivR.setBackgroundResource(R.drawable.selector_band_drawable_r);
+            binding.ivL.setOnClickListener(lrListener);
+            binding.ivR.setOnClickListener(lrListener);
+            binding.ivL.setSelected(false);
+            binding.ivR.setSelected(true);
+        }
+
+        else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
+            if (constraintSetFlag != 1) {
+                constraintSetFlag = 1;
+                constraintSetLeft.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_blue);
+                binding.ivL.setBackground(null);
+            }
+            binding.ivL.setOnClickListener(null); // 单个设备 也不需要点击
+            binding.ivR.setOnClickListener(null);
+        }
+
+        else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
+            if (constraintSetFlag != 2) {
+                constraintSetFlag = 2;
+                constraintSetRight.applyTo(layoutLeftRight);
+                TransitionManager.beginDelayedTransition(layoutLeftRight);
+                binding.viewBgLR.setBackgroundResource(R.drawable.shape_device_l_r);
+                binding.ivR.setBackground(null);
+            }
+            binding.ivL.setOnClickListener(null); // 单个设备 也不需要点击
+            binding.ivR.setOnClickListener(null);
+        }
+    }
+
+    // 改变模式指示图标
+    protected void uiChangeLRModeImage(AIDMode leftMode, AIDMode rightMode) {
         int resIdL = 0;
         int resIdR = 0;
         if (leftMode != null) {
-            switch (leftMode) {
-                case CONVERSATION:
+            switch (leftMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdL = R.drawable.icon_mode_conversation_blue;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdL = R.drawable.icon_mode_restaurant_blue;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdL = R.drawable.icon_mode_outdoor_blue;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdL = R.drawable.icon_mode_music_blue;
                     break;
             }
         }
         if (rightMode != null) {
-            switch (rightMode) {
-                case CONVERSATION:
+            switch (rightMode.getMode()) {
+                case AIDMode.CONVERSATION:
                     resIdR = R.drawable.icon_mode_conversation_nor;
                     break;
-                case RESTAURANT:
+                case AIDMode.RESTAURANT:
                     resIdR = R.drawable.icon_mode_restaurant_nor;
                     break;
-                case OUTDOOR:
+                case AIDMode.OUTDOOR:
                     resIdR = R.drawable.icon_mode_outdoor_nor;
                     break;
-                case MUSIC:
+                case AIDMode.MUSIC:
                     resIdR = R.drawable.icon_mode_music_nor;
                     break;
             }
         }
+        if (resIdL > 0) { binding.ivModeL.setImageResource(resIdL); }
+        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+    }
 
-        if (resIdL > 0 && resIdR > 0) {
-            binding.ivModeL.setVisibility(View.VISIBLE);
-            binding.ivModeR.setVisibility(View.VISIBLE);
-            binding.ivModeL.setImageResource(resIdL);
-            binding.ivModeR.setImageResource(resIdR);
-            if (leftMode != rightMode) {
+    @Override
+    protected void updateView(AIDMode leftMode, AIDMode rightMode) {
+        Log.d(TAG, "updateView leftMode = " + leftMode + " rightMode = " + rightMode);
+        int cnt = 0;
+        if (leftMode != null) { cnt++; }
+        if (rightMode != null) { cnt++; }
+
+        uiChangeLRModeImage(leftMode, rightMode);
+        if (cnt == 2) {
+            if (leftMode.getMode() == rightMode.getMode()) {
+                DeviceManager.getInstance().readModeFile(leftMode);
+            } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
-                uiChangeLR(0,null);
-                uiChangeSetSeekbarEnable(false, null);
-                return;
             }
-            DeviceManager.getInstance().readModeFile(leftMode);
-
-        } else if (resIdL > 0) {
-            binding.ivModeL.setImageResource(resIdL);
-            binding.ivModeR.setVisibility(View.INVISIBLE);
-            DeviceManager.getInstance().readModeFile(leftMode);
-
-        } else if (resIdR > 0) {
-            binding.ivModeL.setVisibility(View.INVISIBLE);
-            binding.ivModeR.setImageResource(resIdR);
-            DeviceManager.getInstance().readModeFile(rightMode);
+        } else if (cnt == 1) {
+            if (leftMode != null) {
+                DeviceManager.getInstance().readModeFile(leftMode);
+            } else {
+                DeviceManager.getInstance().readModeFile(rightMode);
+            }
         }
-        uiChangeLR(0,null);
+        uiChangeLRButton(0, null);
         uiChangeSetSeekbarEnable(false, null);
     }
 
@@ -447,13 +451,13 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         if (leftContent != null) { cnt++; }
         if (rightContent != null) { cnt++; }
         if (leftContent != null) {
-            uiChangeLR(cnt, DeviceManager.EAR_TYPE_LEFT);
+            uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_LEFT);
             uiChangeSetSeekbarEnable(true, leftContent);
         } else if (rightContent != null) {
-            uiChangeLR(cnt, DeviceManager.EAR_TYPE_RIGHT);
+            uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_RIGHT);
             uiChangeSetSeekbarEnable(true, rightContent);
         } else {
-            uiChangeLR(0, null);
+            uiChangeLRButton(0, null);
         }
     }
 

@@ -23,6 +23,7 @@ public class NoiseFragment extends LNBaseFragment {
 
     @Override
     protected void setHeardAid(String earType, int index) {
+        Log.d(TAG, "setHeardAid earType = " + earType + " index = " + index);
         BTProtocol.Noise noise;
         switch (index) {
             case 0:

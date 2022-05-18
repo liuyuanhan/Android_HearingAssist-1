@@ -10,13 +10,13 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.Disposable;
+import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
-import me.forrest.commonlib.jh.BTProtocolD58B;
-import me.forrest.commonlib.jh.SceneMode;
 import me.forrest.commonlib.util.BLEUtil;
 import me.forrest.commonlib.util.CommonUtil;
 import me.forrest.commonlib.view.IOSLoadingDialog;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -27,8 +27,9 @@ import com.upixels.jh.hearingassist.util.DeviceManager;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG =           MainActivity.class.getSimpleName();
-    private ActivityMainBinding binding;
+    private static final String         TAG =           MainActivity.class.getSimpleName();
+    private ActivityMainBinding         binding;
+    private Handler                     uiHandler;
 
     private String                      leftDevType;
     private String                      rightDevType;
@@ -37,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean                     leftConnecting;        //
     private boolean                     rightConnecting;
     private int                         connectedCnt;
-    private SceneMode                   leftMode;
-    private SceneMode                   rightMode;
+    private AIDMode                     leftMode;
+    private AIDMode                     rightMode;
     private int                         modeCnt;            //获取到的模式数量
     private int                         readModeFileCnt;
     private int                         modeFileCnt;        //获取到的模式文件数量
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private BTProtocol.ModeFileContent  rightModeFileContent;
     private BTProtocol.ModeFileContent  mutableLeftModeFileContent;
     private BTProtocol.ModeFileContent  mutableRightModeFileContent;
+
 
     private int     statusChange = 1;  // 用于断开连接变化标记，防止重复设置UI 1: 表示有变化 0: 表示无变化
     private int     delay        = 50; // 用于重连时延时获取数据
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
         }).attach();
 
         binding.ivBack.setOnClickListener(v -> finish());
+
+        uiHandler = new Handler(getMainLooper());
     }
 
     @Override
@@ -99,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "[onStart]");
         super.onStart();
         DeviceManager.getInstance().addListener(deviceChangeListener);
+        DeviceManager.getInstance().readModeVolume(true);
     }
 
     @Override
@@ -126,17 +131,27 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private final Runnable dismissLoadingDialogRunnable = IOSLoadingDialog.instance::dismissDialog;
+
     private final DeviceManager.DeviceChangeListener deviceChangeListener = new DeviceManager.DeviceChangeListener() {
-        boolean showLoading = false;
+        boolean isShowing = false;
+
+        @Override
+        public void onConnectStatus(boolean leftConnected, boolean rightConnected) {
+
+        }
+
         @Override
         public void onReadingStatus(boolean isReading) {
             Log.d(TAG, "onReadingStatus " + isReading);
-            if (!showLoading && isReading) {
-                showLoading = true;
-                IOSLoadingDialog.instance.setOnTouchOutside(true).showDialog(getSupportFragmentManager(), "");
-            } else if (showLoading && !isReading) {
+            if (!isShowing && isReading) {
+                isShowing = true;
+                IOSLoadingDialog.instance.setOnTouchOutside(false).showDialog(getSupportFragmentManager(), "");
+                uiHandler.postDelayed(dismissLoadingDialogRunnable, 10000);
+            } else if (isShowing && !isReading) {
+                isShowing = false;
+                uiHandler.removeCallbacks(dismissLoadingDialogRunnable);
                 IOSLoadingDialog.instance.dismissDialog();
-                showLoading = false;
             }
         }
 
@@ -146,12 +161,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onChangeSceneMode(SceneMode leftMode, SceneMode rightMode) {
-            Log.d(TAG, "onChangeSceneMode");
-            if (leftMode != null && rightMode != null && leftMode != rightMode) {
-                IOSLoadingDialog.instance.dismiss();
-                CommonUtil.showToast(MainActivity.this, getString(R.string.tips_mode_not_same));
-            }
+        public void onChangeSceneMode(AIDMode leftMode, AIDMode rightMode) {
         }
 
         @Override
@@ -189,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     // 同步模式 mode:上报的模式 deviceName:需要去设置的模式
-    private void syncMode(SceneMode mode, final String deviceName) {
+    private void syncMode(AIDMode mode, final String deviceName) {
         if(deviceName.contains("-L") && !leftConnected) { return; }
         if(deviceName.contains("-R") && !rightConnected) { return; }
         IOSLoadingDialog.instance.dismissDialog();

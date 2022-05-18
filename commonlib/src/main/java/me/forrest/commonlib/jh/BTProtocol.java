@@ -7,6 +7,8 @@ import java.util.HashMap;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
 
+import static me.forrest.commonlib.jh.BTProtocol.Loud.No;
+
 public class BTProtocol {
     private final static String TAG = "BTProtocol";
     // 自定义模式的正确数据：fe 68 91 e 0 3 a9 d3 71 98 78 a6 8b 12 2 c2 0 4 12 16
@@ -74,7 +76,7 @@ public class BTProtocol {
 
     // MARK: 模式文件的内容 参数是指 实际的助听值value 转为需要传递的 整数参数值， BLE传递时还需要对于到协议中的字节位上。
     public static class ModeFileContent {
-        public SceneMode mode = SceneMode.UNKNOWN;
+        public AIDMode aidMode = new AIDMode("", AIDMode.UNKNOWN, (byte)0, (byte)0);
 
         public byte NC1;
         public byte NC2;
@@ -166,6 +168,35 @@ public class BTProtocol {
                 return Directional.face_to_face;
             } else {
                 return Directional.unknown;
+            }
+        }
+
+        public void setDirectional(Directional directional) {
+            switch (directional) {
+                case normal:
+                    PG1 = 6;
+                    PG2 = 1;
+                    EQ1 = 1;
+                    EQ2 = 6;
+                    break;
+                case TV:
+                    PG1 = 6;
+                    PG2 = 1;
+                    EQ1 = 4;
+                    EQ2 = 10;
+                    break;
+                case meeting:
+                    PG1 = 6;
+                    PG2 = 5;
+                    EQ1 = 1;
+                    EQ2 = 8;
+                    break;
+                case face_to_face:
+                    PG1 = 6;
+                    PG2 = 6;
+                    EQ1 = 1;
+                    EQ2 = 9;
+                    break;
             }
         }
 
@@ -292,7 +323,7 @@ public class BTProtocol {
         // mpo 转 Loud
         public Loud getLoud() {
             if (MPO == 0) {
-                return Loud.No;
+                return No;
             } else if (MPO == 1) {
                 return Loud.Low;
             } else if (MPO == 2) {
@@ -307,6 +338,25 @@ public class BTProtocol {
                 return Loud.High;
             }
             return Loud.Unknown;
+        }
+
+        public void setLoud(Loud loud) {
+            switch (loud) {
+                case No:
+                    MPO = 0;
+                    break;
+                case Low:
+                    MPO = 1;
+                    break;
+                case Medium:
+                    MPO = 2;
+                    break;
+                case High:
+                    MPO = 3;
+                    break;
+                case Unknown:
+                    break;
+            }
         }
 
         // 通讯参数 转为 实际值
@@ -473,34 +523,7 @@ public class BTProtocol {
             }
         }
 
-        public void setDirectional(Directional directional) {
-            switch (directional) {
-                case normal:
-                    PG1 = 6;
-                    PG2 = 1;
-                    EQ1 = 1;
-                    EQ2 = 6;
-                    break;
-                case TV:
-                    PG1 = 6;
-                    PG2 = 1;
-                    EQ1 = 4;
-                    EQ2 = 10;
-                    break;
-                case meeting:
-                    PG1 = 6;
-                    PG2 = 5;
-                    EQ1 = 1;
-                    EQ2 = 8;
-                    break;
-                case face_to_face:
-                    PG1 = 6;
-                    PG2 = 6;
-                    EQ1 = 1;
-                    EQ2 = 9;
-                    break;
-            }
-        }
+
 
         private static int findElementInArray(float element, float[] array) {
             int minIdx = 0;
@@ -663,7 +686,7 @@ public class BTProtocol {
         @Override
         public String toString() {
             return "ModeFileContent{" +
-                    "mode=" + mode +
+                    "mode=" + aidMode +
                     ", NC1=" + NC1 +
                     ", NC2=" + NC2 +
                     ", NC3=" + NC3 +
@@ -724,13 +747,6 @@ public class BTProtocol {
 
     public byte mode2Volume; // 模式2的音量值
 
-    // 用于监听助听器模式的变化 name:BLE设备名 mode:设备模式 type:返回值的类型，用于区别是 APP读取模式 和 DSP主动上报(Read_Success|Report_Success)
-//    let rxSceneMode = PublishRelay<(name:String, mode:SceneMode, type: UInt8)>()
-//    let rxDSPModeFile = PublishRelay<(name: String, modeFile: ModeFileContent)>()
-//    let rxWriteFeedback = PublishRelay<(name:String, isSuccess:Bool)>()
-//    let rxCrlFeedback = PublishRelay<(name:String, isSuccess:Bool)>() // 从
-//    let rxVersionFeedback = PublishRelay<(name:String, version:String)>()
-
     // MARK: 基础读取命令 CMD = 0x11
     private byte[] baseReadCmd(byte DI0, byte DI1) {
         byte[] cmd = new byte[] {0,0,0,0,0,0,0,0};
@@ -753,24 +769,9 @@ public class BTProtocol {
     }
 
     // MARK: 读取 模式文件 命令
-    public byte[] buildCMD_ReadModeFile(SceneMode mode) {
-        byte md = 0;
-        switch (mode) {
-            case CONVERSATION:
-                md = 0;
-                break;
-            case RESTAURANT:
-                md = 1;
-                break;
-            case OUTDOOR:
-                md = 2;
-                break;
-            case MUSIC:
-                md = 3;
-                break;
-        }
+    public byte[] buildCMD_ReadModeFile(AIDMode mode) {
         byte DI1 = 0x03;
-        byte DI0 = md;
+        byte DI0 = mode.getDI0();
         return baseReadCmd(DI0, DI1);
     }
 
@@ -819,9 +820,9 @@ public class BTProtocol {
     }
 
     // MARK: 写模式文件命令 将模式文件中参数转化为协议字节序
-    public byte[] buildCMD_WriteModeFile(ModeFileContent modeFile, SceneMode mode) {
+    public byte[] buildCMD_WriteModeFile(ModeFileContent modeFile, AIDMode mode) {
         byte DI1 = 0x03;
-        byte DI0 = mode.getMdToDI0();
+        byte DI0 = mode.getDI0();
         byte[] data = new byte[] {
                 (byte)((byte)(modeFile.NC1 & (byte)0x07) | (modeFile.PG1 << 3) | (modeFile.PG2 << 6)),
                 (byte)((byte)(modeFile.NC2 << 1) | (modeFile.PG2 >> 2)),
@@ -863,54 +864,18 @@ public class BTProtocol {
     }
 
     // MARK: 控制命令 设置音量 cmmd = 0x01 value = 模式(高4位,取值范围 1~4)| 档位（低4位，取值范围 0~10）
-    public byte[] buildCMD_CtlVC(SceneMode mode) {
+    public byte[] buildCMD_CtlVC(AIDMode mode) {
         byte cmmd = 0x01; // 设置音量命令
-        byte md = 0;
-        byte volume = 0;
-        switch (mode) {
-            case CONVERSATION:
-                md = 1;
-                volume = mode.getVolume();
-                break;
-            case RESTAURANT:
-                md = 2;
-                volume = mode.getVolume();
-                break;
-            case OUTDOOR:
-                md = 3;
-                volume = mode.getVolume();
-                break;
-            case MUSIC:
-                md = 4;
-                volume = mode.getVolume();
-                break;
-            default:
-                break;
-        }
+        byte md = mode.getMode();
+        byte volume = mode.getVolume();
         byte value = (byte) (md << 4 | volume);
         return baseCtlCmd(cmmd, value);
     }
 
     // MARK: 控制命令 设置模式 cmmd = 0x02 value = 模式(1~4)
-    public byte[] buildCMD_CtlMode(SceneMode mode) {
+    public byte[] buildCMD_CtlMode(AIDMode mode) {
         byte cmmd = 0x02;
-        byte md  = 0;
-        switch (mode) {
-            case CONVERSATION:
-                md = 1;
-                break;
-            case RESTAURANT:
-                md = 2;
-                break;
-            case OUTDOOR:
-                md = 3;
-                break;
-            case MUSIC:
-                md = 4;
-                break;
-            default:
-                break;
-        }
+        byte md  = mode.getMode();
         return baseCtlCmd(cmmd, md);
     }
 
@@ -933,34 +898,6 @@ public class BTProtocol {
     }
 
     // 检查返回数据是否合法
-    /*
-    private byte[] frame = new byte[32];
-    private int desPos = 0;
-    private boolean checkFeedback(String name,  byte[] data) {
-        byte cs = 0;
-        byte rear = 0;
-        int frameLen = 0; // 数据帧的长度 不是frame数组的长度
-        if (desPos == 0) { Arrays.fill(frame, (byte) 0); }
-        if (desPos + data.length > 32) { desPos = 0; }
-        System.arraycopy(data, 0, frame, desPos, data.length);
-        desPos = desPos + data.length;
-        if (desPos < 6) { return false; }
-        if (frame[1] == (byte)0xFE && frame[2] == (byte)0x68) {
-            frameLen = (5 + frame[4] + 2);
-            rear = frame[frameLen - 1];
-            if (rear == (byte) 0x16) {
-                for (int index=2; index <= frameLen - 3; index++) {
-                    cs = (byte) (cs + frame[index]);
-                }
-                if (cs == frame[frameLen - 2]) {  // 校验位
-                    desPos = 0;
-                    return true;
-                }
-            }
-        }
-        return false;
-    } */
-
     private boolean checkFeedback(String name,  byte[] frame) {
         byte cs = 0;
         byte rear = 0;
@@ -982,7 +919,6 @@ public class BTProtocol {
 
     private void parseFeedback(String name, byte[] frame) {
         byte cmmd = frame[3];
-//        var dataLen: UInt8 = 0
         byte DI0 = 0;
         byte DI1 = 0;
         byte md = 0;
@@ -1022,13 +958,13 @@ public class BTProtocol {
                 int d11 = frame[18] & 0xff;
 
                 if (DI0 == 0x00) {
-                    fileContent.mode = SceneMode.CONVERSATION;
+                    fileContent.aidMode.setMode(AIDMode.CONVERSATION);
                 } else if (DI0 == 0x01) {
-                    fileContent.mode = SceneMode.RESTAURANT;
+                    fileContent.aidMode.setMode(AIDMode.RESTAURANT);
                 } else if (DI0 == 0x02) {
-                    fileContent.mode = SceneMode.OUTDOOR;
+                    fileContent.aidMode.setMode(AIDMode.OUTDOOR);
                 } else if (DI0 == 0x03) {
-                    fileContent.mode = SceneMode.MUSIC;
+                    fileContent.aidMode.setMode(AIDMode.MUSIC);
                 }
                 fileContent.NC1 = (byte) (d0 & 0x07);
                 fileContent.NC2 = (byte) (d1 >> 1);
@@ -1056,38 +992,22 @@ public class BTProtocol {
                 fileContent.NR = (byte) ((d11 >> 1) & 0x03);
                 fileContent.NC3 = (byte) (d10 & 0x3F);
                 fileContent.NC4 = (byte) (d11 & 0xF8);
-                Log.d(TAG, "[BTProtocol] 读 蓝牙模块 成功 DSP模式文件: " + fileContent);
-                fileContent.mode.setDeviceName(name);
+                Log.d(TAG, "[BTProtocol] 读 蓝牙模块 成功 DSP模式文件: " + name + " " + fileContent);
+                fileContent.aidMode.setDeviceName(name);
                 modeFileContentObservableEmitter.onNext(fileContent);
             }
             else if (DI1 == 0x04) {
                 if (DI0 == 0x00) {
-                    Log.d(TAG, "[BTProtocol] 读 蓝牙模块 成功 当前模式:" + name + " md="+frame[6]);
-//                    self.rxSceneMode.accept( (name, SceneMode.mode(frame[7], 0), Read_Success) )
-
                 } else if (DI0 == 0x01) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 自定义模式: " + name + SceneMode.CONVERSATION);
-//                    self.rxSceneMode.accept( (name, .custom(frame[7]), Read_Success) )
-
                 } else if (DI0 == 0x02) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 标准模式:" + name +  SceneMode.RESTAURANT);
-//                    self.rxSceneMode.accept( (name, .standard(frame[7]), Read_Success) )
-
                 } else if (DI0 == 0x03) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 降噪模式:" + name + SceneMode.OUTDOOR);
-//                    self.rxSceneMode.accept( (name, .denoise(frame[7]), Read_Success) )
-
                 } else if (DI0 == 0x04) {
-                    Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 户外模式:" + name +  SceneMode.MUSIC);
-//                    self.rxSceneMode.accept( (name, .outdoor(frame[7]), Read_Success) )
-
                 } else if (DI0 == (byte)0xFF) {
                     md = frame[7];
                     byte volume = frame[7+md]; // 7+1 == 模式1音量， 7+2 = 模式2音量
                     mode2Volume = frame[7+2];
                     Log.d(TAG,"[BTProtocol] 读 蓝牙模块 成功 当前运行状态: " + name + " md="+md + " volume="+volume);
-                    modeObservableEmitter.onNext(SceneMode.mode(name, md, volume, Read_Success));
-//                    self.rxSceneMode.accept((name, SceneMode.mode(md, volume), Read_Success))
+                    modeObservableEmitter.onNext(new AIDMode(name, md, volume, Read_Success));
                 }
 
             }
@@ -1131,20 +1051,19 @@ public class BTProtocol {
             md = frame[5];
             byte volume = frame[5+md];
             Log.d(TAG,"读 蓝牙模块 成功 获取上报运行状态:" + name + "md="+md + " volume="+volume);
-            if (modeObservableEmitter != null) modeObservableEmitter.onNext(SceneMode.mode(name, md, volume, Report_Success));
+            if (modeObservableEmitter != null) modeObservableEmitter.onNext(new AIDMode(name, md, volume, Report_Success));
         }
     }
 
     public void checkAndParseFeedback(String name, byte[] data) {
         if (checkFeedback(name, data)) {
-//            parseFeedback(name, this.frame);
             parseFeedback(name, data);
         }
     }
 
     private boolean initObservableEnable;
-    public Observable<SceneMode> sceneModeObservable;                // 被观察者 模式
-    private ObservableEmitter<SceneMode> modeObservableEmitter;
+    public Observable<AIDMode> sceneModeObservable;                // 被观察者 模式
+    private ObservableEmitter<AIDMode> modeObservableEmitter;
     public Observable<String> ctlFeedbackObservable;                 // 被观察者 控制命令反馈
     private ObservableEmitter<String> ctlFeedbackObservableEmitter;
     public Observable<String> writeFeedbackObservable;               // 被观察者 写命令反馈
