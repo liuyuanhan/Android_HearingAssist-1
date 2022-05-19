@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "[onStart]");
         super.onStart();
         DeviceManager.getInstance().addListener(deviceChangeListener);
-        DeviceManager.getInstance().readModeVolume(true);
+        DeviceManager.getInstance().readModeVolume(true);    // 只有在进入Sound Control时才会去读一次模式
     }
 
     @Override
@@ -138,7 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onConnectStatus(boolean leftConnected, boolean rightConnected) {
-
+            if (!leftConnected && !rightConnected) {
+                finish();
+            }
         }
 
         @Override

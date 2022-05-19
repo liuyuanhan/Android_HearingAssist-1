@@ -171,7 +171,6 @@ public class VolumeFragment extends BaseFragment {
             }
             binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
 
-
         } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
             if (constraintSetFlag != 1) {
                 constraintSetFlag = 1;
@@ -226,8 +225,8 @@ public class VolumeFragment extends BaseFragment {
                     break;
             }
         }
-        if (resIdL > 0) { binding.ivModeL.setImageResource(resIdL); }
-        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+        binding.ivModeL.setImageResource(resIdL);
+        binding.ivModeR.setImageResource(resIdR);
     }
 
     protected void uiChangeTextView(int volumeL, int volumeR) {
@@ -253,10 +252,10 @@ public class VolumeFragment extends BaseFragment {
         if (rightMode != null) { cnt++; volumeR = rightMode.getVolume(); }
         uiChangeLRModeImage(leftMode, rightMode);
         uiChangeTextView(volumeL, volumeR);
-        if (cnt > 0) { uiListenerEnable(true); }
         if (cnt == 2) {
             if (leftMode.getMode() == rightMode.getMode()) {
                 uiChangeLRButton(cnt, null);
+                uiListenerEnable(true);
             } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
                 uiListenerEnable(false);
@@ -268,9 +267,11 @@ public class VolumeFragment extends BaseFragment {
             } else {
                 uiChangeLRButton(1, DeviceManager.EAR_TYPE_RIGHT);
             }
+            uiListenerEnable(true);
 
         } else {
             uiChangeLRButton(0, null);
+            uiListenerEnable(false);
         }
     }
 

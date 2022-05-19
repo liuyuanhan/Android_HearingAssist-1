@@ -140,27 +140,11 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         constraintSetRight.clone(layoutRight);
 
         binding.btnAudition.setOnClickListener(l -> {
-//            if (cnt == 0) {
-//                uiChangeLR(2, DeviceManager.EAR_TYPE_LEFT);
-//                cnt++;
-//            } else if (cnt == 1) {
-//                uiChangeLR(2, DeviceManager.EAR_TYPE_RIGHT);
-//                cnt++;
-//            } else if (cnt == 2) {
-//                uiChangeLR(0, DeviceManager.EAR_TYPE_RIGHT);
-//                cnt++;
-//            } else if (cnt == 3) {
-//                uiChangeLR(1, DeviceManager.EAR_TYPE_LEFT);
-//                cnt++;
-//            } else if (cnt == 4) {
-//                uiChangeLR(1, DeviceManager.EAR_TYPE_RIGHT);
-//                cnt = 0;
-//            }
+            if (curContent == null ) { return; }
             Log.d(TAG, "curContent " + curContent.toString());
             DeviceManager.getInstance().writeModeFileForEQ(leftContent, rightContent);
         });
     }
-    int cnt = 0;
 
     private final View.OnClickListener lrListener = new View.OnClickListener() {
         @Override
@@ -168,9 +152,11 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
             if (v.getId() == R.id.iv_L) {
                 binding.ivL.setSelected(true);
                 binding.ivR.setSelected(false);
+                uiChangeSetSeekbarEnable(true, leftContent);
             } else if (v.getId() == R.id.iv_R) {
                 binding.ivL.setSelected(false);
                 binding.ivR.setSelected(true);
+                uiChangeSetSeekbarEnable(true, rightContent);
             }
         }
     };
@@ -250,7 +236,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         binding.sbEq4000.setEnabled(enable);
         binding.sbEq6000.setEnabled(enable);
         curContent = null;
-        if (enable) {
+        if (enable && content != null) {
             curContent = content;
             Rect bounds250 = binding.sbEq250.getProgressDrawable().getBounds();
             int resId = 0;
@@ -413,8 +399,8 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
                     break;
             }
         }
-        if (resIdL > 0) { binding.ivModeL.setImageResource(resIdL); }
-        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+        binding.ivModeL.setImageResource(resIdL);
+        binding.ivModeR.setImageResource(resIdR);
     }
 
     @Override
@@ -423,22 +409,24 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         int cnt = 0;
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
-
         uiChangeLRModeImage(leftMode, rightMode);
         if (cnt == 2) {
             if (leftMode.getMode() == rightMode.getMode()) {
                 DeviceManager.getInstance().readModeFile(leftMode);
+                uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_LEFT);
             } else {
+                uiChangeLRButton(0, null);
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
             }
         } else if (cnt == 1) {
             if (leftMode != null) {
+                uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_LEFT);
                 DeviceManager.getInstance().readModeFile(leftMode);
             } else {
+                uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_RIGHT);
                 DeviceManager.getInstance().readModeFile(rightMode);
             }
         }
-        uiChangeLRButton(0, null);
         uiChangeSetSeekbarEnable(false, null);
     }
 
@@ -451,10 +439,8 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         if (leftContent != null) { cnt++; }
         if (rightContent != null) { cnt++; }
         if (leftContent != null) {
-            uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_LEFT);
             uiChangeSetSeekbarEnable(true, leftContent);
         } else if (rightContent != null) {
-            uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_RIGHT);
             uiChangeSetSeekbarEnable(true, rightContent);
         } else {
             uiChangeLRButton(0, null);

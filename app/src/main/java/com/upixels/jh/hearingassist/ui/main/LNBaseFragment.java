@@ -196,8 +196,8 @@ public class LNBaseFragment extends BaseFragment {
                     break;
             }
         }
-        if (resIdL > 0) { binding.ivModeL.setImageResource(resIdL); }
-        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
+        binding.ivModeL.setImageResource(resIdL);
+        binding.ivModeR.setImageResource(resIdR);
     }
 
     // 改变中间的文字显示状态

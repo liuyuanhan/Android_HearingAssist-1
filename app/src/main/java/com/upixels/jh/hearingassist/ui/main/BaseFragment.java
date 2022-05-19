@@ -26,9 +26,9 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        DeviceManager.getInstance().addListener(deviceChangeListener);
         leftMode = DeviceManager.getInstance().getLeftMode();
         rightMode = DeviceManager.getInstance().getRightMode();
-        DeviceManager.getInstance().addListener(deviceChangeListener);
         updateView(leftMode, rightMode);
     }
 
@@ -60,7 +60,9 @@ public abstract class BaseFragment extends Fragment {
 
         @Override
         public void onConnectStatus(boolean leftConnected, boolean rightConnected) {
-
+            leftMode = DeviceManager.getInstance().getLeftMode();
+            rightMode = DeviceManager.getInstance().getRightMode();
+            requireActivity().runOnUiThread(() -> updateView(leftMode, rightMode));
         }
 
         @Override
@@ -82,9 +84,7 @@ public abstract class BaseFragment extends Fragment {
 
         @Override
         public void onChangeModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
-            requireActivity().runOnUiThread(() -> {
-                updateModeFile(leftContent, rightContent);
-            });
+            requireActivity().runOnUiThread(() -> updateModeFile(leftContent, rightContent));
         }
 
         @Override
@@ -96,6 +96,7 @@ public abstract class BaseFragment extends Fragment {
         public void onWriteFeedback(String leftResult, String rightResult) {
             updateWriteFeedback(leftResult, rightResult);
         }
+
     };
 
 }

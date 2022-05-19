@@ -92,10 +92,10 @@ public class FocusFragment extends BaseFragment {
         binding.btnConfigure.setOnClickListener(clickListener);
     }
 
-    private View.OnClickListener clickListener = new View.OnClickListener() {
+    private final View.OnClickListener clickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (leftMode != null && rightMode != null && leftMode != rightMode) {
+            if (leftMode != null && rightMode != null && leftMode.getMode() != rightMode.getMode()) {
                 CommonUtil.showToastShort(requireActivity(), R.string.tips_mode_not_same);
                 return;
             }
@@ -106,12 +106,12 @@ public class FocusFragment extends BaseFragment {
                 binding.btnFaceToFace.setSelected(false);
                 v.setSelected(true);
             } else {
-                BTProtocol.Directional directional;
-                if (binding.btnNormal.isSelected()) { directional = BTProtocol.Directional.normal; }
-                else if (binding.btnTv.isSelected()) { directional = BTProtocol.Directional.TV; }
-                else if (binding.btnMeeting.isSelected()) { directional = BTProtocol.Directional.meeting; }
-                else if (binding.btnFaceToFace.isSelected()) { directional = BTProtocol.Directional.face_to_face; }
-                else {directional = BTProtocol.Directional.unknown; }
+                BTProtocol.Focus directional;
+                if (binding.btnNormal.isSelected()) { directional = BTProtocol.Focus.normal; }
+                else if (binding.btnTv.isSelected()) { directional = BTProtocol.Focus.TV; }
+                else if (binding.btnMeeting.isSelected()) { directional = BTProtocol.Focus.meeting; }
+                else if (binding.btnFaceToFace.isSelected()) { directional = BTProtocol.Focus.face_to_face; }
+                else { return; }
                 DeviceManager.getInstance().writeModeFileForDirectional(directional);
             }
         }
@@ -153,10 +153,8 @@ public class FocusFragment extends BaseFragment {
                     break;
             }
         }
-        if (resIdL > 0) {binding.ivModeL.setImageResource(resIdL);}
-        binding.ivModeL.setVisibility(resIdL > 0 ? View.VISIBLE : View.INVISIBLE);
-        if (resIdR > 0) { binding.ivModeR.setImageResource(resIdR); }
-        binding.ivModeR.setVisibility(resIdR > 0 ? View.VISIBLE : View.INVISIBLE);
+        binding.ivModeL.setImageResource(resIdL);
+        binding.ivModeR.setImageResource(resIdR);
     }
 
     // 改变Directional图标
@@ -238,8 +236,8 @@ public class FocusFragment extends BaseFragment {
         int indexL = -1;
         int indexR = -1;
         int cnt = 0;
-        if (leftContent != null) { cnt++; indexL = leftContent.getDirectional().ordinal(); }
-        if (rightContent != null) { cnt++; indexR = rightContent.getDirectional().ordinal(); }
+        if (leftContent != null) { cnt++; indexL = leftContent.getFocus().ordinal(); }
+        if (rightContent != null) { cnt++; indexR = rightContent.getFocus().ordinal(); }
         this.checkedIndexL = indexL;
         this.checkedIndexR = indexR;
         uiChangeDirectional(indexL, indexR);

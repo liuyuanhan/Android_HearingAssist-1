@@ -535,7 +535,10 @@ public class BLEUtil {
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
             @Override
             public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-                Log.d(TAG, "gattCallback onConnectionStateChange" + " newState:" + newState + " gatt = " + gatt);
+                Log.d(TAG, "gattCallback onConnectionStateChange"
+                        + " newState:" + newState
+                        + " gatt = " + gatt
+                        + " mac = " + gatt.getDevice().getAddress());
                 String intentAction;
                 if (newState == BluetoothProfile.STATE_CONNECTED) {
                     Log.i(TAG, "STATE_CONNECTED to GATT server.");

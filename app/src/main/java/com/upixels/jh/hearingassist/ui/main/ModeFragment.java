@@ -103,6 +103,13 @@ public class ModeFragment extends BaseFragment {
         }
     };
 
+    private void uiListenerEnable(boolean enable) {
+        binding.btnConversation.setEnabled(enable);
+        binding.btnRestaurant.setEnabled(enable);
+        binding.btnOurDoor.setEnabled(enable);
+        binding.btnMusic.setEnabled(enable);
+    }
+
     private void uiChange(AIDMode sceneMode) {
         binding.btnConversation.setSelected(false);
         binding.btnRestaurant.setSelected(false);
@@ -130,14 +137,19 @@ public class ModeFragment extends BaseFragment {
         if (leftMode != null && rightMode != null && leftMode.getMode() != rightMode.getMode()) {
             CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
             uiChange(new AIDMode(AIDMode.UNKNOWN));
+            uiListenerEnable(true);
         } else if (leftMode != null && rightMode != null && leftMode.getMode() == rightMode.getMode()) {
             uiChange(leftMode);
+            uiListenerEnable(true);
         } else if (leftMode != null && rightMode == null) {
             uiChange(leftMode);
+            uiListenerEnable(true);
         } else if (leftMode == null && rightMode != null) {
             uiChange(rightMode);
+            uiListenerEnable(true);
         } else {
             uiChange(new AIDMode(AIDMode.UNKNOWN));
+            uiListenerEnable(false);
         }
     }
 

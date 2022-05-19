@@ -36,7 +36,7 @@ public class BTProtocol {
     public final static float[] EQ_GAIN_4000 = new float[]{5f, 6.5f, 8.5f, 10.5f, 12.75f, 15f, 16.25f, 18.75f, 19.25f, 22f, 24f, 25f, 30f, 29.5f, 31.5f, 32.75f};
     public final static float[] EQ_GAIN_6000 = new float[]{5f, 6.5f, 8.5f, 10.5f, 12.75f, 15f, 16.25f, 18.75f, 19.25f, 22f, 24f, 25f, 30f, 29.5f, 31.5f, 32.75f};
 
-    public enum Directional {
+    public enum Focus {
          normal, TV, meeting, face_to_face, unknown;
     }
 
@@ -78,7 +78,7 @@ public class BTProtocol {
     public static class ModeFileContent {
         public AIDMode aidMode = new AIDMode("", AIDMode.UNKNOWN, (byte)0, (byte)0);
 
-        public byte NC1;
+        public byte INPUT;
         public byte NC2;
         public byte NC3;
         public byte NC4;
@@ -113,7 +113,7 @@ public class BTProtocol {
         // 一对一模式:  27      27    6/6                           -28(1)      -12(9)
         // BLE发送时按照协议放在对于的位上即可 《增加方向性功能说明》
         // 将方向模式转为需要传递的参数值
-        public void directionalMode_to_PG(Directional dm) {
+        public void directionalMode_to_PG(Focus dm) {
             switch (dm) {
                 case normal:
                     this.PG1 = 6;
@@ -143,64 +143,52 @@ public class BTProtocol {
         }
 
         // 将PG参数值 转 实际方向模式
-        public Directional PG_to_directionalMode()  {
+        public Focus PG_to_directionalMode()  {
             if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 1 && this.EQ2 == 6) {
-                return Directional.normal;
+                return Focus.normal;
             } else if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 4 && this.EQ2 == 10) {
-                return Directional.TV;
+                return Focus.TV;
             } else if (this.PG1 == 6 && this.PG2 == 5 && this.EQ1 == 1 &&this.EQ2 == 8) {
-                return Directional.meeting;
+                return Focus.meeting;
             } else if (this.PG1 == 6 && this.PG2 == 6 && this.EQ1 == 1 && this.EQ2 == 9) {
-                return Directional.face_to_face;
+                return Focus.face_to_face;
             } else {
-                return Directional.unknown;
+                return Focus.unknown;
             }
         }
 
-        public Directional getDirectional() {
-            if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 1 && this.EQ2 == 6) {
-                return Directional.normal;
-            } else if (this.PG1 == 6 && this.PG2 == 1 && this.EQ1 == 4 && this.EQ2 == 10) {
-                return Directional.TV;
-            } else if (this.PG1 == 6 && this.PG2 == 5 && this.EQ1 == 1 &&this.EQ2 == 8) {
+        public Focus getFocus() {
+            if (this.INPUT == 1 && this.PG1 == 4 && this.PG2 == 4) {
+                return Focus.normal;
+            } else if (this.INPUT == 4 && this.PG1 == 4 && this.PG2 == 4) {
+                return Focus.TV;
+            } /* else if (this.INPUT == 4 && this.PG1 == 4 && this.PG2 == 4) {
                 return Directional.meeting;
-            } else if (this.PG1 == 6 && this.PG2 == 6 && this.EQ1 == 1 && this.EQ2 == 9) {
+            } else if (this.INPUT == 4 && this.PG1 == 4 && this.PG2 == 4) {
                 return Directional.face_to_face;
-            } else {
-                return Directional.unknown;
+            } */ else {
+                return Focus.unknown;
             }
         }
 
-        public void setDirectional(Directional directional) {
-            switch (directional) {
+        public void setFocus(Focus focus) {
+            switch (focus) {
                 case normal:
-                    PG1 = 6;
-                    PG2 = 1;
-                    EQ1 = 1;
-                    EQ2 = 6;
+                    INPUT = 1;
+                    PG1 = 4;
+                    PG2 = 4;
                     break;
                 case TV:
-                    PG1 = 6;
-                    PG2 = 1;
-                    EQ1 = 4;
-                    EQ2 = 10;
-                    break;
                 case meeting:
-                    PG1 = 6;
-                    PG2 = 5;
-                    EQ1 = 1;
-                    EQ2 = 8;
-                    break;
                 case face_to_face:
-                    PG1 = 6;
-                    PG2 = 6;
-                    EQ1 = 1;
-                    EQ2 = 9;
+                    INPUT = 4;
+                    PG1 = 4;
+                    PG2 = 4;
                     break;
             }
         }
 
-        public void D58B_directionalMode_to_PG(Directional dm) {
+        public void D58B_directionalMode_to_PG(Focus dm) {
             switch (dm) {
                 case normal:
                     this.PG1 = 4; // 21 15 -24 -16
@@ -228,7 +216,6 @@ public class BTProtocol {
                     break;
             }
         }
-
 
         // 传递参数(0~15) 转 实际EQ值(-30~0)
         public static byte EQ2Value(byte eq) {
@@ -523,8 +510,6 @@ public class BTProtocol {
             }
         }
 
-
-
         private static int findElementInArray(float element, float[] array) {
             int minIdx = 0;
             float minDiff = 100;
@@ -687,7 +672,7 @@ public class BTProtocol {
         public String toString() {
             return "ModeFileContent{" +
                     "mode=" + aidMode +
-                    ", NC1=" + NC1 +
+                    ", INPUT=" + INPUT +
                     ", NC2=" + NC2 +
                     ", NC3=" + NC3 +
                     ", NC4=" + NC4 +
@@ -715,7 +700,7 @@ public class BTProtocol {
                     ", NR=" + NR +
                     '}';
         }
-    } //
+    }
 
     public final static BTProtocol share = new BTProtocol();
 
@@ -824,7 +809,7 @@ public class BTProtocol {
         byte DI1 = 0x03;
         byte DI0 = mode.getDI0();
         byte[] data = new byte[] {
-                (byte)((byte)(modeFile.NC1 & (byte)0x07) | (modeFile.PG1 << 3) | (modeFile.PG2 << 6)),
+                (byte)((byte)(modeFile.INPUT & (byte)0x07) | (modeFile.PG1 << 3) | (modeFile.PG2 << 6)),
                 (byte)((byte)(modeFile.NC2 << 1) | (modeFile.PG2 >> 2)),
                 (byte)(modeFile.EQ1 | (modeFile.EQ2 << 4)),
                 (byte)(modeFile.EQ3 | (modeFile.EQ4 << 4)),   // d3
@@ -966,32 +951,32 @@ public class BTProtocol {
                 } else if (DI0 == 0x03) {
                     fileContent.aidMode.setMode(AIDMode.MUSIC);
                 }
-                fileContent.NC1 = (byte) (d0 & 0x07);
-                fileContent.NC2 = (byte) (d1 >> 1);
-                fileContent.PG1 = (byte) ((d0 >> 3) & 0x07);
-                fileContent.PG2 = (byte) ((d0 >> 6) | ((d1 & 0x01) << 2));
-                fileContent.EQ1 = (byte) (d2 & 0x0F);
-                fileContent.EQ2 = (byte) (d2 >> 4);
-                fileContent.EQ3 = (byte) (d3 & 0x0F);
-                fileContent.EQ4 = (byte) (d3 >> 4);
-                fileContent.EQ5 = (byte) (d4 & 0x0F);
-                fileContent.EQ6 = (byte) (d4 >> 4);
-                fileContent.EQ7 = (byte) (d5 & 0x0F);
-                fileContent.EQ8 = (byte) (d5 >> 4);
-                fileContent.EQ9 = (byte) (d6 & 0x0F);
-                fileContent.EQ10 = (byte) (d6 >> 4);
-                fileContent.EQ11 = (byte) (d7 & 0x0F);
-                fileContent.EQ12 = (byte) (d7 >> 4);
-                fileContent.CR1 = (byte) (d8 & 0x7);  // d8 0000 0___ 后三位
-                fileContent.CR2 = (byte) ((d8 >> 3) & 0x07); // d8 00__ _000
-                fileContent.CR3 = (byte) (((d9 << 2) | (d8 >> 6)) & 0x07);
-                fileContent.CR4 = (byte) ((d9 >> 1) & 0x07);
-                fileContent.CT  = (byte) ((d9 >> 4) & 0x07);
+                fileContent.INPUT = (byte) (d0 & 0x07);
+                fileContent.NC2   = (byte) (d1 >> 1);
+                fileContent.PG1   = (byte) ((d0 >> 3) & 0x07);
+                fileContent.PG2   = (byte) ((d0 >> 6) | ((d1 & 0x01) << 2));
+                fileContent.EQ1   = (byte) (d2 & 0x0F);
+                fileContent.EQ2   = (byte) (d2 >> 4);
+                fileContent.EQ3   = (byte) (d3 & 0x0F);
+                fileContent.EQ4   = (byte) (d3 >> 4);
+                fileContent.EQ5   = (byte) (d4 & 0x0F);
+                fileContent.EQ6   = (byte) (d4 >> 4);
+                fileContent.EQ7   = (byte) (d5 & 0x0F);
+                fileContent.EQ8   = (byte) (d5 >> 4);
+                fileContent.EQ9   = (byte) (d6 & 0x0F);
+                fileContent.EQ10  = (byte) (d6 >> 4);
+                fileContent.EQ11  = (byte) (d7 & 0x0F);
+                fileContent.EQ12  = (byte) (d7 >> 4);
+                fileContent.CR1   = (byte) (d8 & 0x7);  // d8 0000 0___ 后三位
+                fileContent.CR2   = (byte) ((d8 >> 3) & 0x07); // d8 00__ _000
+                fileContent.CR3   = (byte) (((d9 << 2) | (d8 >> 6)) & 0x07);
+                fileContent.CR4   = (byte) ((d9 >> 1) & 0x07);
+                fileContent.CT    = (byte) ((d9 >> 4) & 0x07);
                 fileContent.Expan = (byte) (d9 >> 7);
-                fileContent.MPO = (byte) (((d11 << 2) | d10 >> 6) & 0x07);
-                fileContent.NR = (byte) ((d11 >> 1) & 0x03);
-                fileContent.NC3 = (byte) (d10 & 0x3F);
-                fileContent.NC4 = (byte) (d11 & 0xF8);
+                fileContent.MPO   = (byte) (((d11 << 2) | d10 >> 6) & 0x07);
+                fileContent.NR    = (byte) ((d11 >> 1) & 0x03);
+                fileContent.NC3   = (byte) (d10 & 0x3F);
+                fileContent.NC4   = (byte) (d11 & 0xF8);
                 Log.d(TAG, "[BTProtocol] 读 蓝牙模块 成功 DSP模式文件: " + name + " " + fileContent);
                 fileContent.aidMode.setDeviceName(name);
                 modeFileContentObservableEmitter.onNext(fileContent);
