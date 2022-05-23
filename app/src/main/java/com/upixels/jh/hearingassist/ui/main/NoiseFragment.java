@@ -3,6 +3,7 @@ package com.upixels.jh.hearingassist.ui.main;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.util.DeviceManager;
 
 import androidx.annotation.Nullable;
@@ -19,6 +20,16 @@ public class NoiseFragment extends LNBaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         TAG = "NoiseFragment";
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void initView() {
+        super.initView();
+        binding.ivLR.setOnClickListener(v -> {
+            isActionCombined = !isActionCombined;
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
+        });
     }
 
     @Override
@@ -41,6 +52,19 @@ public class NoiseFragment extends LNBaseFragment {
             default:
                 throw new IllegalStateException("Unexpected value: " + index);
         }
+        switch (earType) {
+            case DeviceManager.EAR_TYPE_BOTH:
+                leftContent.setNoise(noise);
+                rightContent.setNoise(noise);
+                break;
+            case DeviceManager.EAR_TYPE_LEFT:
+                leftContent.setNoise(noise);
+                break;
+            case DeviceManager.EAR_TYPE_RIGHT:
+                rightContent.setNoise(noise);
+                break;
+        }
+        if (isSimulateModeFlag) { return; }
         DeviceManager.getInstance().writeModeFileForNoise(earType, noise);
     }
 

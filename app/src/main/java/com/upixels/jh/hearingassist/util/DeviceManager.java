@@ -282,13 +282,13 @@ public class DeviceManager {
     }
 
     // 控制模式
-    public boolean ctlMode(String mac, AIDMode mode) {
+    public void ctlMode(String mac, AIDMode mode) {
         byte[] data = BTProtocol.share.buildCMD_CtlMode(mode);
-        return BLEUtil.getInstance().writeCharacteristic(mac, data);
+        BLEUtil.getInstance().writeCharacteristic(mac, data);
     }
 
     // 控制模式
-    public boolean ctlMode(AIDMode mode) {
+    public void ctlMode(AIDMode mode) {
         leftResult = null;
         rightResult = null;
         ctlFeedbackCnt =0;
@@ -301,14 +301,18 @@ public class DeviceManager {
         if (rightConnected) {
             resultR = BLEUtil.getInstance().writeCharacteristic(rightMac, data);
         }
-        if (leftConnected || rightConnected) { updateListenerForOnReadingStatus(true); }
-        return resultL && resultR;
+        if (resultL || resultR) { updateListenerForOnReadingStatus(true); }
     }
 
     // 控制音量
-    public boolean ctlVolume(String mac, AIDMode mode) {
+    public void ctlVolume(String earType, AIDMode mode) {
         byte[] data = BTProtocol.share.buildCMD_CtlVC(mode);
-        return BLEUtil.getInstance().writeCharacteristic(mac, data);
+        if (leftConnected && (earType.equals(EAR_TYPE_BOTH) || earType.equals(EAR_TYPE_LEFT))) {
+            BLEUtil.getInstance().writeCharacteristic(leftMac, data);
+        }
+        if (rightConnected && (earType.equals(EAR_TYPE_BOTH) || earType.equals(EAR_TYPE_RIGHT))) {
+            BLEUtil.getInstance().writeCharacteristic(rightMac, data);
+        }
     }
 
     // 读取模式文件

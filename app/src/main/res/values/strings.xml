@@ -18,7 +18,7 @@
     <string name="Music">Music</string>
     <string name="tips_content_0">Conversation:Low Noisy Scenario</string>
     <string name="tips_content_1">These modes are suggestions based on most users needs within these particular environments. The best practice is to use all programs to discover the one that suits your personal needs best.</string>
-    <string name="tips_content_2">If both Left and Rioght devices are connected, Mode adiustments will control both devices</string>
+    <string name="tips_content_2">If both Left and Right devices are connected, Mode adjustments will control both devices</string>
 
     <!-- First Activity -->
     <!-- Home Fragment -->
@@ -55,6 +55,9 @@
     <string name="dialog_device_placeholder">Right Ear: G.SoundBuds-L(232E)</string>
     <string name="rename_device">Rename Device</string>
     <string name="remove_device">Remove Device</string>
+
+    <string name="Note">Note</string>
+    <string name="tips_enter_simulate_mode">No deices is connected, Do you want to enter Simulate Mode?</string>
 
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>

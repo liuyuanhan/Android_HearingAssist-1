@@ -428,16 +428,16 @@ public class ConnectFragment extends Fragment {
 
                 } else { // 更新配对设备列表, 肯定在配对过的设备里面，因为连接过程中已经记录了。 STATE_CONNECTED, STATE_GET_GATT_SERVICES_OVER
 
-                    // 记录连接成功的设备个数,并读取一次电量
+                    // 记录连接成功的设备个数
                     if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-L")) {
                         connectedCnt++;
                         leftConnected = true;
-                        leftPairedDevice = device;
+                        leftPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
 
                     } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
                         connectedCnt++;
                         rightConnected = true;
-                        rightPairedDevice = device;
+                        rightPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
                     }
                 }
             }
@@ -487,6 +487,8 @@ public class ConnectFragment extends Fragment {
                 if (leftPairedDevice != null) {
                     binding.layoutDeviceL.setAlpha(leftConnected ? 1.0f : 0.5f);
                     binding.ivDeviceLStatus.setImageResource(leftConnected ? R.drawable.icon_device_connected : R.drawable.icon_device_disconnected);
+                    binding.tvDeviceLName.setText(String.format(Locale.getDefault(), "%s(%s)", leftPairedDevice.deviceName,
+                                                                                                      leftPairedDevice.getLast4CharMac()));
                     binding.tvDeviceLName.setEnabled(leftConnected);
                     int value = DeviceManager.getInstance().getLeftBat();
                     binding.bvDeviceLBattery.setBattery((float) value / 100.f);
@@ -499,6 +501,8 @@ public class ConnectFragment extends Fragment {
                 if (rightPairedDevice != null) {
                     binding.layoutDeviceR.setAlpha(rightConnected ? 1.0f : 0.5f);
                     binding.ivDeviceRStatus.setImageResource(rightConnected ? R.drawable.icon_device_connected : R.drawable.icon_device_disconnected);
+                    binding.tvDeviceRName.setText(String.format(Locale.getDefault(), "%s(%s)", rightPairedDevice.deviceName,
+                                                                                                      rightPairedDevice.getLast4CharMac()));
                     binding.tvDeviceRName.setEnabled(rightConnected);
                     int value = DeviceManager.getInstance().getRightBat();
                     binding.bvDeviceRBattery.setBattery((float) value / 100.f);

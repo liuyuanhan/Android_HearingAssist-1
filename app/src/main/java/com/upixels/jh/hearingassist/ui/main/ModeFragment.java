@@ -97,8 +97,13 @@ public class ModeFragment extends BaseFragment {
                 aidMode = new AIDMode(AIDMode.MUSIC);
             }
             if (aidMode != null) {
-                DeviceManager.getInstance().ctlMode(aidMode);
                 uiChange(aidMode);
+                if (isSimulateModeFlag) {
+                    leftMode.setMode(aidMode.getMode());
+                    rightMode.setMode(aidMode.getMode());
+                    return;
+                }
+                DeviceManager.getInstance().ctlMode(aidMode);
             }
         }
     };

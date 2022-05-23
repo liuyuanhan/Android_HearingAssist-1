@@ -29,6 +29,7 @@
         <entry key="app/src/main/res/drawable/shape_device_l.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/shape_device_l_r.xml" value="0.229" />
         <entry key="app/src/main/res/drawable/shape_dialog.xml" value="0.1745" />
+        <entry key="app/src/main/res/drawable/shape_dialog_jh_common.xml" value="0.298" />
         <entry key="app/src/main/res/drawable/shape_left_radius.xml" value="0.22" />
         <entry key="app/src/main/res/drawable/shape_loud_text_nor.xml" value="0.2865" />
         <entry key="app/src/main/res/drawable/shape_my_device.xml" value="0.269" />
@@ -50,7 +51,7 @@
         <entry key="app/src/main/res/layout/fragment_band_left.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_band_r.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/fragment_band_right.xml" value="0.3055555555555556" />
-        <entry key="app/src/main/res/layout/fragment_connect.xml" value="0.3055555555555556" />
+        <entry key="app/src/main/res/layout/fragment_connect.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_device_ctl_dialog_list_dialog.xml" value="0.29305555555555557" />
         <entry key="app/src/main/res/layout/fragment_device_ctl_dialog_list_dialog_item.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.33" />
@@ -72,9 +73,15 @@
         <entry key="app/src/main/res/layout/header_navigation_drawer.xml" value="0.2504528985507246" />
         <entry key="app/src/main/res/layout/item_section_content_device.xml" value="0.33" />
         <entry key="app/src/main/res/layout/item_section_head_device.xml" value="0.3055555555555556" />
+        <entry key="app/src/main/res/layout/layout_dialog_jh_common.xml" value="0.5" />
         <entry key="app/src/main/res/layout/layout_navigation_drawer.xml" value="0.33" />
         <entry key="app/src/main/res/menu/menu_drawer_left.xml" value="0.3055555555555556" />
+        <entry key="commonlib/src/main/res/drawable/shape_dialog_custom.xml" value="0.298" />
+        <entry key="commonlib/src/main/res/layout/ios_dialog_loading.xml" value="0.3055555555555556" />
+        <entry key="commonlib/src/main/res/layout/layout_dialog_common.xml" value="0.3055555555555556" />
         <entry key="commonlib/src/main/res/layout/layout_dialog_share.xml" value="0.3055555555555556" />
+        <entry key="commonlib/src/main/res/layout/layout_dialog_update.xml" value="0.3055555555555556" />
+        <entry key="commonlib/src/main/res/layout/layout_load_end.xml" value="0.3055555555555556" />
       </map>
     </option>
   </component>

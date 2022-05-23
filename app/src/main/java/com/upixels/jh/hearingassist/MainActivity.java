@@ -1,5 +1,6 @@
 package com.upixels.jh.hearingassist;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String         TAG =           MainActivity.class.getSimpleName();
     private ActivityMainBinding         binding;
     private Handler                     uiHandler;
-
+    private boolean                     isSimulateModeFlag;
     private String                      leftDevType;
     private String                      rightDevType;
     private boolean                     leftConnected;
@@ -64,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Intent intent = getIntent();
+        isSimulateModeFlag = intent.getBooleanExtra("SimulateMode", false);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this);
         ViewPager2 viewPager = binding.viewPager;
@@ -102,8 +106,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         Log.d(TAG, "[onStart]");
         super.onStart();
-        DeviceManager.getInstance().addListener(deviceChangeListener);
-        DeviceManager.getInstance().readModeVolume(true);    // 只有在进入Sound Control时才会去读一次模式
+        if (!isSimulateModeFlag) {
+            DeviceManager.getInstance().addListener(deviceChangeListener);
+            DeviceManager.getInstance().readModeVolume(true);    // 只有在进入Sound Control时才会去读一次模式
+        }
     }
 
     @Override
@@ -122,13 +128,107 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         Log.d(TAG, "[onStop]");
         super.onStop();
-        DeviceManager.getInstance().removeListener(deviceChangeListener);
+        if (!isSimulateModeFlag) {
+            DeviceManager.getInstance().removeListener(deviceChangeListener);
+        }
     }
 
     @Override
     protected void onDestroy() {
         Log.d(TAG, "[onDestroy]");
         super.onDestroy();
+    }
+
+    public boolean isSimulateMode() {
+        return this.isSimulateModeFlag;
+    }
+
+    // 创建模拟AIDMode
+    private AIDMode sLeftMode;
+    private AIDMode sRightMode;
+    public synchronized AIDMode getSimulateLeftMode() {
+        if (sLeftMode == null) {
+            sLeftMode = new AIDMode("HA-STREAM-L", (byte)1, (byte)7, BTProtocol.Read_Success);
+        }
+        return sLeftMode;
+    }
+
+    public synchronized AIDMode getSimulateRightMode() {
+        if (sRightMode == null) {
+            sRightMode = new AIDMode("HA-STREAM-R", (byte)1, (byte)7, BTProtocol.Read_Success);
+        }
+        return sRightMode;
+    }
+
+    // 创建模拟ModeFileContent
+    private BTProtocol.ModeFileContent leftContent;
+    private BTProtocol.ModeFileContent rightContent;
+    public synchronized BTProtocol.ModeFileContent getSimulateLeftModeFileContent() {
+        if (leftContent == null) {
+            leftContent = new BTProtocol.ModeFileContent();
+            leftContent.aidMode = getSimulateLeftMode();
+            leftContent.INPUT = 1;
+            leftContent.NC2   = 0;
+            leftContent.NC3   = 0;
+            leftContent.NC4   = 0;
+            leftContent.PG1   = 4;  // 前置增益MIC1
+            leftContent.PG2   = 4;  // 前置增益MIC2
+            leftContent.EQ1   = 7;  // 250
+            leftContent.EQ2   = 7;  // 500
+            leftContent.EQ3   = 7;  // 1000
+            leftContent.EQ4   = 7;  // 1500
+            leftContent.EQ5   = 7;  // 2000
+            leftContent.EQ6   = 7;  // 2500
+            leftContent.EQ7   = 7;  // 3000
+            leftContent.EQ8   = 7;  // 3500
+            leftContent.EQ9   = 7;  // 4000
+            leftContent.EQ10  = 7; // 5000
+            leftContent.EQ11  = 7; // 6000
+            leftContent.EQ12  = 7; // 7000
+            leftContent.CR1   = 0;
+            leftContent.CR2   = 0;
+            leftContent.CR3   = 0;
+            leftContent.CR4   = 0;
+            leftContent.Expan = 0; // MIC 扩展
+            leftContent.CT    = 0;    // 压缩阈值
+            leftContent.MPO   = 0;
+            leftContent.NR    = 0;
+        }
+        return leftContent;
+    }
+
+    public synchronized BTProtocol.ModeFileContent getSimulateRightModeFileContent() {
+        if (rightContent == null) {
+            rightContent = new BTProtocol.ModeFileContent();
+            rightContent.aidMode = getSimulateRightMode();
+            rightContent.INPUT = 1;
+            rightContent.NC2   = 0;
+            rightContent.NC3   = 0;
+            rightContent.NC4   = 0 ;
+            rightContent.PG1   = 4;  // 前置增益MIC1
+            rightContent.PG2   = 4;  // 前置增益MIC2
+            rightContent.EQ1   = 7;  // 250
+            rightContent.EQ2   = 7;  // 500
+            rightContent.EQ3   = 7;  // 1000
+            rightContent.EQ4   = 7;  // 1500
+            rightContent.EQ5   = 7;  // 2000
+            rightContent.EQ6   = 7;  // 2500
+            rightContent.EQ7   = 7;  // 3000
+            rightContent.EQ8   = 7;  // 3500
+            rightContent.EQ9   = 7;  // 4000
+            rightContent.EQ10  = 7; // 5000
+            rightContent.EQ11  = 7; // 6000
+            rightContent.EQ12  = 7; // 7000
+            rightContent.CR1   = 0;
+            rightContent.CR2   = 0;
+            rightContent.CR3   = 0;
+            rightContent.CR4   = 0;
+            rightContent.Expan = 0; // MIC 扩展
+            rightContent.CT    = 0;    // 压缩阈值
+            rightContent.MPO   = 0;
+            rightContent.NR    = 0;
+        }
+        return rightContent;
     }
 
     private final Runnable dismissLoadingDialogRunnable = IOSLoadingDialog.instance::dismissDialog;
@@ -366,4 +466,6 @@ public class MainActivity extends AppCompatActivity {
             disposable0 = null;
         }
     }
+
+
 }

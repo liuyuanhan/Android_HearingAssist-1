@@ -31,6 +31,12 @@ public class LoudFragment extends LNBaseFragment {
         binding.tvSet2.setText(R.string.Medium_Compression);
         binding.tvSet3.setText(R.string.High_Compression);
         binding.tv0.setText(R.string.tips_loud_settings);
+
+        binding.ivLR.setOnClickListener(v -> {
+            isActionCombined = !isActionCombined;
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
+        });
     }
 
     @Override
@@ -53,6 +59,19 @@ public class LoudFragment extends LNBaseFragment {
             default:
                 throw new IllegalStateException("Unexpected value: " + index);
         }
+        switch (earType) {
+            case DeviceManager.EAR_TYPE_BOTH:
+                leftContent.setLoud(loud);
+                rightContent.setLoud(loud);
+                break;
+            case DeviceManager.EAR_TYPE_LEFT:
+                leftContent.setLoud(loud);
+                break;
+            case DeviceManager.EAR_TYPE_RIGHT:
+                rightContent.setLoud(loud);
+                break;
+        }
+        if (isSimulateModeFlag) { return; }
         DeviceManager.getInstance().writeModeFileForLoud(earType, loud);
     }
 

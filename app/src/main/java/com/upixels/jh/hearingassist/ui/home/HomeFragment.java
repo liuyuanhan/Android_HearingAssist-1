@@ -1,5 +1,6 @@
 package com.upixels.jh.hearingassist.ui.home;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentHomeBinding;
 import com.upixels.jh.hearingassist.entity.BLEDeviceEntity;
 import com.upixels.jh.hearingassist.util.DeviceManager;
+import com.upixels.jh.hearingassist.view.JHCommonDialog;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -107,7 +109,33 @@ public class HomeFragment extends Fragment {
         });
 
         binding.layoutSoundControl.setOnClickListener(v -> {
-            startActivity(new Intent(requireContext(), MainActivity.class));
+            boolean leftConnected = DeviceManager.getInstance().getLeftConnected();
+            boolean rightConnected = DeviceManager.getInstance().getRightConnected();
+            Intent intent = new Intent(requireContext(), MainActivity.class);
+            if (!leftConnected && !rightConnected) {
+                new JHCommonDialog(getContext(), false)
+                        .setTitle(getString(R.string.Note))
+                        .setSubTitle(getString(R.string.tips_enter_simulate_mode))
+                        .setLeftText(getString(R.string.cancel))
+                        .setRightText(getString(R.string.ok))
+                        .setOnClickBottomListener(new JHCommonDialog.OnClickBottomListener() {
+
+                            @Override
+                            public void onRightClick(Dialog dialog) {
+                                dialog.dismiss();
+                                intent.putExtra("SimulateMode", true);
+                                startActivity(intent);
+                            }
+
+                            @Override
+                            public void onLeftClick(Dialog dialog) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+            } else {
+                intent.putExtra("SimulateMode", false);
+                startActivity(intent);
+            }
         });
     }
 

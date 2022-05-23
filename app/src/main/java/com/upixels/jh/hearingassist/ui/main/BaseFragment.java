@@ -1,6 +1,6 @@
 package com.upixels.jh.hearingassist.ui.main;
 
-import com.upixels.jh.hearingassist.R;
+import com.upixels.jh.hearingassist.MainActivity;
 import com.upixels.jh.hearingassist.util.DeviceManager;
 
 import androidx.fragment.app.Fragment;
@@ -8,8 +8,9 @@ import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
 
 public abstract class BaseFragment extends Fragment {
-    private boolean isVisible       = false;
+//    private boolean                         isVisible       = false;
 
+    protected boolean                       isSimulateModeFlag = true; // 是否进入模拟控制模式
     protected AIDMode                       leftMode;
     protected AIDMode                       rightMode;
     protected BTProtocol.ModeFileContent    leftContent;
@@ -26,16 +27,26 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        DeviceManager.getInstance().addListener(deviceChangeListener);
-        leftMode = DeviceManager.getInstance().getLeftMode();
-        rightMode = DeviceManager.getInstance().getRightMode();
-        updateView(leftMode, rightMode);
+        isSimulateModeFlag = ((MainActivity)requireActivity()).isSimulateMode();
+        if (!isSimulateModeFlag) {
+            DeviceManager.getInstance().addListener(deviceChangeListener);
+            leftMode = DeviceManager.getInstance().getLeftMode();
+            rightMode = DeviceManager.getInstance().getRightMode();
+            updateView(leftMode, rightMode);
+        } else {
+            leftMode = ((MainActivity)requireActivity()).getSimulateLeftMode();
+            rightMode = ((MainActivity)requireActivity()).getSimulateRightMode();
+            leftContent = ((MainActivity)requireActivity()).getSimulateLeftModeFileContent();
+            rightContent = ((MainActivity)requireActivity()).getSimulateRightModeFileContent();
+            updateView(leftMode, rightMode);
+            updateModeFile(leftContent, rightContent);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        DeviceManager.getInstance().removeListener(deviceChangeListener);
+        if (!isSimulateModeFlag) { DeviceManager.getInstance().removeListener(deviceChangeListener); }
     }
 
     @Override

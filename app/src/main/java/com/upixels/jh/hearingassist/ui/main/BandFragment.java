@@ -140,6 +140,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         constraintSetRight.clone(layoutRight);
 
         binding.btnAudition.setOnClickListener(l -> {
+            if (isSimulateModeFlag) { return; }
             if (curContent == null ) { return; }
             Log.d(TAG, "curContent " + curContent.toString());
             DeviceManager.getInstance().writeModeFileForEQ(leftContent, rightContent);
@@ -152,11 +153,11 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
             if (v.getId() == R.id.iv_L) {
                 binding.ivL.setSelected(true);
                 binding.ivR.setSelected(false);
-                uiChangeSetSeekbarEnable(true, leftContent);
+                uiChangeSetSeekbar(true, leftContent);
             } else if (v.getId() == R.id.iv_R) {
                 binding.ivL.setSelected(false);
                 binding.ivR.setSelected(true);
-                uiChangeSetSeekbarEnable(true, rightContent);
+                uiChangeSetSeekbar(true, rightContent);
             }
         }
     };
@@ -224,7 +225,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
     }
 
     // UI更新 Seekbar
-    private void uiChangeSetSeekbarEnable(boolean enable, BTProtocol.ModeFileContent content) {
+    private void uiChangeSetSeekbar(boolean enable, BTProtocol.ModeFileContent content) {
         Log.d(TAG, "uiChangeSetSeekbarEnable +");
         changeListenerIgnoreFlag = true;
         binding.sbEq250.setEnabled(enable);
@@ -410,10 +411,14 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
         uiChangeLRModeImage(leftMode, rightMode);
+        if (isSimulateModeFlag) {
+            uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_LEFT);
+            return;
+        }
         if (cnt == 2) {
             if (leftMode.getMode() == rightMode.getMode()) {
-                DeviceManager.getInstance().readModeFile(leftMode);
                 uiChangeLRButton(cnt, DeviceManager.EAR_TYPE_LEFT);
+                DeviceManager.getInstance().readModeFile(leftMode);
             } else {
                 uiChangeLRButton(0, null);
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
@@ -427,7 +432,7 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
                 DeviceManager.getInstance().readModeFile(rightMode);
             }
         }
-        uiChangeSetSeekbarEnable(false, null);
+        uiChangeSetSeekbar(false, null);
     }
 
     @Override
@@ -439,9 +444,9 @@ public class BandFragment extends BaseFragment implements View.OnTouchListener {
         if (leftContent != null) { cnt++; }
         if (rightContent != null) { cnt++; }
         if (leftContent != null) {
-            uiChangeSetSeekbarEnable(true, leftContent);
+            uiChangeSetSeekbar(true, leftContent);
         } else if (rightContent != null) {
-            uiChangeSetSeekbarEnable(true, rightContent);
+            uiChangeSetSeekbar(true, rightContent);
         } else {
             uiChangeLRButton(0, null);
         }

@@ -139,6 +139,12 @@ public class BLEUtil {
                     '}';
         }
 
+        public String getLast4CharMac() {
+            String[] strs = mac.split(":");
+            int len = strs.length;
+            return strs[len-2]+strs[len-1];
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

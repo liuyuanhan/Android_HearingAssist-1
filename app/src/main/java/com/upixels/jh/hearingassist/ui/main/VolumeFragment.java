@@ -34,6 +34,8 @@ public class VolumeFragment extends BaseFragment {
     private ConstraintSet           constraintSetLeft;
     private ConstraintSet           constraintSetRight;
     private int                     constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
+    private boolean                 leftSBIgnoreFlag;
+    private boolean                 rightSBIgnoreFlag;
 
     public VolumeFragment() {
     }
@@ -91,6 +93,8 @@ public class VolumeFragment extends BaseFragment {
     public void onDestroyView() {
         Log.d(TAG, "[onDestroyView]");
         super.onDestroyView();
+        binding.sbLeftVolume.setOnSeekBarChangeListener(null);
+        binding.sbRightVolume.setOnSeekBarChangeListener(null);
     }
 
     @Override
@@ -110,9 +114,23 @@ public class VolumeFragment extends BaseFragment {
         constraintSetRight.clone(this.requireContext(), R.layout.fragment_volume_right);
 
         binding.sbLeftVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            int oldProgress = -1;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (leftSBIgnoreFlag) { return; }
+                Log.d(TAG, "left onProgressChanged " + progress);
                 binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", progress * 10));
+
+                if (isActionCombined && leftMode != null) {
+                    rightSBIgnoreFlag = true;
+                    oldProgress = oldProgress < 0 ? leftMode.getVolume() : oldProgress;
+                    int p = rightMode.getVolume() + (progress - oldProgress);
+                    p = Math.min(p, 10);
+                    p = Math.max(p, 0);
+                    binding.sbRightVolume.setProgress(p);
+                    binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", p * 10));
+                }
             }
 
             @Override
@@ -122,16 +140,37 @@ public class VolumeFragment extends BaseFragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                String leftMac = DeviceManager.getInstance().getLeftMac();
+                Log.d(TAG, "left onStopTrackingTouch");
+                oldProgress = -1;
                 leftMode.setVolume((byte) seekBar.getProgress());
-                DeviceManager.getInstance().ctlVolume(leftMac, leftMode);
+                if (isActionCombined) { rightMode.setVolume((byte) binding.sbRightVolume.getProgress()); }
+                rightSBIgnoreFlag = false;
+                if (isSimulateModeFlag) { return; }
+
+                if (isActionCombined) {
+                    DeviceManager.getInstance().ctlVolume(DeviceManager.EAR_TYPE_RIGHT, rightMode);
+                }
+                DeviceManager.getInstance().ctlVolume(DeviceManager.EAR_TYPE_LEFT, leftMode);
             }
         });
 
         binding.sbRightVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int oldProgress = -1;
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (rightSBIgnoreFlag) { return; }
+                Log.d(TAG, "right onProgressChanged " + progress);
                 binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", progress * 10));
+
+                if (isActionCombined && rightMode != null) {
+                    leftSBIgnoreFlag = true;
+                    oldProgress = oldProgress < 0 ? rightMode.getVolume() : oldProgress;
+                    int p = leftMode.getVolume() + (progress - oldProgress);
+                    p = Math.min(p, 10);
+                    p = Math.max(p, 0);
+                    binding.sbLeftVolume.setProgress(p);
+                    binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", p * 10));
+                }
             }
 
             @Override
@@ -141,10 +180,24 @@ public class VolumeFragment extends BaseFragment {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                String rightMac = DeviceManager.getInstance().getRightMac();
+                Log.d(TAG, "right onStopTrackingTouch");
+                oldProgress = -1;
                 rightMode.setVolume((byte) seekBar.getProgress());
-                DeviceManager.getInstance().ctlVolume(rightMac, rightMode);
+                if (isActionCombined) { leftMode.setVolume((byte) binding.sbLeftVolume.getProgress()); }
+                leftSBIgnoreFlag = false;
+                if (isSimulateModeFlag) { return; }
+
+                if (isActionCombined) {
+                    DeviceManager.getInstance().ctlVolume(DeviceManager.EAR_TYPE_LEFT, leftMode);
+                }
+                DeviceManager.getInstance().ctlVolume(DeviceManager.EAR_TYPE_RIGHT, rightMode);
             }
+        });
+
+        binding.ivLR.setOnClickListener(v -> {
+            isActionCombined = !isActionCombined;
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
         });
     }
 
@@ -161,7 +214,9 @@ public class VolumeFragment extends BaseFragment {
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
             }
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
+            // ConstrainSet 只能改变约束不能改变背景颜色
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
 
         } else if (connectCnt == 2) {
             if (constraintSetFlag != 0) {
@@ -169,7 +224,8 @@ public class VolumeFragment extends BaseFragment {
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
             }
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
 
         } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
             if (constraintSetFlag != 1) {
@@ -231,6 +287,8 @@ public class VolumeFragment extends BaseFragment {
 
     protected void uiChangeTextView(int volumeL, int volumeR) {
         Log.d(TAG, "uiChangeTextView + volumeL = " + volumeL + " volumeR = "+volumeR);
+        leftSBIgnoreFlag = true;
+        rightSBIgnoreFlag = true;
         if (volumeL >= 0) {
             binding.sbLeftVolume.setProgress(leftMode.getVolume());
             binding.tvLVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)leftMode.getVolume() / 10 * 100)));
@@ -239,6 +297,8 @@ public class VolumeFragment extends BaseFragment {
             binding.sbRightVolume.setProgress(rightMode.getVolume());
             binding.tvRVolume.setText(String.format(Locale.getDefault(),"%d%%", (int)((float)rightMode.getVolume() / 10 * 100)));
         }
+        leftSBIgnoreFlag = false;
+        rightSBIgnoreFlag = false;
         Log.d(TAG, "uiChangeTextView -");
     }
 
@@ -251,11 +311,11 @@ public class VolumeFragment extends BaseFragment {
         if (leftMode != null) { cnt++; volumeL = leftMode.getVolume(); }
         if (rightMode != null) { cnt++; volumeR = rightMode.getVolume(); }
         uiChangeLRModeImage(leftMode, rightMode);
-        uiChangeTextView(volumeL, volumeR);
         if (cnt == 2) {
             if (leftMode.getMode() == rightMode.getMode()) {
                 uiChangeLRButton(cnt, null);
                 uiListenerEnable(true);
+                isActionCombined = true;
             } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
                 uiListenerEnable(false);
@@ -268,11 +328,14 @@ public class VolumeFragment extends BaseFragment {
                 uiChangeLRButton(1, DeviceManager.EAR_TYPE_RIGHT);
             }
             uiListenerEnable(true);
+            isActionCombined = false;
 
         } else {
             uiChangeLRButton(0, null);
             uiListenerEnable(false);
+            isActionCombined = false;
         }
+        uiChangeTextView(volumeL, volumeR);
     }
 
 }

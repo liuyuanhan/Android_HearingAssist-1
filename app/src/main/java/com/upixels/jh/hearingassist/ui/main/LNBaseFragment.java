@@ -40,8 +40,6 @@ public class LNBaseFragment extends BaseFragment {
     private int                             constraintSetFlag = 0; // 0 , 1, 2 防止重复切换
 
     private boolean                         changeListenerIgnoreFlag;   // !! 需要UI监听器忽略该事件，因为主动设置RadioGroup时，监听器也会响应，进入了死循环
-    private boolean                         leftRBIgnoreFlag;
-    private boolean                         rightRBIgnoreFlag;
 
     protected int                           checkedIndexL;
     protected int                           checkedIndexR;
@@ -131,7 +129,9 @@ public class LNBaseFragment extends BaseFragment {
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
             }
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_white); // ConstrainSet 只能改变约束不能改变背景颜色
+            // ConstrainSet 只能改变约束不能改变背景颜色
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
 
         } else if (connectCnt == 2) {
             if (constraintSetFlag != 0) {
@@ -139,8 +139,9 @@ public class LNBaseFragment extends BaseFragment {
                 constraintSetLeftRight.applyTo(layoutLeftRight);
                 TransitionManager.beginDelayedTransition(layoutLeftRight);
             }
-            binding.viewBgLR.setBackgroundResource(R.drawable.shape_view_bg_red);
-
+            // ConstrainSet 只能改变约束不能改变背景颜色
+            binding.viewBgLR.setBackgroundResource(isActionCombined ? R.drawable.shape_view_bg_red : R.drawable.shape_view_bg_white);
+            binding.ivLR.setImageResource(isActionCombined ? R.drawable.icon_l_r_connected : R.drawable.icon_l_r_disconnect);
 
         } else if (connectCnt == 1 && earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
             if (constraintSetFlag != 1) {
@@ -278,19 +279,17 @@ public class LNBaseFragment extends BaseFragment {
             Log.d(TAG, "onCheckedChanged ");
             String earType = "";
             if (changeListenerIgnoreFlag) { return; }
-            if (rightRBIgnoreFlag || leftRBIgnoreFlag ) { // 防止调用setChecked时又触发监听器
-                rightRBIgnoreFlag = false;
-                leftRBIgnoreFlag = false;
-                return;
-            }
             // 点击左耳按钮
             if (checkedId == binding.rbLSet0.getId() && binding.rbLSet0.isChecked()) {
                 earType = DeviceManager.EAR_TYPE_LEFT;
                 checkedIndexL = 0;
                 if (isActionCombined) {
                     checkedIndexR = 0;
-                    rightRBIgnoreFlag = true;
+                    Log.d(TAG, "onCheckedChanged rightRBIgnoreFlag +");
+                    changeListenerIgnoreFlag = true;
                     binding.rbRSet0.setChecked(true);
+                    changeListenerIgnoreFlag = false;
+                    Log.d(TAG, "onCheckedChanged rightRBIgnoreFlag -");
                 }
 
             } else if (checkedId == binding.rbLSet1.getId() && binding.rbLSet1.isChecked() ) {
@@ -298,8 +297,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexL = 1;
                 if (isActionCombined) {
                     checkedIndexR = 1;
-                    rightRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbRSet1.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
 
             } else if (checkedId == binding.rbLSet2.getId() && binding.rbLSet2.isChecked() ) {
@@ -307,8 +307,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexL = 2;
                 if (isActionCombined) {
                     checkedIndexR = 2;
-                    rightRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbRSet2.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
 
             } else if (checkedId == binding.rbLSet3.getId() && binding.rbLSet3.isChecked() ) {
@@ -316,8 +317,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexL = 3;
                 if (isActionCombined) {
                     checkedIndexR = 3;
-                    rightRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbRSet3.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
 
             // 点击右耳按钮
@@ -326,8 +328,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexR = 0;
                 if (isActionCombined) {
                     checkedIndexL = 0;
-                    leftRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbLSet0.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
 
             } else if (checkedId == binding.rbRSet1.getId() && binding.rbRSet1.isChecked() ) {
@@ -335,8 +338,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexR = 1;
                 if (isActionCombined) {
                     checkedIndexL = 1;
-                    leftRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbLSet1.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
 
             } else if (checkedId == binding.rbRSet2.getId() && binding.rbRSet2.isChecked() ) {
@@ -344,8 +348,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexR = 2;
                 if (isActionCombined) {
                     checkedIndexL = 2;
-                    leftRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbLSet2.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
 
             } else if (checkedId == binding.rbRSet3.getId() && binding.rbRSet3.isChecked() ) {
@@ -353,8 +358,9 @@ public class LNBaseFragment extends BaseFragment {
                 checkedIndexR = 3;
                 if (isActionCombined) {
                     checkedIndexL = 3;
-                    leftRBIgnoreFlag = true;
+                    changeListenerIgnoreFlag = true;
                     binding.rbLSet3.setChecked(true);
+                    changeListenerIgnoreFlag = false;
                 }
             }
 
@@ -380,10 +386,15 @@ public class LNBaseFragment extends BaseFragment {
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
         uiChangeLRModeImage(leftMode, rightMode);
+        if (isSimulateModeFlag) {
+            uiChangeLRButton(cnt, null);
+            return;
+        }
         if (cnt == 2) {
             if (leftMode.getMode() == rightMode.getMode()) {
                 uiChangeLRButton(cnt, null);
                 DeviceManager.getInstance().readModeFile(leftMode);
+                isActionCombined = true;
             } else {
                 CommonUtil.showToastLong(requireActivity(), getString(R.string.tips_mode_not_same));
             }
@@ -396,29 +407,33 @@ public class LNBaseFragment extends BaseFragment {
                 uiChangeLRButton(1, DeviceManager.EAR_TYPE_RIGHT);
                 DeviceManager.getInstance().readModeFile(rightMode);
             }
+            isActionCombined = false;
 
         } else {
             uiChangeLRButton(0, null);
+            isActionCombined = false;
         }
         uiChangeTextView(-1, -1);
     }
 
     // 在子类重写 Noise 和 Loud 需要获取的 模式文件的内容不同
-//    @Override
-//    protected void updateModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
-//        Log.d(TAG, "updateModeFile leftContent = " + leftContent + " rightContent = " + rightContent);
-//        int indexL = -1;
-//        int indexR = -1;
-//        this.leftContent = leftContent;
-//        this.rightContent = rightContent;
-//        int cnt = 0;
-//        if (leftContent != null) { cnt++; indexL = leftContent.getNoise().ordinal(); }
-//        if (rightContent != null) { cnt++; indexR = rightContent.getNoise().ordinal(); }
-//        if (cnt != 2) { isActionCombined = false; } // 只获取到了一个模式文件，肯定不需要同步动作
-//        this.checkedIndexL = indexL;
-//        this.checkedIndexR = indexR;
-//        uiChangeTextView(indexL, indexR);
-//    }
+    /*
+    @Override
+    protected void updateModeFile(BTProtocol.ModeFileContent leftContent, BTProtocol.ModeFileContent rightContent) {
+        Log.d(TAG, "updateModeFile leftContent = " + leftContent + " rightContent = " + rightContent);
+        int indexL = -1;
+        int indexR = -1;
+        this.leftContent = leftContent;
+        this.rightContent = rightContent;
+        int cnt = 0;
+        if (leftContent != null) { cnt++; indexL = leftContent.getNoise().ordinal(); }
+        if (rightContent != null) { cnt++; indexR = rightContent.getNoise().ordinal(); }
+        if (cnt != 2) { isActionCombined = false; } // 只获取到了一个模式文件，肯定不需要同步动作
+        this.checkedIndexL = indexL;
+        this.checkedIndexR = indexR;
+        uiChangeTextView(indexL, indexR);
+    }
+    */
 
     @Override
     protected void updateWriteFeedback(String leftResult, String rightResult) {

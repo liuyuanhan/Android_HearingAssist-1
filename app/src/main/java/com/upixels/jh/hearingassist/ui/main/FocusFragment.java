@@ -15,11 +15,14 @@ import androidx.annotation.Nullable;
 import me.forrest.commonlib.jh.AIDMode;
 import me.forrest.commonlib.jh.BTProtocol;
 import me.forrest.commonlib.util.CommonUtil;
+import me.forrest.commonlib.util.SPUtil;
 
 public class FocusFragment extends BaseFragment {
     private final static String         TAG = FocusFragment.class.getSimpleName();
     private FragmentFocusBinding        binding;
 
+    private final static String         KEY_LEFT_FOCUS   = "left_focus"; // 记录本地设置的Focus，因为TV Meeting face-to-face 无法区别，做假的
+    private final static String         KEY_RIGHT_FOCUS  = "right_focus";
     protected int                       checkedIndexL;
     protected int                       checkedIndexR;
 
@@ -106,13 +109,21 @@ public class FocusFragment extends BaseFragment {
                 binding.btnFaceToFace.setSelected(false);
                 v.setSelected(true);
             } else {
-                BTProtocol.Focus directional;
-                if (binding.btnNormal.isSelected()) { directional = BTProtocol.Focus.normal; }
-                else if (binding.btnTv.isSelected()) { directional = BTProtocol.Focus.TV; }
-                else if (binding.btnMeeting.isSelected()) { directional = BTProtocol.Focus.meeting; }
-                else if (binding.btnFaceToFace.isSelected()) { directional = BTProtocol.Focus.face_to_face; }
+                BTProtocol.Focus focus;
+                if (binding.btnNormal.isSelected()) { focus = BTProtocol.Focus.normal; }
+                else if (binding.btnTv.isSelected()) { focus = BTProtocol.Focus.TV; }
+                else if (binding.btnMeeting.isSelected()) { focus = BTProtocol.Focus.meeting; }
+                else if (binding.btnFaceToFace.isSelected()) { focus = BTProtocol.Focus.face_to_face; }
                 else { return; }
-                DeviceManager.getInstance().writeModeFileForDirectional(directional);
+                if (leftContent != null) {
+                    leftContent.setFocus(focus);
+                    SPUtil.getInstance(requireContext()).putInt(KEY_LEFT_FOCUS, focus.ordinal());
+                }
+                if (rightContent != null) {
+                    rightContent.setFocus(focus);
+                    SPUtil.getInstance(requireContext()).putInt(KEY_RIGHT_FOCUS, focus.ordinal());
+                }
+                DeviceManager.getInstance().writeModeFileForDirectional(focus);
             }
         }
     };
@@ -158,7 +169,7 @@ public class FocusFragment extends BaseFragment {
     }
 
     // 改变Directional图标
-    private void uiChangeDirectional(int indexL, int indexR) {
+    private void uiChangeFocus(int indexL, int indexR) {
         Log.d(TAG, "uiChangeDirectional indexL = " + indexL + " indexR = " + indexR);
         binding.btnNormal.setSelected(false);
         binding.btnTv.setSelected(false);
@@ -210,6 +221,7 @@ public class FocusFragment extends BaseFragment {
         if (leftMode != null) { cnt++; }
         if (rightMode != null) { cnt++; }
         uiChangeLRModeImage(leftMode, rightMode);
+        if (isSimulateModeFlag) { return; }
         if (cnt == 2) {
             if (leftMode.getMode() == rightMode.getMode()) {
                 DeviceManager.getInstance().readModeFile(leftMode);
@@ -225,7 +237,7 @@ public class FocusFragment extends BaseFragment {
                 DeviceManager.getInstance().readModeFile(rightMode);
             }
         }
-        uiChangeDirectional(-1, -1);
+        uiChangeFocus(-1, -1);
     }
 
     @Override
@@ -238,9 +250,16 @@ public class FocusFragment extends BaseFragment {
         int cnt = 0;
         if (leftContent != null) { cnt++; indexL = leftContent.getFocus().ordinal(); }
         if (rightContent != null) { cnt++; indexR = rightContent.getFocus().ordinal(); }
+
+        // 假的Focus
+        int fakeIndexL = SPUtil.getInstance(requireContext()).getInt(KEY_LEFT_FOCUS, -1);
+        indexL = fakeIndexL > 0 ? fakeIndexL : indexL;
+        int fakeIndexR = SPUtil.getInstance(requireContext()).getInt(KEY_RIGHT_FOCUS, -1);
+        indexR = fakeIndexR > 0 ? fakeIndexR : indexR;
+
         this.checkedIndexL = indexL;
         this.checkedIndexR = indexR;
-        uiChangeDirectional(indexL, indexR);
+        uiChangeFocus(indexL, indexR);
     }
 
     @Override

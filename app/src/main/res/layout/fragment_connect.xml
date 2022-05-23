@@ -13,7 +13,8 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.home.ConnectFragment">
+        tools:context=".ui.home.ConnectFragment"
+        tools:ignore="HardcodedText,SpUsage,ContentDescription">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rlv_ble_device"
@@ -61,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/my_device"
                 android:textColor="@color/gray_tv_sub_title"
-                android:textSize="14dp"/>
+                android:textSize="14dp" />
             <RelativeLayout
                 android:id="@+id/layout_device_L"
                 android:layout_width="match_parent"
@@ -74,7 +75,7 @@
                     android:layout_height="17dp"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="8dp"
-                    android:src="@drawable/icon_device_disconnected"/>
+                    android:src="@drawable/icon_device_disconnected" />
                 <TextView
                     android:id="@+id/tv_device_L_side"
                     android:layout_width="wrap_content"
@@ -86,6 +87,7 @@
                     android:text="L"
                     android:textStyle="bold"
                     android:textSize="16dp"/>
+
                 <TextView
                     android:id="@+id/tv_device_L_name"
                     android:layout_width="wrap_content"
@@ -93,24 +95,25 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="12dp"
                     android:layout_toEndOf="@id/tv_device_L_side"
-                    android:text="G.SoundBuds-L"
+                    android:text="G.SoundBuds-L(0000)"
                     android:textColor="@color/selector_device_name_color"
                     android:textSize="14dp" />
+
                 <com.upixels.jh.hearingassist.view.BatteryView
                     android:id="@+id/bv_device_L_battery"
                     android:layout_width="33dp"
                     android:layout_height="18dp"
                     android:layout_centerVertical="true"
-                    android:layout_toStartOf="@id/tv_device_L_battery"
-                    android:layout_marginEnd="12dp"/>
+                    android:layout_marginEnd="0dp"
+                    android:layout_toStartOf="@id/tv_device_L_battery" />
                 <TextView
                     android:id="@+id/tv_device_L_battery"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:gravity="start"
+                    android:gravity="end"
                     android:layout_toStartOf="@id/iv_device_L_arrow"
-                    android:layout_marginEnd="20dp"
+                    android:layout_marginEnd="0dp"
                     android:text="0%"/>
                 <ImageView
                     android:id="@+id/iv_device_L_arrow"
@@ -153,24 +156,24 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="12dp"
                     android:layout_toEndOf="@id/tv_device_R_side"
-                    android:text="G.SoundBuds-R"
+                    android:text="G.SoundBuds-R(0000)"
                     android:textColor="@color/selector_device_name_color"
-                    android:textSize="14dp" />
+                    android:textSize="14dp"/>
                 <com.upixels.jh.hearingassist.view.BatteryView
                     android:id="@+id/bv_device_R_battery"
                     android:layout_width="33dp"
                     android:layout_height="18dp"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/tv_device_R_battery"
-                    android:layout_marginEnd="12dp"/>
+                    android:layout_marginEnd="0dp"/>
                 <TextView
                     android:id="@+id/tv_device_R_battery"
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:gravity="start"
+                    android:gravity="end"
                     android:layout_toStartOf="@id/iv_device_R_arrow"
-                    android:layout_marginEnd="20dp"
+                    android:layout_marginEnd="0dp"
                     android:text="0%"/>
                 <ImageView
                     android:id="@+id/iv_device_R_arrow"
