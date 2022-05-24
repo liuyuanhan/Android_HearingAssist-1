@@ -88,7 +88,7 @@
             android:id="@+id/tv_0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/tips_content_0"
+            android:text="@string/tips_content_0_conversation"
             android:textSize="14dp"
             android:textColor="@color/black_toolbar_title"
             app:layout_constraintTop_toBottomOf="@id/btn_our_door"

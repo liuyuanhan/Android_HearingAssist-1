@@ -115,7 +115,7 @@ public class BLEUtil {
         public int     connectStatus;
         public String  devType;
         public boolean needAutoReconnect; // 需要自动重连
-        public String  alias;             // 别名
+        public String  alias = "";             // 别名
 
         public BLEDevice() {
 
@@ -139,10 +139,18 @@ public class BLEUtil {
                     '}';
         }
 
+        public String getShowName() {
+            if (alias.length() > 0) {
+                return alias;
+            } else {
+                return deviceName;
+            }
+        }
+
         public String getLast4CharMac() {
-            String[] strs = mac.split(":");
-            int len = strs.length;
-            return strs[len-2]+strs[len-1];
+            String[] strings = mac.split(":");
+            int len = strings.length;
+            return strings[len-2]+strings[len-1];
         }
 
         @Override
@@ -743,12 +751,11 @@ public class BLEUtil {
                         // 设置通知 与上面的通知同时设置有问题。延时设置一下。
                         mBackgroundHandler.postDelayed(() -> {
                             BluetoothGatt gatt = mBluetoothGattMap.get(mac);
-                            // 读一下电池电量
-//                        if (gatt != null) { gatt.readCharacteristic(gattCharacteristic); }
                             BluetoothGattDescriptor descriptor = descriptors.get(0);
                             descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
                             if (gatt != null && gatt.writeDescriptor(descriptor)) {
-                                gatt.setCharacteristicNotification(gattCharacteristic, true);
+                                boolean result = gatt.setCharacteristicNotification(gattCharacteristic, true);
+                                Log.d(TAG, "设置电量通知回调 " + result);
                             }
                         }, 1000);
                         // 记录电池 read描述符
@@ -818,21 +825,18 @@ public class BLEUtil {
         return result;
     }
 
-//    public boolean readCharacteristic(String mac, byte[] data) {
-//
-//    }
 
     // 读电量
     public boolean readBatValue(String mac) {
         //check mBluetoothGatt is available
         BluetoothGatt gatt = mBluetoothGattMap.get(mac);
         if (gatt == null || getConnectStatus(mac) != BluetoothProfile.STATE_CONNECTED) {
-            Log.e(TAG, "### readBatValue not available!" + mac);
+            Log.e(TAG, "readBatValue not available!" + mac);
             return false;
         }
         BluetoothGattCharacteristic chat = mBluetoothBatCharMap.get(mac);
         if (chat == null) {
-            Log.e(TAG,  "### readBatValue char not found!" + mac);
+            Log.e(TAG,  "readBatValue char not found!" + mac);
             return false;
         }
         boolean result = gatt.readCharacteristic(chat);

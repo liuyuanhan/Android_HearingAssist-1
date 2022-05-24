@@ -1,12 +1,14 @@
 package com.upixels.jh.hearingassist.ui.home;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +31,7 @@ import com.upixels.jh.hearingassist.databinding.FragmentConnectBinding;
 import com.upixels.jh.hearingassist.entity.BLEDeviceEntity;
 import com.upixels.jh.hearingassist.util.DeviceManager;
 import com.upixels.jh.hearingassist.view.DeviceCtlDialog;
+import com.upixels.jh.hearingassist.view.JHCommonDialog;
 import com.upixels.jh.hearingassist.view.LocServiceDialog;
 
 import java.util.ArrayList;
@@ -37,27 +40,26 @@ import java.util.List;
 import java.util.Locale;
 
 public class ConnectFragment extends Fragment {
-    private final static String TAG = "ConnectFragment";
-    private String[] permissions;
-    private final static int REQUEST_CODE = 1;
-    private FragmentConnectBinding binding;
-    private SectionQuickAdapter mAdapter;
-    private boolean visible;
-    private final Handler mUIHandler = new Handler();
-    private Runnable dismissDialogRunnable;
+    private final static                String TAG = "ConnectFragment";
+    private String[]                    permissions;
+    private final static int            REQUEST_CODE = 1;
+    private FragmentConnectBinding      binding;
+    private SectionQuickAdapter         mAdapter;
+    private boolean                     visible;
+    private final Handler               mUIHandler = new Handler();
+    private Runnable                    dismissDialogRunnable;
 
-    private boolean leftConnected;
-    private boolean rightConnected;
-    private List<BLEDeviceEntity> mDeviceList;
-    private List<BLEUtil.BLEDevice> mBleDevices;
+    private boolean                     leftConnected;
+    private boolean                     rightConnected;
+    private final List<BLEDeviceEntity> entities = new LinkedList<>();
+    private List<BLEUtil.BLEDevice>     mBleDevices;
     private final List<BLEDeviceEntity> mScannedDeviceEntities =  new ArrayList<>(5); // 扫描到的设备
-    private BLEDeviceEntity headerSection0;
-    private BLEUtil.BLEDevice leftPairedDevice;
-    private BLEUtil.BLEDevice rightPairedDevice;
-    private boolean autoConnectLeft;  // 是否需要主动连接左耳
-    private boolean autoConnectRight; // 是否需要主动连接右耳
-    private int connectedCnt = 0;
-    private int scanCnt = 0;   // 记录第几次发起扫描，第一次扫描时为了快速连接设备，扫描到两个设备，并连接上了就不扫了。重新发起扫描时，扫描10S，
+    private BLEUtil.BLEDevice           leftPairedDevice;
+    private BLEUtil.BLEDevice           rightPairedDevice;
+    private boolean                     autoConnectLeft;  // 是否需要主动连接左耳
+    private boolean                     autoConnectRight; // 是否需要主动连接右耳
+    private int                         connectedCnt = 0;
+    private int                         scanCnt = 0;   // 记录第几次发起扫描，第一次扫描时为了快速连接设备，扫描到两个设备，并连接上了就不扫了。重新发起扫描时，扫描10S，
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -129,10 +131,17 @@ public class ConnectFragment extends Fragment {
     }
 
     private void initView() {
-        mDeviceList = initData();
+        //entities = null;//initData();
         binding.rlvBleDevice.setLayoutManager(new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false));
-        mAdapter = new SectionQuickAdapter(R.layout.item_section_content_device, R.layout.item_section_head_device, mDeviceList);
+        mAdapter = new SectionQuickAdapter(R.layout.item_section_content_device, R.layout.item_section_head_device, entities);
+        View headView = getLayoutInflater().inflate(R.layout.item_section_head_device, binding.rlvBleDevice, false);
+        mAdapter.addHeaderView(headView);
+        View footView = getLayoutInflater().inflate(R.layout.item_section_foot_device, binding.rlvBleDevice, false);
+        mAdapter.addFooterView(footView);
+        mAdapter.setHeaderWithEmptyEnable(true);
+        mAdapter.setFooterWithEmptyEnable(true);
         binding.rlvBleDevice.setAdapter(mAdapter);
+        mAdapter.setEmptyView(R.layout.item_section_no_device);
 
         binding.btnSearchDevice.setOnClickListener(v -> {
             if (!PermissionUtil.isLocServiceEnable(requireContext())) {
@@ -179,7 +188,7 @@ public class ConnectFragment extends Fragment {
         });
 
         mAdapter.setOnItemChildClickListener((adapter, view, position) -> {
-            BLEDeviceEntity entity = mDeviceList.get(position);
+            BLEDeviceEntity entity = entities.get(position);
             // 找到连接的设备，与要连接的设备进行比较。如果名称一致，不连；如果类型不同，不连。
             if (entity.deviceName.contains("-L")) {
                 if (leftConnected) { return; }
@@ -200,33 +209,25 @@ public class ConnectFragment extends Fragment {
         binding.layoutDeviceL.setOnClickListener(v -> {
             final BLEUtil.BLEDevice device = leftPairedDevice;
             if (device == null) { return; }
-            String[] macChar = device.mac.split(":");
             DeviceCtlDialog dialog = new DeviceCtlDialog(requireContext(), R.layout.dialog_device_ctl, false);
-            dialog.setTitle(String.format("Left Ear: %s(%s)", device.deviceName, macChar[4]+macChar[5]));
+            dialog.setTitle(String.format("Left Ear: %s(%s)", device.getShowName(), device.getLast4CharMac()));
             dialog.setOnClickListener(new DeviceCtlDialog.OnClickListener() {
                 @Override
                 public void onDisconnectClick(DeviceCtlDialog dialog) {
-                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
-                        BLEUtil.getInstance().disconnectBLE(device.mac);
-                    }
+                    BLEUtil.getInstance().disconnectBLE(device.mac);
                     dialog.dismiss();
                 }
 
                 @Override
                 public void onRenameClick(DeviceCtlDialog dialog) {
                     dialog.dismiss();
+                    showRenameDeviceDialog(DeviceManager.EAR_TYPE_LEFT, leftPairedDevice.getShowName());
                 }
 
                 @Override
                 public void onRemoveClick(DeviceCtlDialog dialog) {
-                    leftPairedDevice = null;
-                    FileUtil.writePairedDevice(requireContext(), "Left", null);
-                    DeviceManager.getInstance().setLeftPairedDevice(null);
-                    binding.layoutDeviceL.setVisibility(View.GONE);
-                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
-                        BLEUtil.getInstance().disconnectBLE(device.mac);
-                    }
                     dialog.dismiss();
+                    showRemoveDeviceDialog(DeviceManager.EAR_TYPE_LEFT, String.format("%s(%s)", device.getShowName(), device.getLast4CharMac()), device.mac);
                 }
 
                 @Override
@@ -240,33 +241,25 @@ public class ConnectFragment extends Fragment {
         binding.layoutDeviceR.setOnClickListener(v -> {
             final BLEUtil.BLEDevice device = rightPairedDevice;
             if (device == null) { return; }
-            String[] macChar = device.mac.split(":");
             DeviceCtlDialog dialog = new DeviceCtlDialog(requireContext(), R.layout.dialog_device_ctl, false);
-            dialog.setTitle(String.format("Right Ear: %s(%s)", device.deviceName, macChar[4]+macChar[5]));
+            dialog.setTitle(String.format("Right Ear: %s(%s)", device.getShowName(), device.getLast4CharMac()));
             dialog.setOnClickListener(new DeviceCtlDialog.OnClickListener() {
                 @Override
                 public void onDisconnectClick(DeviceCtlDialog dialog) {
-                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
-                        BLEUtil.getInstance().disconnectBLE(device.mac);
-                    }
+                    BLEUtil.getInstance().disconnectBLE(device.mac);
                     dialog.dismiss();
                 }
 
                 @Override
                 public void onRenameClick(DeviceCtlDialog dialog) {
                     dialog.dismiss();
+                    showRenameDeviceDialog(DeviceManager.EAR_TYPE_RIGHT, rightPairedDevice.getShowName());
                 }
 
                 @Override
                 public void onRemoveClick(DeviceCtlDialog dialog) {
-                    rightPairedDevice = null;
-                    FileUtil.writePairedDevice(requireContext(), "Right",null);
-                    DeviceManager.getInstance().setRightPairedDevice(null);
-                    binding.layoutDeviceR.setVisibility(View.GONE);
-                    if (device.connectStatus != BLEUtil.STATE_DISCONNECTED && device.connectStatus != BLEUtil.STATE_DISCONNECTING) {
-                        BLEUtil.getInstance().disconnectBLE(device.mac);
-                    }
                     dialog.dismiss();
+                    showRemoveDeviceDialog(DeviceManager.EAR_TYPE_RIGHT, String.format("%s(%s)", device.getShowName(), device.getLast4CharMac()), device.mac);
                 }
 
                 @Override
@@ -280,14 +273,80 @@ public class ConnectFragment extends Fragment {
         binding.btnPersonalize.setOnClickListener(v -> requireActivity().finish());
     }
 
-    private List<BLEDeviceEntity> initData() {
-        List<BLEDeviceEntity> list = new LinkedList<>();
-        headerSection0 = new BLEDeviceEntity(true);
-        headerSection0.section = 0;
-        headerSection0.mac = "";
-        headerSection0.header = getResources().getString(R.string.search_for_a_device);
-        list.add(headerSection0);
-        return list;
+    private void showRenameDeviceDialog(String earType, String message) {
+        new JHCommonDialog(getContext(), R.layout.dialog_rename_device, false)
+                .setTitle(getString(R.string.rename_device))
+                .setMessage(message)
+                .setLeftText(getString(R.string.cancel))
+                .setRightText(getString(R.string.Yes))
+                .setOnClickBottomListener(new JHCommonDialog.OnClickBottomListener() {
+
+                    @Override
+                    public void onRightClick(Dialog dialog) {
+                        String alias = ((JHCommonDialog)dialog).getEditText().trim();
+                        Log.d(TAG, "alias = " + alias);
+                        if (TextUtils.isEmpty(alias)) {
+                            CommonUtil.showToastShort(requireActivity(), getString(R.string.tips_input_right_name));
+                            return;
+                        }
+                        dialog.dismiss();
+                        if (earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
+                            leftPairedDevice.alias = alias;
+                            FileUtil.writePairedDevice(requireContext(), "Left", leftPairedDevice);
+                            binding.tvDeviceLName.setText(String.format(Locale.getDefault(), "%s(%s)", leftPairedDevice.getShowName(),
+                                                                                                              leftPairedDevice.getLast4CharMac()));
+
+                        } else if (earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
+                            rightPairedDevice.alias = alias;
+                            FileUtil.writePairedDevice(requireContext(), "Right",rightPairedDevice);
+                            binding.tvDeviceRName.setText(String.format(Locale.getDefault(), "%s(%s)", rightPairedDevice.getShowName(),
+                                                                                                              rightPairedDevice.getLast4CharMac()));
+                        }
+                        CommonUtil.showToastShort(requireActivity(), getString(R.string.tips_rename_ok));
+                    }
+
+                    @Override
+                    public void onLeftClick(Dialog dialog) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
+
+    private void showRemoveDeviceDialog(String earType, String message, String mac) {
+        new JHCommonDialog(getContext(), false)
+                .setTitle(getString(R.string.remove_device))
+                .setSubTitle(getString(R.string.tips_remove_device))
+                .setMessage(message)
+                .setLeftText(getString(R.string.cancel))
+                .setRightText(getString(R.string.Yes))
+                .setOnClickBottomListener(new JHCommonDialog.OnClickBottomListener() {
+
+                    @Override
+                    public void onRightClick(Dialog dialog) {
+                        dialog.dismiss();
+                        if (earType.equals(DeviceManager.EAR_TYPE_LEFT)) {
+                            leftPairedDevice = null;
+                            FileUtil.writePairedDevice(requireContext(), "Left", null);
+                            DeviceManager.getInstance().setLeftPairedDevice(null);
+                            binding.layoutDeviceL.setVisibility(View.GONE);
+                        } else if (earType.equals(DeviceManager.EAR_TYPE_RIGHT)) {
+                            rightPairedDevice = null;
+                            FileUtil.writePairedDevice(requireContext(), "Right",null);
+                            DeviceManager.getInstance().setRightPairedDevice(null);
+                            binding.layoutDeviceR.setVisibility(View.GONE);
+                        }
+                        if (leftPairedDevice == null && rightPairedDevice == null) {
+                            binding.layoutMyDevice.setVisibility(View.GONE);
+                            binding.btnPersonalize.setVisibility(View.GONE);
+                        }
+                        BLEUtil.getInstance().disconnectBLE(mac);
+                    }
+
+                    @Override
+                    public void onLeftClick(Dialog dialog) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     private void requestPermissions() {
@@ -333,7 +392,6 @@ public class ConnectFragment extends Fragment {
 //            openBT();
         }
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -414,15 +472,19 @@ public class ConnectFragment extends Fragment {
 
                         if (device.deviceName.contains("-L")) {
                             // 重新保存配对过的设备信息
-                            leftPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
-                            DeviceManager.getInstance().setLeftPairedDevice(leftPairedDevice);
-                            FileUtil.writePairedDevice(requireContext(), "Left", leftPairedDevice);
+                            if (leftPairedDevice == null || !leftPairedDevice.mac.equals(device.mac)) {
+                                leftPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
+                                DeviceManager.getInstance().setLeftPairedDevice(leftPairedDevice);
+                                FileUtil.writePairedDevice(requireContext(), "Left", leftPairedDevice);
+                            }
 
                         } else if (device.deviceName.contains("-R")) {
                             // 重新保存配对过的设备信息
-                            rightPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
-                            DeviceManager.getInstance().setRightPairedDevice(rightPairedDevice);
-                            FileUtil.writePairedDevice(requireContext(), "Right", rightPairedDevice);
+                            if (rightPairedDevice == null || !rightPairedDevice.mac.equals(device.mac)) {
+                                rightPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
+                                DeviceManager.getInstance().setRightPairedDevice(rightPairedDevice);
+                                FileUtil.writePairedDevice(requireContext(), "Right", rightPairedDevice);
+                            }
                         }
                     }
 
@@ -432,12 +494,10 @@ public class ConnectFragment extends Fragment {
                     if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-L")) {
                         connectedCnt++;
                         leftConnected = true;
-                        leftPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
 
                     } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
                         connectedCnt++;
                         rightConnected = true;
-                        rightPairedDevice = new BLEUtil.BLEDevice(device.deviceName, device.mac, 0, device.devType);
                     }
                 }
             }
@@ -459,9 +519,8 @@ public class ConnectFragment extends Fragment {
                 }
             }
 
-            mDeviceList.clear();
-            mDeviceList.add(headerSection0);
-            mDeviceList.addAll(mScannedDeviceEntities);
+            entities.clear();
+            entities.addAll(mScannedDeviceEntities);
             mUIHandler.post(() -> mAdapter.notifyDataSetChanged());
 
             // 更新 底部我的设备部分的UI
@@ -487,9 +546,8 @@ public class ConnectFragment extends Fragment {
                 if (leftPairedDevice != null) {
                     binding.layoutDeviceL.setAlpha(leftConnected ? 1.0f : 0.5f);
                     binding.ivDeviceLStatus.setImageResource(leftConnected ? R.drawable.icon_device_connected : R.drawable.icon_device_disconnected);
-                    binding.tvDeviceLName.setText(String.format(Locale.getDefault(), "%s(%s)", leftPairedDevice.deviceName,
+                    binding.tvDeviceLName.setText(String.format(Locale.getDefault(), "%s(%s)", leftPairedDevice.getShowName(),
                                                                                                       leftPairedDevice.getLast4CharMac()));
-                    binding.tvDeviceLName.setEnabled(leftConnected);
                     int value = DeviceManager.getInstance().getLeftBat();
                     binding.bvDeviceLBattery.setBattery((float) value / 100.f);
                     binding.tvDeviceLBattery.setText(String.format(Locale.getDefault(),"%d%%",value));
@@ -501,9 +559,8 @@ public class ConnectFragment extends Fragment {
                 if (rightPairedDevice != null) {
                     binding.layoutDeviceR.setAlpha(rightConnected ? 1.0f : 0.5f);
                     binding.ivDeviceRStatus.setImageResource(rightConnected ? R.drawable.icon_device_connected : R.drawable.icon_device_disconnected);
-                    binding.tvDeviceRName.setText(String.format(Locale.getDefault(), "%s(%s)", rightPairedDevice.deviceName,
+                    binding.tvDeviceRName.setText(String.format(Locale.getDefault(), "%s(%s)", rightPairedDevice.getShowName(),
                                                                                                       rightPairedDevice.getLast4CharMac()));
-                    binding.tvDeviceRName.setEnabled(rightConnected);
                     int value = DeviceManager.getInstance().getRightBat();
                     binding.bvDeviceRBattery.setBattery((float) value / 100.f);
                     binding.tvDeviceRBattery.setText(String.format(Locale.getDefault(),"%d%%",value));
@@ -541,4 +598,5 @@ public class ConnectFragment extends Fragment {
 
         }
     };
+
 }

@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ public class JHCommonDialog extends Dialog {
     private TextView tv_message;
     private TextView btn_left;
     private TextView btn_right;
+    private EditText editText;
 
     private String message;
     private String title;
@@ -44,10 +46,17 @@ public class JHCommonDialog extends Dialog {
         this.canceledOnTouchOutside = canceledOnTouchOutside;
     }
 
+    public JHCommonDialog(Context context, int resId, boolean canceledOnTouchOutside) {
+        super(context);
+        this.resId = resId;
+        this.canceledOnTouchOutside = canceledOnTouchOutside;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.layout_dialog_jh_common, null);
+        resId = resId > 0 ? resId : R.layout.layout_dialog_jh_common;
+        View view = LayoutInflater.from(getContext()).inflate(resId, null);
         setContentView(view);
 
         // 如何想要 setCanceledOnTouchOutside(true) 有效 必须重新设置 Window的大小，
@@ -98,6 +107,8 @@ public class JHCommonDialog extends Dialog {
         }
         if (!TextUtils.isEmpty(message)) {
             tv_message.setText(message);
+        }else {
+            tv_message.setVisibility(View.GONE);
         }
         if (!TextUtils.isEmpty(rightText)) {
             btn_right.setText(rightText);
@@ -123,6 +134,7 @@ public class JHCommonDialog extends Dialog {
         tv_sub_title = findViewById(R.id.tv_sub_title);
         tv_message = findViewById(R.id.tv_message);
         imageIv = findViewById(R.id.image);
+        editText = findViewById(R.id.et_device_name);
     }
 
     /**
@@ -184,6 +196,10 @@ public class JHCommonDialog extends Dialog {
     public JHCommonDialog setLeftText(String leftText) {
         this.leftText = leftText;
         return this;
+    }
+
+    public String getEditText() {
+        return this.editText.getText().toString();
     }
 }
 

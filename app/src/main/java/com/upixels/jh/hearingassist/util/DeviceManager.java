@@ -500,9 +500,11 @@ public class DeviceManager {
                         connectedDeviceMacSet.add(device.mac);
                         delay = !readLeftBat ? 1500 : 500; // 如果没读电量，先读电量
                         if (!readLeftBat) {
-                            Log.d(TAG, "读取 左耳 电量");
                             readLeftBat = true;
-                            workHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
+                            workHandler.postDelayed(() -> {
+                                Log.d(TAG, "读取 左耳 电量");
+                                readLeftBat = BLEUtil.getInstance().readBatValue(device.mac);
+                            }, 1500);
                         }
 
                     } else if (device.connectStatus == BLEUtil.STATE_GET_GATT_SERVICES_OVER && device.deviceName.contains("-R")) {
@@ -513,9 +515,11 @@ public class DeviceManager {
                         connectedDeviceMacSet.add(device.mac);
                         delay = !readRightBat ? 1500 : 500; // 如果没读电量，先读电量
                         if ((!readRightBat)) {
-                            Log.d(TAG, "读取 右耳 电量");
                             readRightBat = true;
-                            workHandler.postDelayed(() -> BLEUtil.getInstance().readBatValue(device.mac), 500);
+                            workHandler.postDelayed(() -> {
+                                Log.d(TAG, "读取 右耳 电量");
+                                readRightBat = BLEUtil.getInstance().readBatValue(device.mac);
+                            }, 1500);
                         }
                     }
 
@@ -610,13 +614,13 @@ public class DeviceManager {
                     if (modeFileContent.aidMode.getDeviceName().contains("-L")) {
                         Log.d(TAG, modeFileContent.aidMode.getDeviceName() + " 获取模式文件成功");
                         leftModeFileContent = modeFileContent;
-                        mutableLeftModeFileContent = modeFileContent;
+                        mutableLeftModeFileContent = (BTProtocol.ModeFileContent) modeFileContent.clone();
                         modeFileCnt = modeFileCnt | BIT(0);
 
                     } else if (modeFileContent.aidMode.getDeviceName().contains("-R")) {
                         Log.d(TAG, modeFileContent.aidMode.getDeviceName() + " 获取模式文件成功");
                         rightModeFileContent = modeFileContent;
-                        mutableRightModeFileContent = modeFileContent;
+                        mutableRightModeFileContent = (BTProtocol.ModeFileContent) modeFileContent.clone();
                         modeFileCnt = modeFileCnt | BIT(1);
                     }
                     Log.d(TAG, String.format(Locale.getDefault(), "modeFileCnt(%d) connectedCnt(%d)", modeFileCnt, connectedCnt));

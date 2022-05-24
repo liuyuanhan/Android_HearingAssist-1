@@ -11,7 +11,9 @@
     <color name="white_F5">#F5F5F5</color>
     <color name="border_color">#F5F5F5</color>
     <color name="red_C7">#C70D25</color>
+    <color name="red_C7_half">#80C70D25</color>
     <color name="blue_09">#096096</color>
+    <color name="blue_09_half">#80096096</color>
     <color name="black_toolbar_title">#303133</color>
     <color name="gray_tv_sub_title">#909399</color>
     <color name="white_F8">#F8F8F8</color>

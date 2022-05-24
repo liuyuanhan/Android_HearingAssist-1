@@ -83,7 +83,7 @@
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@id/iv_device_L_status"
                     android:layout_marginStart="12dp"
-                    android:textColor="@color/red_C7"
+                    android:textColor="@color/blue_09"
                     android:text="L"
                     android:textStyle="bold"
                     android:textSize="16dp"/>
@@ -96,7 +96,7 @@
                     android:layout_marginStart="12dp"
                     android:layout_toEndOf="@id/tv_device_L_side"
                     android:text="G.SoundBuds-L(0000)"
-                    android:textColor="@color/selector_device_name_color"
+                    android:textColor="@color/blue_09"
                     android:textSize="14dp" />
 
                 <com.upixels.jh.hearingassist.view.BatteryView
@@ -157,7 +157,7 @@
                     android:layout_marginStart="12dp"
                     android:layout_toEndOf="@id/tv_device_R_side"
                     android:text="G.SoundBuds-R(0000)"
-                    android:textColor="@color/selector_device_name_color"
+                    android:textColor="@color/red_C7"
                     android:textSize="14dp"/>
                 <com.upixels.jh.hearingassist.view.BatteryView
                     android:id="@+id/bv_device_R_battery"

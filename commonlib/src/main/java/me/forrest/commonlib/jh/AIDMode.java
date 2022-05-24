@@ -1,7 +1,9 @@
 package me.forrest.commonlib.jh;
 
+import androidx.annotation.NonNull;
+
 // 枚举类型每个常量在JVM中只有一个实例 如果都是CONVERSATION类型的枚举，如果改变了md,其它的等于CONVERSATION的枚举都改变了。
-public class AIDMode {
+public class AIDMode implements Cloneable {
     // 模式1 ~ 模式4
     public static final byte CONVERSATION = 1; // DI0 = 0
     public static final byte RESTAURANT   = 2; // DI0 = 1
@@ -13,6 +15,12 @@ public class AIDMode {
     private byte   mode;   // 模式号
     private byte   volume; // 音量大小
     private byte   type;   // 类型：读取返回类型/主动上报类型 Read_Success Report_Success
+
+    @NonNull
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     public AIDMode(byte mode) {
         this.mode = mode;

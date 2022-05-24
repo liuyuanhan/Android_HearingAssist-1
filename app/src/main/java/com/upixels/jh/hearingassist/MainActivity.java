@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             leftContent.CR2   = 0;
             leftContent.CR3   = 0;
             leftContent.CR4   = 0;
-            leftContent.Expan = 0; // MIC 扩展
+            leftContent.EXPAN = 0; // MIC 扩展
             leftContent.CT    = 0;    // 压缩阈值
             leftContent.MPO   = 0;
             leftContent.NR    = 0;
@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
             rightContent.CR2   = 0;
             rightContent.CR3   = 0;
             rightContent.CR4   = 0;
-            rightContent.Expan = 0; // MIC 扩展
+            rightContent.EXPAN = 0; // MIC 扩展
             rightContent.CT    = 0;    // 压缩阈值
             rightContent.MPO   = 0;
             rightContent.NR    = 0;

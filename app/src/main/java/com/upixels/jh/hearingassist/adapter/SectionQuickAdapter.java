@@ -44,10 +44,7 @@ public class SectionQuickAdapter extends BaseSectionQuickAdapter<BLEDeviceEntity
     @Override
     protected void convert(@NotNull BaseViewHolder helper, @NotNull BLEDeviceEntity item) {
         Log.d(TAG, "ItemView: " + helper.itemView + " " + helper.getAdapterPosition());
-        String[] strings = item.mac.split(":");
-        int len = strings.length;
-        String last4CharMac = strings[len-2] + strings[len-1];
-        String device_name = String.format(Locale.getDefault(),"%s(%d)", item.deviceName, last4CharMac);
+        String device_name = String.format(Locale.getDefault(),"%s(%s)", item.deviceName, item.getLast4CharMac());
         helper.setText(R.id.tv_device_name, device_name);
 //        helper.setText(R.id.tv_device_mac, item.mac);
         ((EasySwipeMenuLayout) helper.getView(R.id.layout_device)).setCanLeftSwipe(false);

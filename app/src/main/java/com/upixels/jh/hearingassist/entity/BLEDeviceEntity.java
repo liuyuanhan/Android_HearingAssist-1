@@ -24,6 +24,17 @@ public class BLEDeviceEntity extends JSectionEntity {
         return this.isHeader;
     }
 
+    // 获取MAC地址的最后4个字符
+    public String getLast4CharMac() {
+        String last4CharMac = "";
+        if(mac != null) {
+            String[] strings = mac.split(":");
+            int len = strings.length;
+            if (len > 2) { last4CharMac = strings[len-2] + strings[len-1]; }
+        }
+        return last4CharMac;
+    }
+
     @Override
     public String toString() {
         return "BLEDeviceEntity{" +

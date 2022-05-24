@@ -149,4 +149,17 @@
         <item name="colorSecondary">@color/red_C7</item>
     </style>
 
+    <style name="ThemeOverlay.MaterialComponents.TextInputEditText.Rename" parent="">
+        <item name="colorControlActivated">@color/red_C7</item>
+    </style>
+
+    <style name="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Rename" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">#E4E4E4</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">1dp</item>
+        <item name="android:theme">@style/ThemeOverlay.MaterialComponents.TextInputEditText.Rename </item>
+        <item name="hintEnabled">false</item>
+    </style>
+
+
 </resources>

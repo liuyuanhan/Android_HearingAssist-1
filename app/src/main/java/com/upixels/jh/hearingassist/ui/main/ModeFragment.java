@@ -89,12 +89,16 @@ public class ModeFragment extends BaseFragment {
             AIDMode aidMode = null;
             if (v == binding.btnConversation) {
                 aidMode = new AIDMode(AIDMode.CONVERSATION);
+                binding.tv0.setText(getString(R.string.tips_content_0_conversation));
             } else if (v == binding.btnRestaurant) {
                 aidMode = new AIDMode(AIDMode.RESTAURANT);
+                binding.tv0.setText(getString(R.string.tips_content_0_restaurant));
             } else if (v == binding.btnOurDoor) {
                 aidMode = new AIDMode(AIDMode.OUTDOOR);
+                binding.tv0.setText(getString(R.string.tips_content_0_outdoor));
             } else if (v == binding.btnMusic) {
                 aidMode = new AIDMode(AIDMode.MUSIC);
+                binding.tv0.setText(getString(R.string.tips_content_0_music));
             }
             if (aidMode != null) {
                 uiChange(aidMode);
@@ -123,15 +127,19 @@ public class ModeFragment extends BaseFragment {
         switch (sceneMode.getMode()) {
             case AIDMode.CONVERSATION:
                 binding.btnConversation.setSelected(true);
+                binding.tv0.setText(getString(R.string.tips_content_0_conversation));
                 break;
             case AIDMode.RESTAURANT:
                 binding.btnRestaurant.setSelected(true);
+                binding.tv0.setText(getString(R.string.tips_content_0_restaurant));
                 break;
             case AIDMode.OUTDOOR:
                 binding.btnOurDoor.setSelected(true);
+                binding.tv0.setText(getString(R.string.tips_content_0_outdoor));
                 break;
             case AIDMode.MUSIC:
                 binding.btnMusic.setSelected(true);
+                binding.tv0.setText(getString(R.string.tips_content_0_music));
                 break;
         }
     }

@@ -39,6 +39,7 @@ public class DensityHelper {
     public static void resetDensity(Context context) {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         Log.d(TAG, "original displayMetrics.density = " + displayMetrics.density);
+        /*
         originalDensity = displayMetrics.density;
         if (displayMetrics.density <= 0.75f) {
             displayMetrics.density = 0.75f;
@@ -46,16 +47,15 @@ public class DensityHelper {
             displayMetrics.density = 1f;
         } else if (displayMetrics.density <= 1.5f) {
             displayMetrics.density = 1.5f;
-        } else if (displayMetrics.density <= 2.0f) {
+        } else if (displayMetrics.density <= 2.5f) {
             displayMetrics.density = 2.0f;
-        } else if (displayMetrics.density <= 3.0f) {
-            displayMetrics.density = 3.0f;
         } else if (displayMetrics.density <= 3.5f) { // OPPO Remo5 Pro Android11 density = 3.375 放到4倍太大了
             displayMetrics.density = 3.0f;
         } else if (displayMetrics.density <= 4.0f) {
             displayMetrics.density = 4.0f;
-        }
-        newDensity = displayMetrics.density;
+        } */
+        displayMetrics.density = (float) displayMetrics.widthPixels * 3 / 1080 ;
+        Log.d(TAG, "new_density = " + displayMetrics.density);
     }
 
     /**

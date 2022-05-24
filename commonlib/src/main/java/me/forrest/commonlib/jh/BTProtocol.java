@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 
+import androidx.annotation.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
 
@@ -75,7 +76,7 @@ public class BTProtocol {
     }
 
     // MARK: 模式文件的内容 参数是指 实际的助听值value 转为需要传递的 整数参数值， BLE传递时还需要对于到协议中的字节位上。
-    public static class ModeFileContent {
+    public static class ModeFileContent implements Cloneable {
         public AIDMode aidMode = new AIDMode("", AIDMode.UNKNOWN, (byte)0, (byte)0);
 
         public byte INPUT;
@@ -100,10 +101,23 @@ public class BTProtocol {
         public byte CR2;
         public byte CR3;
         public byte CR4;
-        public byte Expan; // MIC 扩展
+        public byte EXPAN; // MIC 扩展
         public byte CT;    // 压缩阈值
         public byte MPO;
         public byte NR;
+
+        @NonNull
+        @Override
+        public Object clone() {
+            ModeFileContent modeFileContent = null;
+            try {
+                modeFileContent = (ModeFileContent) super.clone();
+                modeFileContent.aidMode = (AIDMode) this.aidMode.clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            return modeFileContent;
+        }
 
         // 方向性 转 传递参数 四种方向性 实际值是确定的，所以需要写入的参数值也是确定的，
         //           MIC1    MIC2  对应需要传递的前置增益参数PG1/PG2   EQ250   EQ500
@@ -694,7 +708,7 @@ public class BTProtocol {
                     ", CR2=" + CR2 +
                     ", CR3=" + CR3 +
                     ", CR4=" + CR4 +
-                    ", Expan=" + Expan +
+                    ", Expan=" + EXPAN +
                     ", CT=" + CT +
                     ", MPO=" + MPO +
                     ", NR=" + NR +
@@ -818,7 +832,7 @@ public class BTProtocol {
                 (byte)(modeFile.EQ9 | (modeFile.EQ10 << 4)),  // d6
                 (byte)(modeFile.EQ11 | (modeFile.EQ12 << 4)), // d7
                 (byte)(modeFile.CR1 | (modeFile.CR2 << 3) | ((modeFile.CR3 & 0x03) << 6)), // d8
-                (byte) ((byte)(modeFile.CR3 >> 2) | (modeFile.CR4 << 1) | (modeFile.CT << 4) | (modeFile.Expan << 7)), //d9
+                (byte) ((byte)(modeFile.CR3 >> 2) | (modeFile.CR4 << 1) | (modeFile.CT << 4) | (modeFile.EXPAN << 7)), //d9
                 (byte)((modeFile.MPO << 6) | modeFile.NC3),                   // d10
                 (byte)(modeFile.NC4 | (modeFile.MPO>>2) | modeFile.NR << 1)};  // d11
         return baseWriteCmd(DI0, DI1, data, data.length);
@@ -972,7 +986,7 @@ public class BTProtocol {
                 fileContent.CR3   = (byte) (((d9 << 2) | (d8 >> 6)) & 0x07);
                 fileContent.CR4   = (byte) ((d9 >> 1) & 0x07);
                 fileContent.CT    = (byte) ((d9 >> 4) & 0x07);
-                fileContent.Expan = (byte) (d9 >> 7);
+                fileContent.EXPAN = (byte) (d9 >> 7);
                 fileContent.MPO   = (byte) (((d11 << 2) | d10 >> 6) & 0x07);
                 fileContent.NR    = (byte) ((d11 >> 1) & 0x03);
                 fileContent.NC3   = (byte) (d10 & 0x3F);

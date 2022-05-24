@@ -507,7 +507,10 @@ public class FileUtil {
         if (!dir.exists()) { dir.mkdir(); }
         if (pairedDevice == null) { return writeToInternalFile(context, DIR_NAME_DEVICES + File.separator + fileName, ""); }
         StringBuilder sb = new StringBuilder(128);
-        sb.append(pairedDevice.deviceName).append(",").append(pairedDevice.mac).append("\n");
+        sb.append(pairedDevice.deviceName).append(",")
+                .append(pairedDevice.mac).append(",")
+                .append(pairedDevice.alias).append(",")
+                .append("\n");
         Log.d(TAG, "writePairedDevice : " + sb);
         return writeToInternalFile(context, DIR_NAME_DEVICES + File.separator + fileName, sb.toString());
     }
@@ -530,9 +533,10 @@ public class FileUtil {
             String[] subStrings = sb.toString().split("\n"); // deviceName,mac
             for (String deviceName_mac : subStrings) {
                 String[] subSubString = deviceName_mac.split(",");
-                if (subSubString.length == 2) {
+                if (subSubString.length == 3) {
                     pairedDevice.deviceName = subSubString[0];
                     pairedDevice.mac        = subSubString[1];
+                    pairedDevice.alias      = subSubString[2];
                     pairedDevice.connectStatus = 0;
                     return true;
                 }

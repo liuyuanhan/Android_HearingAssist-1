@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<me.forrest.commonlib.view.EasySwipeMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<me.forrest.commonlib.view.EasySwipeMenuLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_device"
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:background="@color/white"
     app:contentView="@+id/content"
-    app:rightMenuView="@+id/right">
+    app:rightMenuView="@+id/right"
+    tools:ignore="SpUsage,HardcodedText">
 
     <RelativeLayout
         android:id="@+id/content"
@@ -17,15 +20,16 @@
             android:layout_height="1px"
             android:background="@color/gray_tv_sub_title"
             android:layout_alignParentBottom="true"/>
+
         <TextView
             android:id="@+id/tv_device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="23dp"
             android:layout_centerVertical="true"
+            android:layout_marginStart="23dp"
+            android:text="xxxxxxx"
             android:textColor="@color/black_toolbar_title"
-            android:textSize="16dp"
-            android:text="xxxxxxx"/>
+            android:textSize="16dp" />
         <TextView
             android:id="@+id/tv_device_status"
             android:layout_width="wrap_content"
