@@ -24,10 +24,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HearingAssist">
         <activity
+            android:name=".HearingEntryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.HearingAssist.NoActionBar" />
+        <activity
             android:name=".ConnectActivity"
             android:exported="false"
-            android:theme="@style/Theme.HearingAssist.NoActionBar"/>
-
+            android:theme="@style/Theme.HearingAssist.NoActionBar" />
         <activity
             android:name=".HomeActivity"
             android:exported="true"

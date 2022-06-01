@@ -5,46 +5,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ConnectActivity">
+    tools:context=".HearingEntryActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/layout_title"
+        android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?actionBarSize"
         android:gravity="center_vertical"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:theme="@style/Theme.HearingAssist.AppBarOverlay">
+
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
             <ImageView
-                android:id="@+id/iv_back"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="23dp"
-                android:layout_centerVertical="true"
-                android:src="@drawable/icon_back"/>
-
-            <TextView
-                android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:gravity="center"
-                android:minHeight="?actionBarSize"
-                android:text="@string/Device"
-                android:textAppearance="@style/TextAppearance.HearingAssist.Toolbar.Title" />
+                android:src="@drawable/icon_hearing_assist" />
+
+            <ImageView
+                android:id="@+id/backImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/icon_back" />
         </RelativeLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <fragment
-        android:id="@+id/fragment_connect"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:name="com.upixels.jh.hearingassist.ui.home.ConnectFragment"
-        app:layout_constraintTop_toBottomOf="@id/layout_title"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tab_layout"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

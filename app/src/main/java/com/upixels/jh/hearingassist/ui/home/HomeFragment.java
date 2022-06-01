@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.upixels.jh.hearingassist.ConnectActivity;
+import com.upixels.jh.hearingassist.HearingEntryActivity;
 import com.upixels.jh.hearingassist.MainActivity;
 import com.upixels.jh.hearingassist.R;
 import com.upixels.jh.hearingassist.databinding.FragmentHomeBinding;
@@ -136,6 +137,10 @@ public class HomeFragment extends Fragment {
                 intent.putExtra("SimulateMode", false);
                 startActivity(intent);
             }
+        });
+
+        binding.layoutHearingCheck.setOnClickListener( v -> {
+            startActivity(new Intent(requireContext(), HearingEntryActivity.class));
         });
     }
 
