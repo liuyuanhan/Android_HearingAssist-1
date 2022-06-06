@@ -41,9 +41,11 @@
         <entry key="app/src/main/res/drawable/shape_radius.xml" value="0.3175" />
         <entry key="app/src/main/res/drawable/shape_radius_sub.xml" value="0.1775" />
         <entry key="app/src/main/res/drawable/shape_right_radius.xml" value="0.3175" />
+        <entry key="app/src/main/res/drawable/shape_view_bg_blue.xml" value="0.335" />
         <entry key="app/src/main/res/drawable/shape_view_bg_l_r.xml" value="0.343" />
         <entry key="app/src/main/res/drawable/shape_view_bg_red.xml" value="0.255" />
         <entry key="app/src/main/res/drawable/shape_view_bg_white.xml" value="0.288" />
+        <entry key="app/src/main/res/drawable/shape_view_border.xml" value="0.335" />
         <entry key="app/src/main/res/drawable/tabs_indicator.xml" value="0.2705" />
         <entry key="app/src/main/res/layout/activity_connect.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/activity_first.xml" value="0.3055555555555556" />
@@ -84,7 +86,7 @@
         <entry key="app/src/main/res/layout/fragment_volume_right.xml" value="0.3055555555555556" />
         <entry key="app/src/main/res/layout/header_navigation_drawer.xml" value="0.2504528985507246" />
         <entry key="app/src/main/res/layout/hearing_entry_item.xml" value="0.3125" />
-        <entry key="app/src/main/res/layout/item_hearing_entry.xml" value="0.296875" />
+        <entry key="app/src/main/res/layout/item_hearing_entry.xml" value="0.5404305159354155" />
         <entry key="app/src/main/res/layout/item_section_content_device.xml" value="0.33" />
         <entry key="app/src/main/res/layout/item_section_foot_device.xml" value="0.33" />
         <entry key="app/src/main/res/layout/item_section_head_device.xml" value="0.3055555555555556" />
@@ -106,5 +108,8 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="SuppressKotlinCodeStyleNotification">
+    <option name="disableForAll" value="true" />
   </component>
 </project>

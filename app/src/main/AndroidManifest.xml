@@ -26,7 +26,8 @@
         <activity
             android:name=".HearingEntryActivity"
             android:exported="false"
-            android:theme="@style/Theme.HearingAssist.NoActionBar" />
+            android:theme="@style/Theme.HearingAssist.NoActionBar"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ConnectActivity"
             android:exported="false"
